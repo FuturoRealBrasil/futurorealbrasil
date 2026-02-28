@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          plan: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          plan?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          plan?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_financial_data: {
+        Row: {
+          completed_missions: string[]
+          created_at: string
+          dependentes: number
+          gastos: number
+          id: string
+          onboarding_done: boolean
+          renda: number
+          tem_dividas: boolean
+          tem_reserva: boolean
+          updated_at: string
+          user_id: string
+          valor_reserva: number
+        }
+        Insert: {
+          completed_missions?: string[]
+          created_at?: string
+          dependentes?: number
+          gastos?: number
+          id?: string
+          onboarding_done?: boolean
+          renda?: number
+          tem_dividas?: boolean
+          tem_reserva?: boolean
+          updated_at?: string
+          user_id: string
+          valor_reserva?: number
+        }
+        Update: {
+          completed_missions?: string[]
+          created_at?: string
+          dependentes?: number
+          gastos?: number
+          id?: string
+          onboarding_done?: boolean
+          renda?: number
+          tem_dividas?: boolean
+          tem_reserva?: boolean
+          updated_at?: string
+          user_id?: string
+          valor_reserva?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
