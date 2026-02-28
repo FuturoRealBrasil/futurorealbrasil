@@ -1,17 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { Shield, TrendingUp, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getUserData } from "@/lib/storage";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
-  const data = getUserData();
+  const { user, loading } = useAuth();
 
   const handleStart = () => {
-    if (data.onboardingDone) {
+    if (user) {
       navigate("/dashboard");
     } else {
-      navigate("/cadastro");
+      navigate("/auth");
     }
   };
 
@@ -51,10 +51,10 @@ const Index = () => {
         {/* CTAs */}
         <div className="w-full max-w-sm space-y-3 animate-fade-up" style={{ animationDelay: "0.4s" }}>
           <Button onClick={handleStart} className="w-full h-14 text-base font-bold rounded-xl" size="lg">
-            Começar agora
+            {user ? "Ir para o Dashboard" : "Começar agora"}
           </Button>
-          {data.onboardingDone && (
-            <Button onClick={() => navigate("/dashboard")} variant="outline" className="w-full h-12 text-base font-semibold rounded-xl">
+          {!user && (
+            <Button onClick={() => navigate("/auth")} variant="outline" className="w-full h-12 text-base font-semibold rounded-xl">
               Entrar
             </Button>
           )}
@@ -64,7 +64,7 @@ const Index = () => {
       {/* Footer */}
       <div className="pb-8 pt-4 text-center">
         <p className="text-xs text-muted-foreground">
-          🔒 Seus dados ficam no seu celular. Sem anúncios. Sem julgamento.
+          🔒 Seus dados ficam seguros. Sem anúncios. Sem julgamento.
         </p>
       </div>
     </div>
