@@ -58,6 +58,11 @@ export function useDailyExpenses() {
     await loadExpenses();
   }
 
+  async function updateExpense(id: string, nome: string, valor: number, descricao: string) {
+    await supabase.from("weekly_expenses").update({ nome, valor, descricao } as any).eq("id", id);
+    await loadExpenses();
+  }
+
   async function deleteExpense(id: string) {
     await supabase.from("weekly_expenses").delete().eq("id", id);
     await loadExpenses();
@@ -72,5 +77,5 @@ export function useDailyExpenses() {
     return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   };
 
-  return { expenses, loading, addExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth };
+  return { expenses, loading, addExpense, updateExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth };
 }
