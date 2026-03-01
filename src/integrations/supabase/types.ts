@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           imagem_url: string | null
+          meta_valor: number
           nome: string
           updated_at: string
           user_id: string
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           id?: string
           imagem_url?: string | null
+          meta_valor?: number
           nome: string
           updated_at?: string
           user_id: string
@@ -37,6 +39,7 @@ export type Database = {
           created_at?: string
           id?: string
           imagem_url?: string | null
+          meta_valor?: number
           nome?: string
           updated_at?: string
           user_id?: string

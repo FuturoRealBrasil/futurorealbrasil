@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useAuth } from "@/hooks/useAuth";
-import { TrendingUp, AlertTriangle, Shield, ChevronRight, LogOut, ChevronLeft, Wallet, PiggyBank, RefreshCw, DollarSign } from "lucide-react";
+import { TrendingUp, AlertTriangle, Shield, ChevronRight, LogOut, ChevronLeft, Wallet, PiggyBank, RefreshCw, DollarSign, Minus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,12 +22,16 @@ const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
-  const { saving: monthlySaving, addSaving, addReserve } = useMonthlySavings(selectedMonth, selectedYear);
+  const { saving: monthlySaving, addSaving, addReserve, removeSaving, removeReserve } = useMonthlySavings(selectedMonth, selectedYear);
 
   const [showSavingInput, setShowSavingInput] = useState(false);
   const [savingValue, setSavingValue] = useState("");
   const [showReserveInput, setShowReserveInput] = useState(false);
   const [reserveValue, setReserveValue] = useState("");
+  const [showRemoveSaving, setShowRemoveSaving] = useState(false);
+  const [removeSavingValue, setRemoveSavingValue] = useState("");
+  const [showRemoveReserve, setShowRemoveReserve] = useState(false);
+  const [removeReserveValue, setRemoveReserveValue] = useState("");
   const [showUpdateRenda, setShowUpdateRenda] = useState(false);
   const [newRenda, setNewRenda] = useState("");
   const [showUpdateGastos, setShowUpdateGastos] = useState(false);
@@ -68,9 +72,26 @@ const Dashboard = () => {
     const v = parseFloat(reserveValue.replace(",", "."));
     if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
     await addReserve(v);
-    // Also update the main financial data reserve
     await saveData({ temReserva: true, valorReserva: data.valorReserva + v });
     setReserveValue(""); setShowReserveInput(false);
+    toast.success("Reserva atualizada!");
+  }
+
+  async function handleRemoveSaving() {
+    const v = parseFloat(removeSavingValue.replace(",", "."));
+    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    await removeSaving(v);
+    setRemoveSavingValue(""); setShowRemoveSaving(false);
+    toast.success("Valor retirado!");
+  }
+
+  async function handleRemoveReserve() {
+    const v = parseFloat(removeReserveValue.replace(",", "."));
+    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    await removeReserve(v);
+    await saveData({ valorReserva: Math.max(0, data.valorReserva - v) });
+    setRemoveReserveValue(""); setShowRemoveReserve(false);
+    toast.success("Reserva reduzida!");
     toast.success("Reserva atualizada!");
   }
 
@@ -275,10 +296,23 @@ const Dashboard = () => {
                   <Button size="sm" variant="outline" onClick={() => setShowSavingInput(false)} className="h-7 text-xs">X</Button>
                 </div>
               </div>
+            ) : showRemoveSaving ? (
+              <div className="mt-2 space-y-2">
+                <Input placeholder="Valor (R$)" value={removeSavingValue} onChange={(e) => setRemoveSavingValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
+                <div className="flex gap-1">
+                  <Button size="sm" variant="destructive" onClick={handleRemoveSaving} className="flex-1 h-7 text-xs">Retirar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowRemoveSaving(false)} className="h-7 text-xs">X</Button>
+                </div>
+              </div>
             ) : (
-              <button onClick={() => setShowSavingInput(true)} className="text-xs text-primary font-medium hover:underline mt-2 flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Adicionar valor
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => setShowSavingInput(true)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" /> Adicionar
+                </button>
+                <button onClick={() => setShowRemoveSaving(true)} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
+                  <Minus className="w-3 h-3" /> Retirar
+                </button>
+              </div>
             )}
           </div>
 
@@ -298,10 +332,23 @@ const Dashboard = () => {
                   <Button size="sm" variant="outline" onClick={() => setShowReserveInput(false)} className="h-7 text-xs">X</Button>
                 </div>
               </div>
+            ) : showRemoveReserve ? (
+              <div className="mt-2 space-y-2">
+                <Input placeholder="Valor (R$)" value={removeReserveValue} onChange={(e) => setRemoveReserveValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
+                <div className="flex gap-1">
+                  <Button size="sm" variant="destructive" onClick={handleRemoveReserve} className="flex-1 h-7 text-xs">Retirar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowRemoveReserve(false)} className="h-7 text-xs">X</Button>
+                </div>
+              </div>
             ) : (
-              <button onClick={() => setShowReserveInput(true)} className="text-xs text-primary font-medium hover:underline mt-2 flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Adicionar reserva
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => setShowReserveInput(true)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" /> Adicionar
+                </button>
+                <button onClick={() => setShowRemoveReserve(true)} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
+                  <Minus className="w-3 h-3" /> Retirar
+                </button>
+              </div>
             )}
           </div>
         </div>

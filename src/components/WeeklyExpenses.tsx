@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useDailyExpenses } from "@/hooks/useWeeklyExpenses";
-import { Plus, Trash2, Receipt, FileText, Pencil, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, Receipt, FileText, Pencil, Check, X, BarChart3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 interface WeeklyExpensesProps {
   selectedMonth: number;
@@ -210,6 +211,38 @@ export default function WeeklyExpenses({ selectedMonth, selectedYear }: WeeklyEx
           </div>
         </div>
       )}
+
+      {/* Bar Chart */}
+      {(() => {
+        const chartData = [];
+        for (let d = 1; d <= totalDays; d++) {
+          const total = dayTotal(d);
+          if (total > 0) chartData.push({ dia: d, total });
+        }
+        if (chartData.length === 0) return null;
+        return (
+          <div className="bg-card rounded-xl border shadow-sm p-4">
+            <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" /> Evolução dos Gastos
+            </h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                  <XAxis dataKey="dia" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                  <YAxis tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                  <Tooltip
+                    formatter={(value: number) => [`R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, "Gasto"]}
+                    labelFormatter={(label) => `Dia ${label}`}
+                    contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }}
+                  />
+                  <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Grand total summary */}
       <div className="bg-card rounded-xl border shadow-sm p-4">

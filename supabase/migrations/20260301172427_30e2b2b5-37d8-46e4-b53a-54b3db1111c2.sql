@@ -1,0 +1,1 @@
+ALTER TABLE public.caixinhas ADD COLUMN meta_valor numeric NOT NULL DEFAULT 0;
