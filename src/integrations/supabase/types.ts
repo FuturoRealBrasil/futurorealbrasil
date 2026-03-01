@@ -113,6 +113,36 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_expenses: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          receipt_url: string | null
+          semana: number
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          receipt_url?: string | null
+          semana: number
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          receipt_url?: string | null
+          semana?: number
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

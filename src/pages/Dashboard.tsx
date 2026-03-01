@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { TrendingUp, AlertTriangle, Shield, ChevronRight, LogOut } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import AppLayout from "@/components/AppLayout";
+import WeeklyExpenses from "@/components/WeeklyExpenses";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -89,8 +90,11 @@ const Dashboard = () => {
           ))}
         </div>
 
+        {/* Weekly Expenses */}
+        <WeeklyExpenses />
+
         {/* Premium CTA */}
-        <button onClick={() => navigate("/planos")} className="w-full bg-card rounded-xl p-4 border shadow-sm flex items-center gap-3 hover:bg-muted/50 transition-colors">
+        <button onClick={() => navigate("/planos")} className="w-full bg-card rounded-xl p-4 border shadow-sm flex items-center gap-3 hover:bg-muted/50 transition-colors mt-6">
           <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-accent" />
           </div>
