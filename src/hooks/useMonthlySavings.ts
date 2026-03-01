@@ -61,5 +61,19 @@ export function useMonthlySavings(mes: number, ano: number) {
     await load();
   }
 
-  return { saving, loading, addSaving, addReserve };
+  async function removeSaving(valor: number) {
+    if (!user || !saving) return;
+    const newVal = Math.max(0, (saving.valor_guardado || 0) - valor);
+    await supabase.from("monthly_savings").update({ valor_guardado: newVal } as any).eq("id", saving.id);
+    await load();
+  }
+
+  async function removeReserve(valor: number) {
+    if (!user || !saving) return;
+    const newVal = Math.max(0, (saving.valor_reserva || 0) - valor);
+    await supabase.from("monthly_savings").update({ valor_reserva: newVal } as any).eq("id", saving.id);
+    await load();
+  }
+
+  return { saving, loading, addSaving, addReserve, removeSaving, removeReserve };
 }
