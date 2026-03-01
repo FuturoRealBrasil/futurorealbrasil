@@ -1,16 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
+import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useAuth } from "@/hooks/useAuth";
-import { TrendingUp, AlertTriangle, Shield, ChevronRight, LogOut } from "lucide-react";
+import { TrendingUp, AlertTriangle, Shield, ChevronRight, LogOut, ChevronLeft, Wallet, PiggyBank, RefreshCw, DollarSign } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/AppLayout";
 import WeeklyExpenses from "@/components/WeeklyExpenses";
+import Caixinhas from "@/components/Caixinhas";
+import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { data, loading } = useFinancialData();
-  const { signOut } = useAuth();
+  const { data, loading, saveData } = useFinancialData();
+  const { signOut, isPremium } = useAuth();
+
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const { saving: monthlySaving, addSaving, addReserve } = useMonthlySavings(selectedMonth, selectedYear);
+
+  const [showSavingInput, setShowSavingInput] = useState(false);
+  const [savingValue, setSavingValue] = useState("");
+  const [showReserveInput, setShowReserveInput] = useState(false);
+  const [reserveValue, setReserveValue] = useState("");
+  const [showUpdateRenda, setShowUpdateRenda] = useState(false);
+  const [newRenda, setNewRenda] = useState("");
+  const [showUpdateGastos, setShowUpdateGastos] = useState(false);
+  const [newGastos, setNewGastos] = useState("");
 
   useEffect(() => {
     if (!loading && !data.onboardingDone) {
@@ -23,6 +44,58 @@ const Dashboard = () => {
   const { saldo, diasSemDinheiro, score } = calcularFuturo(data);
   const scoreColor = score >= 60 ? "text-safe" : score >= 30 ? "text-warning" : "text-danger";
   const scoreBg = score >= 60 ? "bg-safe" : score >= 30 ? "bg-warning" : "bg-danger";
+
+  const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString("pt-BR", { month: "long" });
+
+  function prevMonth() {
+    if (selectedMonth === 1) { setSelectedMonth(12); setSelectedYear(selectedYear - 1); }
+    else setSelectedMonth(selectedMonth - 1);
+  }
+  function nextMonth() {
+    if (selectedMonth === 12) { setSelectedMonth(1); setSelectedYear(selectedYear + 1); }
+    else setSelectedMonth(selectedMonth + 1);
+  }
+
+  async function handleAddSaving() {
+    const v = parseFloat(savingValue.replace(",", "."));
+    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    await addSaving(v);
+    setSavingValue(""); setShowSavingInput(false);
+    toast.success("Valor guardado!");
+  }
+
+  async function handleAddReserve() {
+    const v = parseFloat(reserveValue.replace(",", "."));
+    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    await addReserve(v);
+    // Also update the main financial data reserve
+    await saveData({ temReserva: true, valorReserva: data.valorReserva + v });
+    setReserveValue(""); setShowReserveInput(false);
+    toast.success("Reserva atualizada!");
+  }
+
+  async function handleUpdateRenda() {
+    const v = parseFloat(newRenda.replace(",", "."));
+    if (isNaN(v) || v < 0) { toast.error("Valor inválido"); return; }
+    await saveData({ renda: v });
+    setNewRenda(""); setShowUpdateRenda(false);
+    toast.success("Renda atualizada!");
+  }
+
+  async function handleUpdateGastos() {
+    const v = parseFloat(newGastos.replace(",", "."));
+    if (isNaN(v) || v < 0) { toast.error("Valor inválido"); return; }
+    await saveData({ gastos: v });
+    setNewGastos(""); setShowUpdateGastos(false);
+    toast.success("Gastos atualizados!");
+  }
+
+  // Savings projection
+  const monthlySavingsAmount = saldo > 0 ? saldo : 0;
+  const projection6m = monthlySavingsAmount * 6;
+  const projection1y = monthlySavingsAmount * 12;
+  const projection5y = monthlySavingsAmount * 60;
+  const projection10y = monthlySavingsAmount * 120;
 
   const alerts: { text: string; type: "safe" | "warning" | "danger" }[] = [];
   if (saldo < 0) {
@@ -47,12 +120,26 @@ const Dashboard = () => {
     <AppLayout>
       <div className="px-5 py-6 pb-24 max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-extrabold text-foreground">Seu Futuro</h1>
-            <p className="text-sm text-muted-foreground">Simulação dos próximos 6 meses</p>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
+            <div>
+              <h1 className="text-2xl font-extrabold text-foreground">Seu Futuro</h1>
+              <p className="text-sm text-muted-foreground">Simulação financeira</p>
+            </div>
           </div>
           <button onClick={signOut} className="text-muted-foreground hover:text-foreground p-2">
             <LogOut className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Month Navigation */}
+        <div className="flex items-center justify-between bg-card rounded-xl border shadow-sm p-3 mb-6">
+          <button onClick={prevMonth} className="p-1 text-muted-foreground hover:text-foreground">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="font-bold text-foreground capitalize">{monthName} {selectedYear}</span>
+          <button onClick={nextMonth} className="p-1 text-muted-foreground hover:text-foreground">
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
@@ -75,35 +162,171 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {[
-            { label: "Renda", value: `R$ ${data.renda.toLocaleString("pt-BR")}` },
-            { label: "Gastos", value: `R$ ${data.gastos.toLocaleString("pt-BR")}` },
-            { label: "Saldo", value: `R$ ${saldo.toLocaleString("pt-BR")}` },
-            { label: "Reserva", value: data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "Nenhuma" },
-          ].map((item, i) => (
-            <div key={i} className="bg-card rounded-xl p-4 border shadow-sm">
-              <p className="text-xs text-muted-foreground font-medium">{item.label}</p>
-              <p className="text-lg font-bold text-foreground mt-1">{item.value}</p>
+        {/* Savings Projection */}
+        <div className="bg-card rounded-2xl p-5 border shadow-sm mb-6 animate-fade-up">
+          <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Economia
+          </h2>
+          {saldo > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Se você guardar <span className="font-bold text-foreground">R$ {monthlySavingsAmount.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span>:
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
+                  <p className="text-xs text-muted-foreground">Em 6 meses</p>
+                  <p className="text-sm font-bold text-safe">R$ {projection6m.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                </div>
+                {isPremium ? (
+                  <>
+                    <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
+                      <p className="text-xs text-muted-foreground">Em 1 ano</p>
+                      <p className="text-sm font-bold text-safe">R$ {projection1y.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                    </div>
+                    <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
+                      <p className="text-xs text-muted-foreground">Em 5 anos</p>
+                      <p className="text-sm font-bold text-safe">R$ {projection5y.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                    </div>
+                    <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
+                      <p className="text-xs text-muted-foreground">Em 10 anos</p>
+                      <p className="text-sm font-bold text-primary">R$ {projection10y.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                    </div>
+                  </>
+                ) : (
+                  <button onClick={() => navigate("/planos")} className="bg-primary/5 rounded-lg p-3 border border-primary/20 text-left hover:bg-primary/10 transition-colors">
+                    <p className="text-xs text-muted-foreground">1, 5 e 10 anos</p>
+                    <p className="text-xs font-bold text-primary">🔒 Premium</p>
+                  </button>
+                )}
+              </div>
             </div>
-          ))}
+          ) : (
+            <p className="text-sm text-muted-foreground">Aumente sua renda ou reduza gastos para ver projeções de economia.</p>
+          )}
+        </div>
+
+        {/* Summary cards */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-card rounded-xl p-4 border shadow-sm">
+            <p className="text-xs text-muted-foreground font-medium">Renda</p>
+            <p className="text-lg font-bold text-foreground mt-1">R$ {data.renda.toLocaleString("pt-BR")}</p>
+          </div>
+          <div className="bg-card rounded-xl p-4 border shadow-sm">
+            <p className="text-xs text-muted-foreground font-medium">Gastos</p>
+            <p className="text-lg font-bold text-foreground mt-1">R$ {data.gastos.toLocaleString("pt-BR")}</p>
+          </div>
+          <div className="bg-card rounded-xl p-4 border shadow-sm">
+            <p className="text-xs text-muted-foreground font-medium">Saldo</p>
+            <p className={`text-lg font-bold mt-1 ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
+          </div>
+          <div className="bg-card rounded-xl p-4 border shadow-sm">
+            <p className="text-xs text-muted-foreground font-medium">Reserva</p>
+            <p className="text-lg font-bold text-foreground mt-1">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "Nenhuma"}</p>
+          </div>
+        </div>
+
+        {/* Update Renda / Gastos buttons */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {showUpdateRenda ? (
+            <div className="bg-card rounded-xl p-3 border shadow-sm space-y-2">
+              <Input placeholder="Nova renda" value={newRenda} onChange={(e) => setNewRenda(e.target.value)} inputMode="decimal" className="h-9 text-sm" />
+              <div className="flex gap-1">
+                <Button size="sm" onClick={handleUpdateRenda} className="flex-1 h-8 text-xs">Salvar</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowUpdateRenda(false)} className="h-8 text-xs">X</Button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => { setShowUpdateRenda(true); setNewRenda(String(data.renda)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
+              <RefreshCw className="w-4 h-4 text-brand-green" />
+              <span className="text-xs font-semibold text-foreground">Atualizar Renda</span>
+            </button>
+          )}
+          {showUpdateGastos ? (
+            <div className="bg-card rounded-xl p-3 border shadow-sm space-y-2">
+              <Input placeholder="Novos gastos" value={newGastos} onChange={(e) => setNewGastos(e.target.value)} inputMode="decimal" className="h-9 text-sm" />
+              <div className="flex gap-1">
+                <Button size="sm" onClick={handleUpdateGastos} className="flex-1 h-8 text-xs">Salvar</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowUpdateGastos(false)} className="h-8 text-xs">X</Button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => { setShowUpdateGastos(true); setNewGastos(String(data.gastos)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
+              <RefreshCw className="w-4 h-4 text-warning" />
+              <span className="text-xs font-semibold text-foreground">Atualizar Gastos</span>
+            </button>
+          )}
+        </div>
+
+        {/* Monthly Savings / Reserve */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="bg-card rounded-xl p-4 border shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Wallet className="w-4 h-4 text-brand-green" />
+              <p className="text-xs text-muted-foreground font-medium">Guardado em {monthName}</p>
+            </div>
+            <p className="text-lg font-bold text-brand-green">
+              R$ {(monthlySaving?.valor_guardado || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            </p>
+            {showSavingInput ? (
+              <div className="mt-2 space-y-2">
+                <Input placeholder="Valor (R$)" value={savingValue} onChange={(e) => setSavingValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
+                <div className="flex gap-1">
+                  <Button size="sm" onClick={handleAddSaving} className="flex-1 h-7 text-xs">Guardar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowSavingInput(false)} className="h-7 text-xs">X</Button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setShowSavingInput(true)} className="text-xs text-primary font-medium hover:underline mt-2 flex items-center gap-1">
+                <DollarSign className="w-3 h-3" /> Adicionar valor
+              </button>
+            )}
+          </div>
+
+          <div className="bg-card rounded-xl p-4 border shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <PiggyBank className="w-4 h-4 text-brand-gold" />
+              <p className="text-xs text-muted-foreground font-medium">Reserva em {monthName}</p>
+            </div>
+            <p className="text-lg font-bold text-brand-gold">
+              R$ {(monthlySaving?.valor_reserva || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            </p>
+            {showReserveInput ? (
+              <div className="mt-2 space-y-2">
+                <Input placeholder="Valor (R$)" value={reserveValue} onChange={(e) => setReserveValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
+                <div className="flex gap-1">
+                  <Button size="sm" onClick={handleAddReserve} className="flex-1 h-7 text-xs">Adicionar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowReserveInput(false)} className="h-7 text-xs">X</Button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setShowReserveInput(true)} className="text-xs text-primary font-medium hover:underline mt-2 flex items-center gap-1">
+                <DollarSign className="w-3 h-3" /> Adicionar reserva
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Weekly Expenses */}
-        <WeeklyExpenses />
+        <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
+
+        {/* Caixinhas */}
+        <div className="mt-6">
+          <Caixinhas />
+        </div>
 
         {/* Premium CTA */}
-        <button onClick={() => navigate("/planos")} className="w-full bg-card rounded-xl p-4 border shadow-sm flex items-center gap-3 hover:bg-muted/50 transition-colors mt-6">
-          <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-accent" />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-bold text-foreground">Simulação de 1 e 5 anos</p>
-            <p className="text-xs text-muted-foreground">Disponível no plano Premium</p>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
+        {!isPremium && (
+          <button onClick={() => navigate("/planos")} className="w-full bg-card rounded-xl p-4 border shadow-sm flex items-center gap-3 hover:bg-muted/50 transition-colors mt-6">
+            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-accent" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-foreground">Simulação de 1, 5 e 10 anos</p>
+              <p className="text-xs text-muted-foreground">Disponível no plano Premium</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </button>
+        )}
       </div>
     </AppLayout>
   );

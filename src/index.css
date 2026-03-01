@@ -6,97 +6,105 @@
 
 @layer base {
   :root {
-    --background: 40 33% 98%;
-    --foreground: 220 25% 14%;
+    --background: 210 20% 97%;
+    --foreground: 213 60% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 14%;
+    --card-foreground: 213 60% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 14%;
+    --popover-foreground: 213 60% 16%;
 
-    --primary: 152 55% 38%;
+    --primary: 213 65% 28%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 60% 94%;
-    --secondary-foreground: 220 25% 14%;
+    --secondary: 152 50% 94%;
+    --secondary-foreground: 213 60% 16%;
 
-    --muted: 40 20% 94%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 210 15% 93%;
+    --muted-foreground: 213 20% 46%;
 
     --accent: 38 92% 55%;
-    --accent-foreground: 220 25% 14%;
+    --accent-foreground: 213 60% 16%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --safe: 152 55% 38%;
+    --safe: 147 50% 36%;
     --safe-foreground: 0 0% 100%;
     --warning: 38 92% 55%;
-    --warning-foreground: 220 25% 14%;
+    --warning-foreground: 213 60% 16%;
     --danger: 0 72% 51%;
     --danger-foreground: 0 0% 100%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 152 55% 38%;
+    --brand-green: 147 50% 36%;
+    --brand-blue: 213 65% 28%;
+    --brand-gold: 38 92% 55%;
+
+    --border: 210 15% 88%;
+    --input: 210 15% 88%;
+    --ring: 213 65% 28%;
 
     --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary: 213 65% 28%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 213 65% 28%;
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 40 33% 96%;
+    --background: 213 30% 8%;
+    --foreground: 210 20% 96%;
 
-    --card: 220 25% 12%;
-    --card-foreground: 40 33% 96%;
+    --card: 213 30% 12%;
+    --card-foreground: 210 20% 96%;
 
-    --popover: 220 25% 12%;
-    --popover-foreground: 40 33% 96%;
+    --popover: 213 30% 12%;
+    --popover-foreground: 210 20% 96%;
 
-    --primary: 152 55% 42%;
+    --primary: 213 65% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 18%;
-    --secondary-foreground: 40 33% 96%;
+    --secondary: 213 20% 18%;
+    --secondary-foreground: 210 20% 96%;
 
-    --muted: 220 15% 20%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 213 15% 20%;
+    --muted-foreground: 213 10% 60%;
 
     --accent: 38 92% 55%;
-    --accent-foreground: 220 25% 8%;
+    --accent-foreground: 213 30% 8%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --safe: 152 55% 42%;
+    --safe: 147 50% 40%;
     --safe-foreground: 0 0% 100%;
     --warning: 38 80% 50%;
     --warning-foreground: 0 0% 100%;
     --danger: 0 72% 45%;
     --danger-foreground: 0 0% 100%;
 
-    --border: 220 15% 22%;
-    --input: 220 15% 22%;
-    --ring: 152 55% 42%;
+    --brand-green: 147 50% 40%;
+    --brand-blue: 213 65% 45%;
+    --brand-gold: 38 92% 55%;
 
-    --sidebar-background: 220 25% 8%;
+    --border: 213 15% 22%;
+    --input: 213 15% 22%;
+    --ring: 213 65% 45%;
+
+    --sidebar-background: 213 30% 8%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 213 65% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 213 65% 45%;
   }
 }
 
@@ -120,4 +128,10 @@
   .bg-safe\/10 { background-color: hsl(var(--safe) / 0.1); }
   .bg-warning\/10 { background-color: hsl(var(--warning) / 0.1); }
   .bg-danger\/10 { background-color: hsl(var(--danger) / 0.1); }
+  .text-brand-green { color: hsl(var(--brand-green)); }
+  .text-brand-blue { color: hsl(var(--brand-blue)); }
+  .text-brand-gold { color: hsl(var(--brand-gold)); }
+  .bg-brand-green { background-color: hsl(var(--brand-green)); }
+  .bg-brand-blue { background-color: hsl(var(--brand-blue)); }
+  .bg-brand-gold { background-color: hsl(var(--brand-gold)); }
 }

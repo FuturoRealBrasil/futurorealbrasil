@@ -5,6 +5,8 @@ import { useAuth } from "./useAuth";
 export interface DailyExpense {
   id: string;
   dia: number;
+  mes: number;
+  ano: number;
   nome: string;
   valor: number;
   descricao: string | null;
@@ -12,10 +14,14 @@ export interface DailyExpense {
   created_at: string;
 }
 
-export function useDailyExpenses() {
+export function useDailyExpenses(selectedMonth?: number, selectedYear?: number) {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<DailyExpense[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const now = new Date();
+  const mes = selectedMonth ?? now.getMonth() + 1;
+  const ano = selectedYear ?? now.getFullYear();
 
   const loadExpenses = useCallback(async () => {
     if (!user) { setExpenses([]); setLoading(false); return; }
@@ -24,10 +30,12 @@ export function useDailyExpenses() {
       .from("weekly_expenses")
       .select("*")
       .eq("user_id", user.id)
+      .eq("mes", mes)
+      .eq("ano", ano)
       .order("dia", { ascending: true });
     setExpenses((data as unknown as DailyExpense[]) || []);
     setLoading(false);
-  }, [user]);
+  }, [user, mes, ano]);
 
   useEffect(() => { loadExpenses(); }, [loadExpenses]);
 
@@ -49,6 +57,8 @@ export function useDailyExpenses() {
     await supabase.from("weekly_expenses").insert({
       user_id: user.id,
       dia,
+      mes,
+      ano,
       nome,
       valor,
       descricao,
@@ -72,10 +82,7 @@ export function useDailyExpenses() {
   const dayTotal = (day: number) => byDay(day).reduce((s, e) => s + Number(e.valor), 0);
   const grandTotal = expenses.reduce((s, e) => s + Number(e.valor), 0);
 
-  const daysInMonth = () => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  };
+  const daysInMonth = () => new Date(ano, mes, 0).getDate();
 
-  return { expenses, loading, addExpense, updateExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth };
+  return { expenses, loading, addExpense, updateExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth, mes, ano };
 }
