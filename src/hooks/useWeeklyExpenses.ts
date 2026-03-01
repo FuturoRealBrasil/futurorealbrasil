@@ -2,18 +2,19 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-export interface WeeklyExpense {
+export interface DailyExpense {
   id: string;
-  semana: number;
+  dia: number;
   nome: string;
   valor: number;
+  descricao: string | null;
   receipt_url: string | null;
   created_at: string;
 }
 
-export function useWeeklyExpenses() {
+export function useDailyExpenses() {
   const { user } = useAuth();
-  const [expenses, setExpenses] = useState<WeeklyExpense[]>([]);
+  const [expenses, setExpenses] = useState<DailyExpense[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadExpenses = useCallback(async () => {
@@ -23,14 +24,14 @@ export function useWeeklyExpenses() {
       .from("weekly_expenses")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: true });
-    setExpenses((data as WeeklyExpense[]) || []);
+      .order("dia", { ascending: true });
+    setExpenses((data as unknown as DailyExpense[]) || []);
     setLoading(false);
   }, [user]);
 
   useEffect(() => { loadExpenses(); }, [loadExpenses]);
 
-  async function addExpense(semana: number, nome: string, valor: number, receiptFile?: File) {
+  async function addExpense(dia: number, nome: string, valor: number, descricao: string, receiptFile?: File) {
     if (!user) return;
 
     let receipt_url: string | null = null;
@@ -47,11 +48,12 @@ export function useWeeklyExpenses() {
 
     await supabase.from("weekly_expenses").insert({
       user_id: user.id,
-      semana,
+      dia,
       nome,
       valor,
+      descricao,
       receipt_url,
-    });
+    } as any);
 
     await loadExpenses();
   }
@@ -61,9 +63,14 @@ export function useWeeklyExpenses() {
     await loadExpenses();
   }
 
-  const byWeek = (week: number) => expenses.filter((e) => e.semana === week);
-  const weekTotal = (week: number) => byWeek(week).reduce((s, e) => s + Number(e.valor), 0);
+  const byDay = (day: number) => expenses.filter((e) => e.dia === day);
+  const dayTotal = (day: number) => byDay(day).reduce((s, e) => s + Number(e.valor), 0);
   const grandTotal = expenses.reduce((s, e) => s + Number(e.valor), 0);
 
-  return { expenses, loading, addExpense, deleteExpense, byWeek, weekTotal, grandTotal };
+  const daysInMonth = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  };
+
+  return { expenses, loading, addExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth };
 }

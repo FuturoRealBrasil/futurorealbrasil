@@ -116,28 +116,31 @@ export type Database = {
       weekly_expenses: {
         Row: {
           created_at: string
+          descricao: string | null
+          dia: number
           id: string
           nome: string
           receipt_url: string | null
-          semana: number
           user_id: string
           valor: number
         }
         Insert: {
           created_at?: string
+          descricao?: string | null
+          dia: number
           id?: string
           nome: string
           receipt_url?: string | null
-          semana: number
           user_id: string
           valor?: number
         }
         Update: {
           created_at?: string
+          descricao?: string | null
+          dia?: number
           id?: string
           nome?: string
           receipt_url?: string | null
-          semana?: number
           user_id?: string
           valor?: number
         }
