@@ -21,11 +21,11 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "R$ 9,90",
+    price: "R$ 19,90",
     period: "/mês",
     description: "Proteção completa para você e sua família",
     features: [
-      "Simulação de 1 e 5 anos",
+      "Simulação de 1, 5 e 10 anos",
       "Modo Emergência completo",
       "Missões personalizadas ilimitadas",
       "Educação financeira completa",
@@ -43,7 +43,6 @@ const Planos = () => {
 
   const handleSubscribe = async () => {
     if (!user) return;
-    // For now, directly activate premium (replace with Stripe later)
     const { error } = await supabase
       .from("subscriptions")
       .update({ plan: "premium", active: true })

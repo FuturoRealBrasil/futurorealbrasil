@@ -4,8 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -52,9 +53,7 @@ const Auth = () => {
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
         <div className="text-center mb-8 animate-fade-up">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Shield className="w-8 h-8 text-primary" />
-          </div>
+          <img src={logo} alt="Futuro Real Brasil" className="w-40 mx-auto mb-4" />
           <h1 className="text-2xl font-extrabold text-foreground">
             {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
           </h1>
@@ -67,59 +66,32 @@ const Auth = () => {
           {!isLogin && (
             <div>
               <Label className="text-sm font-semibold text-foreground">Nome</Label>
-              <Input
-                type="text"
-                placeholder="Seu nome"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="h-12 rounded-xl bg-card mt-1"
-              />
+              <Input type="text" placeholder="Seu nome" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-12 rounded-xl bg-card mt-1" />
             </div>
           )}
 
           <div>
             <Label className="text-sm font-semibold text-foreground">Email</Label>
-            <Input
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 rounded-xl bg-card mt-1"
-              required
-            />
+            <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-xl bg-card mt-1" required />
           </div>
 
           <div>
             <Label className="text-sm font-semibold text-foreground">Senha</Label>
             <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl bg-card mt-1 pr-12"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              >
+              <Input type={showPassword ? "text" : "password"} placeholder="••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-xl bg-card mt-1 pr-12" required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full h-14 text-base font-bold rounded-xl" size="lg">
+          <Button type="submit" disabled={submitting} className="w-full h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90" size="lg">
             {submitting ? "Aguarde..." : isLogin ? "Entrar" : "Criar conta"}
           </Button>
         </form>
 
         <div className="text-center mt-6">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-primary font-semibold hover:underline"
-          >
+          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary font-semibold hover:underline">
             {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
           </button>
         </div>

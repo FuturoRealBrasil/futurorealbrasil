@@ -1,13 +1,18 @@
 import { useState, useRef } from "react";
 import { useDailyExpenses } from "@/hooks/useWeeklyExpenses";
-import { Plus, Trash2, Receipt, FileText, Pencil, Check, X } from "lucide-react";
+import { Plus, Trash2, Receipt, FileText, Pencil, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export default function WeeklyExpenses() {
-  const { loading, addExpense, updateExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth } = useDailyExpenses();
+interface WeeklyExpensesProps {
+  selectedMonth: number;
+  selectedYear: number;
+}
+
+export default function WeeklyExpenses({ selectedMonth, selectedYear }: WeeklyExpensesProps) {
+  const { loading, addExpense, updateExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth } = useDailyExpenses(selectedMonth, selectedYear);
   const [openDay, setOpenDay] = useState<number | null>(new Date().getDate());
   const [nome, setNome] = useState("");
   const [valor, setValor] = useState("");
@@ -17,7 +22,6 @@ export default function WeeklyExpenses() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
-  // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editValor, setEditValor] = useState("");
@@ -31,12 +35,16 @@ export default function WeeklyExpenses() {
     const v = parseFloat(valor.replace(",", "."));
     if (isNaN(v) || v <= 0) { toast.error("Informe um valor válido"); return; }
     setSaving(true);
-    await addExpense(dia, nome.trim(), v, descricao.trim(), receiptFile || undefined);
-    setNome(""); setValor(""); setDescricao(""); setReceiptFile(null);
-    if (fileRef.current) fileRef.current.value = "";
-    setAddingDay(null);
+    try {
+      await addExpense(dia, nome.trim(), v, descricao.trim(), receiptFile || undefined);
+      setNome(""); setValor(""); setDescricao(""); setReceiptFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+      setAddingDay(null);
+      toast.success("Gasto registrado!");
+    } catch (err) {
+      toast.error("Erro ao salvar gasto");
+    }
     setSaving(false);
-    toast.success("Gasto registrado!");
   }
 
   async function handleEdit(id: string) {
@@ -57,6 +65,12 @@ export default function WeeklyExpenses() {
     setEditDescricao(item.descricao || "");
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    e.stopPropagation();
+    const file = e.target.files?.[0] || null;
+    setReceiptFile(file);
+  }
+
   if (loading) return null;
 
   const daysWithExpenses = new Set<number>();
@@ -65,11 +79,12 @@ export default function WeeklyExpenses() {
   }
 
   const today = new Date().getDate();
-  const monthName = new Date().toLocaleString("pt-BR", { month: "long" });
+  const isCurrentMonth = selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear();
+  const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString("pt-BR", { month: "long" });
 
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-bold text-foreground capitalize">Gastos de {monthName}</h2>
+      <h2 className="text-lg font-bold text-foreground capitalize">Gastos de {monthName} {selectedYear}</h2>
 
       {/* Calendar grid */}
       <div className="bg-card rounded-xl border shadow-sm p-4">
@@ -79,12 +94,12 @@ export default function WeeklyExpenses() {
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
-          {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() }).map((_, i) => (
+          {Array.from({ length: new Date(selectedYear, selectedMonth - 1, 1).getDay() }).map((_, i) => (
             <div key={`empty-${i}`} />
           ))}
           {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => {
             const hasExpenses = daysWithExpenses.has(day);
-            const isToday = day === today;
+            const isToday = isCurrentMonth && day === today;
             const isSelected = openDay === day;
             return (
               <button
@@ -172,17 +187,17 @@ export default function WeeklyExpenses() {
                 <Input placeholder="Valor (R$)" value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" />
                 <Textarea placeholder="Descrição (ex: Comprei neste dia...)" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={300} rows={2} />
                 <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                  <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={(e) => e.stopPropagation()}>
                     <Receipt className="w-4 h-4" />
                     <span>{receiptFile ? receiptFile.name : "Anexar nota fiscal"}</span>
-                    <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setReceiptFile(e.target.files?.[0] || null)} />
+                    <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
                   </label>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => handleAdd(openDay)} disabled={saving} className="flex-1">
+                  <Button type="button" size="sm" onClick={() => handleAdd(openDay)} disabled={saving} className="flex-1">
                     {saving ? "Salvando..." : "Salvar"}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setAddingDay(null); setNome(""); setValor(""); setDescricao(""); setReceiptFile(null); }}>
+                  <Button type="button" size="sm" variant="outline" onClick={() => { setAddingDay(null); setNome(""); setValor(""); setDescricao(""); setReceiptFile(null); }}>
                     Cancelar
                   </Button>
                 </div>

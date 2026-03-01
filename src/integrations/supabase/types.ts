@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      caixinhas: {
+        Row: {
+          created_at: string
+          id: string
+          imagem_url: string | null
+          nome: string
+          updated_at: string
+          user_id: string
+          valor_atual: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          nome: string
+          updated_at?: string
+          user_id: string
+          valor_atual?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          nome?: string
+          updated_at?: string
+          user_id?: string
+          valor_atual?: number
+        }
+        Relationships: []
+      }
+      monthly_savings: {
+        Row: {
+          ano: number
+          created_at: string
+          id: string
+          mes: number
+          updated_at: string
+          user_id: string
+          valor_guardado: number
+          valor_reserva: number
+        }
+        Insert: {
+          ano: number
+          created_at?: string
+          id?: string
+          mes: number
+          updated_at?: string
+          user_id: string
+          valor_guardado?: number
+          valor_reserva?: number
+        }
+        Update: {
+          ano?: number
+          created_at?: string
+          id?: string
+          mes?: number
+          updated_at?: string
+          user_id?: string
+          valor_guardado?: number
+          valor_reserva?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -115,30 +178,36 @@ export type Database = {
       }
       weekly_expenses: {
         Row: {
+          ano: number
           created_at: string
           descricao: string | null
           dia: number
           id: string
+          mes: number
           nome: string
           receipt_url: string | null
           user_id: string
           valor: number
         }
         Insert: {
+          ano?: number
           created_at?: string
           descricao?: string | null
           dia: number
           id?: string
+          mes?: number
           nome: string
           receipt_url?: string | null
           user_id: string
           valor?: number
         }
         Update: {
+          ano?: number
           created_at?: string
           descricao?: string | null
           dia?: number
           id?: string
+          mes?: number
           nome?: string
           receipt_url?: string | null
           user_id?: string

@@ -53,6 +53,9 @@ export default {
         safe: "hsl(var(--safe))",
         warning: "hsl(var(--warning))",
         danger: "hsl(var(--danger))",
+        "brand-green": "hsl(var(--brand-green))",
+        "brand-blue": "hsl(var(--brand-blue))",
+        "brand-gold": "hsl(var(--brand-gold))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
