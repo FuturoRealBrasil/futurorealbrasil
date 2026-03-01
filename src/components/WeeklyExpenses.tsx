@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
 import { useDailyExpenses } from "@/hooks/useWeeklyExpenses";
-import { Plus, Trash2, Receipt, ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { Plus, Trash2, Receipt, FileText, Pencil, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function WeeklyExpenses() {
-  const { loading, addExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth } = useDailyExpenses();
+  const { loading, addExpense, updateExpense, deleteExpense, byDay, dayTotal, grandTotal, daysInMonth } = useDailyExpenses();
   const [openDay, setOpenDay] = useState<number | null>(new Date().getDate());
   const [nome, setNome] = useState("");
   const [valor, setValor] = useState("");
@@ -17,6 +17,13 @@ export default function WeeklyExpenses() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editNome, setEditNome] = useState("");
+  const [editValor, setEditValor] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
   const totalDays = daysInMonth();
 
   async function handleAdd(dia: number) {
@@ -25,19 +32,33 @@ export default function WeeklyExpenses() {
     if (isNaN(v) || v <= 0) { toast.error("Informe um valor válido"); return; }
     setSaving(true);
     await addExpense(dia, nome.trim(), v, descricao.trim(), receiptFile || undefined);
-    setNome("");
-    setValor("");
-    setDescricao("");
-    setReceiptFile(null);
+    setNome(""); setValor(""); setDescricao(""); setReceiptFile(null);
     if (fileRef.current) fileRef.current.value = "";
     setAddingDay(null);
     setSaving(false);
     toast.success("Gasto registrado!");
   }
 
+  async function handleEdit(id: string) {
+    if (!editNome.trim()) { toast.error("Informe o nome do gasto"); return; }
+    const v = parseFloat(editValor.replace(",", "."));
+    if (isNaN(v) || v <= 0) { toast.error("Informe um valor válido"); return; }
+    setEditSaving(true);
+    await updateExpense(id, editNome.trim(), v, editDescricao.trim());
+    setEditingId(null);
+    setEditSaving(false);
+    toast.success("Gasto atualizado!");
+  }
+
+  function startEditing(item: { id: string; nome: string; valor: number; descricao: string | null }) {
+    setEditingId(item.id);
+    setEditNome(item.nome);
+    setEditValor(String(item.valor));
+    setEditDescricao(item.descricao || "");
+  }
+
   if (loading) return null;
 
-  // Get days that have expenses
   const daysWithExpenses = new Set<number>();
   for (let d = 1; d <= totalDays; d++) {
     if (byDay(d).length > 0) daysWithExpenses.add(d);
@@ -58,7 +79,6 @@ export default function WeeklyExpenses() {
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
-          {/* Empty cells for offset */}
           {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() }).map((_, i) => (
             <div key={`empty-${i}`} />
           ))}
@@ -66,7 +86,6 @@ export default function WeeklyExpenses() {
             const hasExpenses = daysWithExpenses.has(day);
             const isToday = day === today;
             const isSelected = openDay === day;
-
             return (
               <button
                 key={day}
@@ -101,61 +120,62 @@ export default function WeeklyExpenses() {
             )}
 
             {byDay(openDay).map((item) => (
-              <div key={item.id} className="flex items-start justify-between bg-muted/30 rounded-lg p-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.nome}</p>
-                  {item.descricao && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.descricao}</p>
-                  )}
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs font-semibold text-foreground">
-                      R$ {Number(item.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
-                    {item.receipt_url && (
-                      <a href={item.receipt_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        <FileText className="w-3.5 h-3.5" />
-                      </a>
-                    )}
+              <div key={item.id} className="bg-muted/30 rounded-lg p-3">
+                {editingId === item.id ? (
+                  <div className="space-y-2">
+                    <Input value={editNome} onChange={(e) => setEditNome(e.target.value)} placeholder="Nome do gasto" maxLength={100} />
+                    <Input value={editValor} onChange={(e) => setEditValor(e.target.value)} placeholder="Valor (R$)" inputMode="decimal" />
+                    <Textarea value={editDescricao} onChange={(e) => setEditDescricao(e.target.value)} placeholder="Descrição" maxLength={300} rows={2} />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => handleEdit(item.id)} disabled={editSaving} className="flex-1">
+                        {editSaving ? "Salvando..." : <><Check className="w-4 h-4 mr-1" /> Salvar</>}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <button onClick={() => deleteExpense(item.id)} className="text-muted-foreground hover:text-destructive p-1 ml-2">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                ) : (
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.nome}</p>
+                      {item.descricao && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.descricao}</p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs font-semibold text-foreground">
+                          R$ {Number(item.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </p>
+                        {item.receipt_url && (
+                          <a href={item.receipt_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                            <FileText className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 ml-2">
+                      <button onClick={() => startEditing(item)} className="text-muted-foreground hover:text-primary p-1">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => deleteExpense(item.id)} className="text-muted-foreground hover:text-destructive p-1">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
 
             {addingDay === openDay ? (
               <div className="space-y-2 pt-2 border-t">
-                <Input
-                  placeholder="Nome do gasto"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  maxLength={100}
-                />
-                <Input
-                  placeholder="Valor (R$)"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  inputMode="decimal"
-                />
-                <Textarea
-                  placeholder="Descrição (ex: Comprei neste dia...)"
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  maxLength={300}
-                  rows={2}
-                />
+                <Input placeholder="Nome do gasto" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={100} />
+                <Input placeholder="Valor (R$)" value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" />
+                <Textarea placeholder="Descrição (ex: Comprei neste dia...)" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={300} rows={2} />
                 <div className="flex items-center gap-2">
                   <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                     <Receipt className="w-4 h-4" />
                     <span>{receiptFile ? receiptFile.name : "Anexar nota fiscal"}</span>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept="image/*,.pdf"
-                      className="hidden"
-                      onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                    />
+                    <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setReceiptFile(e.target.files?.[0] || null)} />
                   </label>
                 </div>
                 <div className="flex gap-2">
@@ -168,10 +188,7 @@ export default function WeeklyExpenses() {
                 </div>
               </div>
             ) : (
-              <button
-                onClick={() => setAddingDay(openDay)}
-                className="flex items-center gap-2 text-sm text-primary font-medium hover:underline pt-1"
-              >
+              <button onClick={() => setAddingDay(openDay)} className="flex items-center gap-2 text-sm text-primary font-medium hover:underline pt-1">
                 <Plus className="w-4 h-4" /> Adicionar gasto
               </button>
             )}
