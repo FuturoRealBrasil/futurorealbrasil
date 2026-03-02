@@ -12,6 +12,7 @@ const steps = [
   { key: "temDividas", label: "Você tem dívidas?", type: "boolean" },
   { key: "dependentes", label: "Quantas pessoas dependem de você?", placeholder: "Ex: 2", type: "number" },
   { key: "temReserva", label: "Você tem alguma reserva de emergência?", type: "boolean" },
+  { key: "whatsapp", label: "Qual seu WhatsApp? (para notificações)", placeholder: "Ex: 11999999999", type: "phone" },
 ];
 
 const Cadastro = () => {
@@ -25,13 +26,14 @@ const Cadastro = () => {
     dependentes: "",
     temReserva: false,
     valorReserva: "",
+    whatsapp: "",
   });
   const [showReserva, setShowReserva] = useState(false);
 
   const current = steps[step];
 
   const handleNext = async () => {
-    if (step === 4 && formData.temReserva && !showReserva) {
+    if (step === 5 && formData.temReserva && !showReserva) {
       setShowReserva(true);
       return;
     }
@@ -39,6 +41,14 @@ const Cadastro = () => {
       setStep(step + 1);
       setShowReserva(false);
     } else {
+      // Save WhatsApp to profiles
+      const { data: { user } } = await (await import("@/integrations/supabase/client")).supabase.auth.getUser();
+      if (user && formData.whatsapp) {
+        await (await import("@/integrations/supabase/client")).supabase
+          .from("profiles")
+          .update({ whatsapp: formData.whatsapp } as any)
+          .eq("user_id", user.id);
+      }
       await saveData({
         renda: Number(formData.renda) || 0,
         gastos: Number(formData.gastos) || 0,
@@ -108,6 +118,12 @@ const Cadastro = () => {
                     {opt.label}
                   </button>
                 ))}
+              </div>
+            )}
+            {current.type === "phone" && (
+              <div>
+                <Input type="tel" placeholder={current.placeholder} value={formData[current.key as keyof typeof formData] as string} onChange={(e) => setValue(current.key, e.target.value)} className="h-14 text-lg rounded-xl bg-card" inputMode="tel" />
+                <p className="text-xs text-muted-foreground mt-2">Obrigatório para receber lembretes de estudo.</p>
               </div>
             )}
           </div>

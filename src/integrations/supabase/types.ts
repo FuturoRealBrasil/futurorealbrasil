@@ -88,6 +88,7 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -96,6 +97,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -104,6 +106,40 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      savings_transactions: {
+        Row: {
+          ano: number
+          created_at: string
+          descricao: string | null
+          id: string
+          mes: number
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          ano: number
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mes: number
+          tipo: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          ano?: number
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mes?: number
+          tipo?: string
+          user_id?: string
+          valor?: number
         }
         Relationships: []
       }
