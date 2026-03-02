@@ -157,10 +157,10 @@ const Dashboard = () => {
     <AppLayout>
       <div className="px-5 py-6 pb-24 max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="Logo" className="w-25 h-25 object-contain mix-blend-multiply" />
-            <div>
-              <h1 className="text-2xl font-extrabold text-foreground">Seu Futuro</h1>
+          <div className="flex items-center gap-3 min-w-0">
+            <img src={logo} alt="Logo" className="w-19 h-19 object-contain mix-blend-multiply shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold text-foreground leading-tight">Seu Futuro</h1>
               <p className="text-sm text-muted-foreground">Simulação financeira</p>
             </div>
           </div>
