@@ -106,12 +106,9 @@ const Dashboard = () => {
   }
 
   async function handleDownloadPDF() {
-    await loadTransactions();
-    // Small delay to ensure state is updated
-    setTimeout(() => {
-      generateTransactionsPDF(transactions, monthName, selectedYear);
-      toast.success("PDF baixado!");
-    }, 500);
+    const txs = await loadTransactions();
+    generateTransactionsPDF(txs || [], monthName, selectedYear);
+    toast.success("PDF baixado!");
   }
 
   async function handleUpdateRenda() {

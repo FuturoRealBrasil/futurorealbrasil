@@ -18,7 +18,7 @@ export function useSavingsTransactions(mes: number, ano: number) {
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user) return [];
     setLoading(true);
     const { data } = await supabase
       .from("savings_transactions")
@@ -27,8 +27,10 @@ export function useSavingsTransactions(mes: number, ano: number) {
       .eq("mes", mes)
       .eq("ano", ano)
       .order("created_at", { ascending: false });
-    setTransactions((data as unknown as SavingsTransaction[]) || []);
+    const result = (data as unknown as SavingsTransaction[]) || [];
+    setTransactions(result);
     setLoading(false);
+    return result;
   }, [user, mes, ano]);
 
   async function logTransaction(tipo: string, valor: number, descricao: string, mes: number, ano: number) {
