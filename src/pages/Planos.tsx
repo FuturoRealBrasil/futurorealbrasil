@@ -1,9 +1,11 @@
-import { Check, Star } from "lucide-react";
+import { Check, Star, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const plans = [
   {
@@ -39,20 +41,59 @@ const plans = [
 ];
 
 const Planos = () => {
-  const { isPremium, user } = useAuth();
+  const { isPremium, user, refreshSubscription, subscriptionStart } = useAuth();
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // Check for success/canceled redirect
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      toast.success("🎉 Plano Premium ativado com sucesso!");
+      refreshSubscription();
+    }
+    if (searchParams.get("canceled") === "true") {
+      toast.info("Assinatura cancelada. Você pode tentar novamente.");
+    }
+  }, [searchParams, refreshSubscription]);
+
+  const canCancel = () => {
+    if (!subscriptionStart) return false;
+    const start = new Date(subscriptionStart);
+    const twelveMonthsLater = new Date(start);
+    twelveMonthsLater.setMonth(twelveMonthsLater.getMonth() + 12);
+    return new Date() >= twelveMonthsLater;
+  };
 
   const handleSubscribe = async () => {
     if (!user) return;
-    const { error } = await supabase
-      .from("subscriptions")
-      .update({ plan: "premium", active: true })
-      .eq("user_id", user.id);
+    setLoadingCheckout(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (e: any) {
+      toast.error("Erro ao iniciar checkout: " + (e.message || "Tente novamente"));
+    } finally {
+      setLoadingCheckout(false);
+    }
+  };
 
-    if (error) {
-      toast.error("Erro ao ativar plano");
-    } else {
-      toast.success("🎉 Plano Premium ativado!");
-      window.location.reload();
+  const handleManageSubscription = async () => {
+    if (!user) return;
+    setLoadingPortal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (e: any) {
+      toast.error("Erro ao abrir portal: " + (e.message || "Tente novamente"));
+    } finally {
+      setLoadingPortal(false);
     }
   };
 
@@ -77,6 +118,16 @@ const Planos = () => {
                 <span className="text-3xl font-black text-foreground">{plan.price}</span>
                 {plan.period && <span className="text-sm text-muted-foreground">{plan.period}</span>}
               </div>
+
+              {plan.highlight && (
+                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                    Este plano tem fidelidade de <strong>12 meses</strong> e poderá ser cancelado após esse período.
+                  </p>
+                </div>
+              )}
+
               <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
               <div className="space-y-2.5 mb-5">
                 {plan.features.map((f, j) => (
@@ -86,13 +137,51 @@ const Planos = () => {
                   </div>
                 ))}
               </div>
-              <Button
-                className={`w-full h-12 rounded-xl font-bold ${!plan.highlight ? "bg-muted text-muted-foreground hover:bg-muted" : ""}`}
-                disabled={!plan.highlight || (isPremium && plan.planId === "premium")}
-                onClick={plan.highlight ? handleSubscribe : undefined}
-              >
-                {isPremium && plan.planId === "premium" ? "✅ Plano ativo" : isPremium && plan.planId === "free" ? "—" : plan.cta}
-              </Button>
+
+              {plan.planId === "premium" ? (
+                <div className="space-y-2">
+                  {isPremium ? (
+                    <>
+                      <Button className="w-full h-12 rounded-xl font-bold" disabled>
+                        ✅ Plano ativo
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full h-10 rounded-xl text-sm"
+                        onClick={handleManageSubscription}
+                        disabled={loadingPortal || !canCancel()}
+                      >
+                        {loadingPortal ? (
+                          <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Abrindo...</>
+                        ) : !canCancel() ? (
+                          "🔒 Cancelamento disponível após 12 meses"
+                        ) : (
+                          "Cancelar Assinatura"
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      className="w-full h-12 rounded-xl font-bold"
+                      onClick={handleSubscribe}
+                      disabled={loadingCheckout}
+                    >
+                      {loadingCheckout ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processando...</>
+                      ) : (
+                        plan.cta
+                      )}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  className="w-full h-12 rounded-xl font-bold bg-muted text-muted-foreground hover:bg-muted"
+                  disabled
+                >
+                  {isPremium ? "—" : plan.cta}
+                </Button>
+              )}
             </div>
           ))}
         </div>

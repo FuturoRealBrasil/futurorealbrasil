@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -7,6 +7,9 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isPremium: boolean;
+  subscriptionEnd: string | null;
+  subscriptionStart: string | null;
+  refreshSubscription: () => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -19,15 +22,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
+  const [subscriptionStart, setSubscriptionStart] = useState<string | null>(null);
+
+  const checkSubscription = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("check-subscription");
+      if (error) {
+        console.error("Error checking subscription:", error);
+        setIsPremium(false);
+        return;
+      }
+      setIsPremium(data?.subscribed === true);
+      setSubscriptionEnd(data?.subscription_end ?? null);
+      setSubscriptionStart(data?.subscription_start ?? null);
+    } catch (e) {
+      console.error("Error checking subscription:", e);
+      setIsPremium(false);
+    }
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        setTimeout(() => checkSubscription(session.user.id), 0);
+        setTimeout(() => checkSubscription(), 0);
       } else {
         setIsPremium(false);
+        setSubscriptionEnd(null);
+        setSubscriptionStart(null);
       }
       setLoading(false);
     });
@@ -36,22 +60,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkSubscription(session.user.id);
+        checkSubscription();
       }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [checkSubscription]);
 
-  async function checkSubscription(userId: string) {
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("plan, active")
-      .eq("user_id", userId)
-      .single();
-    setIsPremium(data?.plan === "premium" && data?.active === true);
-  }
+  // Auto-refresh subscription every 60 seconds
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(checkSubscription, 60000);
+    return () => clearInterval(interval);
+  }, [user, checkSubscription]);
 
   async function signUp(email: string, password: string, displayName: string) {
     const { error } = await supabase.auth.signUp({
@@ -75,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isPremium, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isPremium, subscriptionEnd, subscriptionStart, refreshSubscription: checkSubscription, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
