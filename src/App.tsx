@@ -12,6 +12,7 @@ import Missoes from "./pages/Missoes";
 import Educacao from "./pages/Educacao";
 import Emergencia from "./pages/Emergencia";
 import Planos from "./pages/Planos";
+import AssinaturaConfirmada from "./pages/AssinaturaConfirmada";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const AppRoutes = () => (
     <Route path="/educacao" element={<ProtectedRoute><Educacao /></ProtectedRoute>} />
     <Route path="/emergencia" element={<ProtectedRoute><Emergencia /></ProtectedRoute>} />
     <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+    <Route path="/assinatura-confirmada" element={<ProtectedRoute><AssinaturaConfirmada /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

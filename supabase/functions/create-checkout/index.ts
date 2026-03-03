@@ -38,7 +38,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: "price_1T6sIeDCQ4UlhGP6s6BNKn0q", quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/planos?success=true`,
+      success_url: `${origin}/assinatura-confirmada`,
       cancel_url: `${origin}/planos?canceled=true`,
     });
 
