@@ -54,8 +54,16 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const sub = subscriptions.data[0];
-      subscriptionEnd = new Date(sub.current_period_end * 1000).toISOString();
-      subscriptionStart = new Date(sub.start_date * 1000).toISOString();
+      
+      if (sub.current_period_end) {
+        subscriptionEnd = new Date(sub.current_period_end * 1000).toISOString();
+      }
+      
+      // Use created timestamp as start date (start_date may not exist in all API versions)
+      const startTimestamp = sub.start_date || sub.created;
+      if (startTimestamp) {
+        subscriptionStart = new Date(startTimestamp * 1000).toISOString();
+      }
     }
 
     return new Response(JSON.stringify({
@@ -67,6 +75,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
+    console.error("check-subscription error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
