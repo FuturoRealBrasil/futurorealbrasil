@@ -1,23 +1,54 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import Testimonials from "@/components/Testimonials";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const parallaxRef = useRef<HTMLDivElement>(null);
 
   const handleStart = () => {
     navigate(user ? "/dashboard" : "/auth");
   };
 
+  // Parallax scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!parallaxRef.current) return;
+      const scrollY = window.scrollY;
+      parallaxRef.current.style.transform = `translateY(${scrollY * 0.4}px)`;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate-fade-up");
+            entry.target.classList.remove("opacity-0", "translate-y-6");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    document.querySelectorAll(".scroll-reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Hero Section - Dark overlay inspired */}
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+      {/* Hero Section with parallax */}
       <div className="relative overflow-hidden bg-primary text-primary-foreground">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
+        <div ref={parallaxRef} className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
@@ -72,12 +103,12 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Why section */}
+      {/* Why section with scroll reveal */}
       <div className="px-6 py-10">
-        <h2 className="text-lg font-extrabold text-foreground text-center mb-2">
+        <h2 className="text-lg font-extrabold text-foreground text-center mb-2 scroll-reveal opacity-0 translate-y-6">
           Por que usar o <span className="text-brand-green">Futuro Real</span>?
         </h2>
-        <p className="text-sm text-muted-foreground text-center mb-6 max-w-xs mx-auto">
+        <p className="text-sm text-muted-foreground text-center mb-6 max-w-xs mx-auto scroll-reveal opacity-0 translate-y-6">
           Ferramentas simples para transformar sua vida financeira
         </p>
 
@@ -89,8 +120,8 @@ const Index = () => {
           ].map((item, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border animate-fade-up"
-              style={{ animationDelay: `${0.6 + i * 0.1}s` }}
+              className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border scroll-reveal opacity-0 translate-y-6"
+              style={{ transitionDelay: `${i * 100}ms` }}
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <item.icon className={`w-5 h-5 ${item.color}`} />
@@ -101,7 +132,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Features grid */}
+      {/* Features grid with scroll reveal */}
       <div className="px-6 pb-10">
         <div className="w-full max-w-sm mx-auto grid grid-cols-3 gap-3">
           {[
@@ -111,8 +142,8 @@ const Index = () => {
           ].map((feat, i) => (
             <div
               key={i}
-              className="bg-card border rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm animate-fade-up"
-              style={{ animationDelay: `${0.9 + i * 0.1}s` }}
+              className="bg-card border rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm scroll-reveal opacity-0 translate-y-6"
+              style={{ transitionDelay: `${i * 100}ms` }}
             >
               <div className={`w-10 h-10 rounded-full ${feat.color} flex items-center justify-center`}>
                 <feat.icon className="w-5 h-5" />
@@ -121,6 +152,11 @@ const Index = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Testimonials section */}
+      <div className="scroll-reveal opacity-0 translate-y-6">
+        <Testimonials />
       </div>
 
       {/* Footer */}
