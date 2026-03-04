@@ -1,31 +1,29 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { CheckCircle2, Sparkles, ArrowRight, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ReviewForm from "@/components/ReviewForm";
 import confetti from "canvas-confetti";
 
 const AssinaturaConfirmada = () => {
   const { refreshSubscription } = useAuth();
   const navigate = useNavigate();
+  const [showReview, setShowReview] = useState(false);
 
   const fireConfetti = useCallback(() => {
-    // First burst - left side
     confetti({
       particleCount: 80,
       spread: 70,
       origin: { x: 0.15, y: 0.6 },
       colors: ["#1a5632", "#d4a017", "#1e3a5f", "#ffffff"],
     });
-    // First burst - right side
     confetti({
       particleCount: 80,
       spread: 70,
       origin: { x: 0.85, y: 0.6 },
       colors: ["#1a5632", "#d4a017", "#1e3a5f", "#ffffff"],
     });
-
-    // Second wave after delay
     setTimeout(() => {
       confetti({
         particleCount: 50,
@@ -34,8 +32,6 @@ const AssinaturaConfirmada = () => {
         colors: ["#1a5632", "#d4a017", "#1e3a5f"],
       });
     }, 300);
-
-    // Stars effect
     setTimeout(() => {
       confetti({
         particleCount: 30,
@@ -50,9 +46,13 @@ const AssinaturaConfirmada = () => {
 
   useEffect(() => {
     refreshSubscription();
-    // Fire confetti on mount
     const timer = setTimeout(fireConfetti, 400);
-    return () => clearTimeout(timer);
+    // Show review form after 2 seconds
+    const reviewTimer = setTimeout(() => setShowReview(true), 2000);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(reviewTimer);
+    };
   }, [refreshSubscription, fireConfetti]);
 
   return (
@@ -94,14 +94,16 @@ const AssinaturaConfirmada = () => {
           <Button className="w-full h-12 rounded-xl font-bold bg-brand-green hover:bg-brand-green/90" onClick={() => navigate("/dashboard")}>
             Ir para o Dashboard <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
-          <Button variant="outline" className="w-full h-10 rounded-xl" onClick={() => navigate("/planos")}>
-            Ver meu plano
+          <Button variant="outline" className="w-full h-10 rounded-xl" onClick={() => setShowReview(true)}>
+            ⭐ Deixar avaliação
           </Button>
           <button onClick={fireConfetti} className="text-xs text-muted-foreground hover:text-brand-gold transition-colors">
             🎊 Celebrar novamente!
           </button>
         </div>
       </div>
+
+      <ReviewForm open={showReview} onOpenChange={setShowReview} />
     </div>
   );
 };

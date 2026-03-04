@@ -110,6 +110,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comentario: string | null
+          created_at: string
+          foto_url: string | null
+          id: string
+          nome: string
+          nota: number
+          user_id: string
+        }
+        Insert: {
+          comentario?: string | null
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          nome: string
+          nota?: number
+          user_id: string
+        }
+        Update: {
+          comentario?: string | null
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          nota?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       savings_transactions: {
         Row: {
           ano: number
