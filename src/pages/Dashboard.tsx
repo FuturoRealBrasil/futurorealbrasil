@@ -155,13 +155,13 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <div className="px-5 py-6 pb-24 max-w-lg mx-auto">
+      <div className="px-5 py-6 pb-24 max-w-lg md:max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
             <img src={logo} alt="Logo" className="w-16 h-16 object-contain mix-blend-multiply shrink-0" />
             <div className="min-w-0">
-              <h1 className="text-xl font-extrabold text-foreground leading-tight truncate">Seu Futuro</h1>
-              <p className="text-xs text-muted-foreground truncate">Simulação financeira</p>
+              <h1 className="text-xl md:text-2xl font-extrabold text-foreground leading-tight truncate">Seu Futuro</h1>
+              <p className="text-xs md:text-sm text-muted-foreground truncate">Simulação financeira</p>
             </div>
           </div>
           <button onClick={signOut} className="text-muted-foreground hover:text-foreground p-2">
@@ -180,23 +180,26 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Score */}
-        <div className="bg-card rounded-2xl p-6 border shadow-sm mb-6 text-center animate-fade-up">
-          <p className="text-sm font-semibold text-muted-foreground mb-2">Saúde Financeira</p>
-          <p className={`text-5xl font-black ${scoreColor}`}>{score}</p>
-          <p className="text-xs text-muted-foreground mt-1">de 100 pontos</p>
-          <Progress value={score} className="mt-4 h-3 rounded-full" />
-          <div className={`h-3 rounded-full ${scoreBg} -mt-3`} style={{ width: `${score}%` }} />
-        </div>
+        {/* Desktop: Score + Alerts side by side */}
+        <div className="md:grid md:grid-cols-2 md:gap-6 mb-6">
+          {/* Score */}
+          <div className="bg-card rounded-2xl p-6 border shadow-sm mb-6 md:mb-0 text-center animate-fade-up">
+            <p className="text-sm font-semibold text-muted-foreground mb-2">Saúde Financeira</p>
+            <p className={`text-5xl md:text-6xl font-black ${scoreColor}`}>{score}</p>
+            <p className="text-xs text-muted-foreground mt-1">de 100 pontos</p>
+            <Progress value={score} className="mt-4 h-3 rounded-full" />
+            <div className={`h-3 rounded-full ${scoreBg} -mt-3`} style={{ width: `${score}%` }} />
+          </div>
 
-        {/* Alerts */}
-        <div className="space-y-3 mb-6">
-          {alerts.map((alert, i) => (
-            <div key={i} className={`rounded-xl p-4 border flex items-start gap-3 animate-fade-up ${alert.type === "danger" ? "bg-danger/5 border-danger/20" : alert.type === "warning" ? "bg-warning/5 border-warning/20" : "bg-safe/5 border-safe/20"}`} style={{ animationDelay: `${(i + 1) * 0.1}s` }}>
-              {alert.type === "safe" ? <Shield className="w-5 h-5 text-safe shrink-0 mt-0.5" /> : <AlertTriangle className={`w-5 h-5 shrink-0 mt-0.5 ${alert.type === "warning" ? "text-warning" : "text-danger"}`} />}
-              <p className="text-sm font-medium text-foreground leading-relaxed">{alert.text}</p>
-            </div>
-          ))}
+          {/* Alerts */}
+          <div className="space-y-3 md:flex md:flex-col md:justify-center">
+            {alerts.map((alert, i) => (
+              <div key={i} className={`rounded-xl p-4 border flex items-start gap-3 animate-fade-up ${alert.type === "danger" ? "bg-danger/5 border-danger/20" : alert.type === "warning" ? "bg-warning/5 border-warning/20" : "bg-safe/5 border-safe/20"}`} style={{ animationDelay: `${(i + 1) * 0.1}s` }}>
+                {alert.type === "safe" ? <Shield className="w-5 h-5 text-safe shrink-0 mt-0.5" /> : <AlertTriangle className={`w-5 h-5 shrink-0 mt-0.5 ${alert.type === "warning" ? "text-warning" : "text-danger"}`} />}
+                <p className="text-sm font-medium text-foreground leading-relaxed">{alert.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Savings Projection */}
@@ -243,7 +246,7 @@ const Dashboard = () => {
         </div>
 
         {/* Summary cards */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 md:mt-6">
           <div className="bg-card rounded-xl p-4 border shadow-sm">
             <p className="text-xs text-muted-foreground font-medium">Renda</p>
             <p className="text-lg font-bold text-foreground mt-1">R$ {data.renda.toLocaleString("pt-BR")}</p>
@@ -295,7 +298,7 @@ const Dashboard = () => {
         </div>
 
         {/* Monthly Savings / Reserve */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-3">
           <div className="bg-card rounded-xl p-4 border shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <Wallet className="w-4 h-4 text-brand-green" />
@@ -379,12 +382,12 @@ const Dashboard = () => {
           <span className="text-xs font-semibold text-foreground">Baixar Relatório PDF de {monthName}</span>
         </button>
 
-        {/* Weekly Expenses */}
-        <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
-
-        {/* Caixinhas */}
-        <div className="mt-6">
-          <Caixinhas />
+        {/* Weekly Expenses & Caixinhas - side by side on desktop */}
+        <div className="md:grid md:grid-cols-2 md:gap-6">
+          <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
+          <div className="mt-6 md:mt-0">
+            <Caixinhas />
+          </div>
         </div>
 
         {/* Premium CTA */}
