@@ -4,7 +4,7 @@ import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen, Use
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-transparent.png";
 
 const AnimatedCounter = ({ target, label, icon }: { target: number; label: string; icon: React.ReactNode }) => {
   const [count, setCount] = useState(0);

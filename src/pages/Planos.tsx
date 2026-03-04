@@ -57,13 +57,15 @@ const Planos = () => {
     }
   }, [searchParams, refreshSubscription]);
 
-  const canCancel = () => {
-    if (!subscriptionStart) return false;
+  const getRemainingMonths = () => {
+    if (!subscriptionStart) return 12;
     const start = new Date(subscriptionStart);
-    const twelveMonthsLater = new Date(start);
-    twelveMonthsLater.setMonth(twelveMonthsLater.getMonth() + 12);
-    return new Date() >= twelveMonthsLater;
+    const now = new Date();
+    const monthsPassed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+    return Math.max(0, 12 - monthsPassed);
   };
+
+  const canCancel = () => getRemainingMonths() === 0;
 
   const handleSubscribe = async () => {
     if (!user) return;
@@ -145,20 +147,38 @@ const Planos = () => {
                       <Button className="w-full h-12 rounded-xl font-bold" disabled>
                         ✅ Plano ativo
                       </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full h-10 rounded-xl text-sm"
-                        onClick={handleManageSubscription}
-                        disabled={loadingPortal || !canCancel()}
-                      >
-                        {loadingPortal ? (
-                          <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Abrindo...</>
-                        ) : !canCancel() ? (
-                          "🔒 Cancelamento disponível após 12 meses"
-                        ) : (
-                          "Cancelar Assinatura"
-                        )}
-                      </Button>
+                      {canCancel() ? (
+                        <div className="space-y-2">
+                          <Button
+                            variant="destructive"
+                            className="w-full h-10 rounded-xl text-sm"
+                            onClick={handleManageSubscription}
+                            disabled={loadingPortal}
+                          >
+                            {loadingPortal ? (
+                              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Abrindo...</>
+                            ) : (
+                              "Cancelar Assinatura"
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 rounded-xl text-sm border-primary text-primary"
+                            onClick={handleManageSubscription}
+                            disabled={loadingPortal}
+                          >
+                            🔄 Renovar por mais 12 meses
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="w-full h-10 rounded-xl text-sm"
+                          disabled
+                        >
+                          🔒 Cancelamento disponível em {getRemainingMonths()} {getRemainingMonths() === 1 ? "mês" : "meses"}
+                        </Button>
+                      )}
                     </>
                   ) : (
                     <Button
