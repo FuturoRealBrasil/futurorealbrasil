@@ -1,10 +1,47 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
-import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
 import logo from "@/assets/logo.png";
+
+const AnimatedCounter = ({ target, label, icon }: { target: number; label: string; icon: React.ReactNode }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        const duration = 2000;
+        const steps = 60;
+        const increment = target / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            setCount(target);
+            clearInterval(timer);
+          } else {
+            setCount(Math.floor(current));
+          }
+        }, duration / steps);
+      }
+    }, { threshold: 0.3 });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return (
+    <div ref={ref} className="flex flex-col items-center gap-1">
+      {icon}
+      <span className="text-2xl font-extrabold text-brand-green">{count.toLocaleString("pt-BR")}+</span>
+      <span className="text-xs text-muted-foreground font-medium">{label}</span>
+    </div>
+  );
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -60,8 +97,8 @@ const Index = () => {
             <img
               src={logo}
               alt="Futuro Real Brasil"
-              className="w-48 mx-auto mb-6 drop-shadow-lg"
-              style={{ filter: "brightness(1.2)" }}
+              className="w-48 mx-auto mb-6 drop-shadow-lg rounded-2xl"
+              style={{ mixBlendMode: "multiply" }}
             />
           </div>
 
@@ -100,6 +137,15 @@ const Index = () => {
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0 40L48 36C96 32 192 24 288 28C384 32 480 48 576 52C672 56 768 48 864 40C960 32 1056 24 1152 28C1248 32 1344 48 1392 56L1440 64V80H0V40Z" fill="hsl(var(--background))" />
           </svg>
+        </div>
+      </div>
+
+      {/* Animated counters */}
+      <div className="px-6 py-8 scroll-reveal opacity-0 translate-y-6">
+        <div className="w-full max-w-sm mx-auto grid grid-cols-3 gap-4 bg-card border rounded-2xl p-6 shadow-sm">
+          <AnimatedCounter target={1250} label="Usuários ativos" icon={<Users className="w-5 h-5 text-brand-blue" />} />
+          <AnimatedCounter target={52} label="Avaliações" icon={<Heart className="w-5 h-5 text-destructive" />} />
+          <AnimatedCounter target={98} label="% Satisfação" icon={<TrendingUp className="w-5 h-5 text-brand-green" />} />
         </div>
       </div>
 
