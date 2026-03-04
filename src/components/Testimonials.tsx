@@ -54,18 +54,18 @@ const Testimonials = () => {
   if (reviews.length === 0) return null;
 
   return (
-    <div className="px-6 py-10">
-      <h2 className="text-lg font-extrabold text-foreground text-center mb-2">
+    <div className="px-6 py-10 md:py-16">
+      <h2 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-foreground text-center mb-2">
         O que dizem nossos <span className="text-brand-green">usuários</span>
       </h2>
-      <p className="text-sm text-muted-foreground text-center mb-6 max-w-xs mx-auto">
+      <p className="text-sm md:text-base text-muted-foreground text-center mb-6 md:mb-10 max-w-xs md:max-w-lg mx-auto">
         Mais de {reviews.length} pessoas já transformaram sua vida financeira
       </p>
 
       {/* Horizontal scroll of avatars */}
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide max-w-sm mx-auto snap-x snap-mandatory"
+        className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide max-w-sm md:max-w-4xl mx-auto snap-x snap-mandatory"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {reviews.map((review, i) => (
@@ -92,7 +92,7 @@ const Testimonials = () => {
       </div>
 
       {/* Featured review cards - show first 3 */}
-      <div className="max-w-sm mx-auto mt-4 space-y-3">
+      <div className="max-w-sm md:max-w-4xl mx-auto mt-4 space-y-3 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
         {reviews.slice(0, 3).map((review, i) => (
           <div
             key={review.id}
@@ -138,7 +138,7 @@ const Testimonials = () => {
 
       {/* Full review modal with navigation */}
       <Dialog open={selectedIndex !== null} onOpenChange={() => setSelectedIndex(null)}>
-        <DialogContent className="max-w-sm rounded-2xl p-0 overflow-hidden">
+        <DialogContent className="max-w-sm md:max-w-md rounded-2xl p-0 overflow-hidden">
           {selected && (
             <div className="relative">
               {/* Photo area */}

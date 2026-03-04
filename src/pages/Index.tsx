@@ -35,10 +35,10 @@ const AnimatedCounter = ({ target, label, icon }: { target: number; label: strin
   }, [target]);
 
   return (
-    <div ref={ref} className="flex flex-col items-center gap-1">
+    <div ref={ref} className="flex flex-col items-center gap-1 md:gap-2">
       {icon}
-      <span className="text-2xl font-extrabold text-brand-green">{count.toLocaleString("pt-BR")}+</span>
-      <span className="text-xs text-muted-foreground font-medium">{label}</span>
+      <span className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-brand-green">{count.toLocaleString("pt-BR")}+</span>
+      <span className="text-xs md:text-sm text-muted-foreground font-medium">{label}</span>
     </div>
   );
 };
@@ -92,30 +92,30 @@ const Index = () => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-brand-blue" />
 
-        <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 text-center">
+        <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 md:py-28 lg:py-36 text-center">
           <div className="animate-fade-up">
             <img
               src={logo}
               alt="Futuro Real Brasil"
-              className="w-48 mx-auto mb-6 drop-shadow-lg rounded-2xl"
+              className="w-48 md:w-56 mx-auto mb-6 drop-shadow-lg rounded-2xl"
               style={{ mixBlendMode: "multiply" }}
             />
           </div>
 
-          <h1 className="text-3xl font-extrabold leading-tight mb-3 animate-fade-up max-w-sm" style={{ animationDelay: "0.15s" }}>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-3 md:mb-5 animate-fade-up max-w-sm md:max-w-2xl" style={{ animationDelay: "0.15s" }}>
             Educação Financeira{" "}
             <span className="text-brand-gold">Acessível</span>
           </h1>
 
-          <p className="text-base opacity-90 font-medium leading-relaxed max-w-xs mx-auto mb-8 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <p className="text-base md:text-lg lg:text-xl opacity-90 font-medium leading-relaxed max-w-xs md:max-w-md mx-auto mb-8 animate-fade-up" style={{ animationDelay: "0.3s" }}>
             Antes que a vida te pegue de surpresa,{" "}
             <span className="text-brand-gold font-bold">veja o futuro.</span>
           </p>
 
-          <div className="w-full max-w-sm space-y-3 animate-fade-up" style={{ animationDelay: "0.45s" }}>
+          <div className="w-full max-w-sm md:max-w-md space-y-3 md:flex md:space-y-0 md:gap-4 animate-fade-up" style={{ animationDelay: "0.45s" }}>
             <Button
               onClick={handleStart}
-              className="w-full h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg"
+              className="w-full md:w-auto md:px-10 h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg"
               size="lg"
             >
               {user ? "Ir para o Dashboard" : "Começar agora"} <ArrowRight className="w-5 h-5 ml-1" />
@@ -124,7 +124,7 @@ const Index = () => {
               <Button
                 onClick={() => navigate("/auth")}
                 variant="outline"
-                className="w-full h-12 text-base font-semibold rounded-xl border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
+                className="w-full md:w-auto md:px-10 h-12 text-base font-semibold rounded-xl border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
               >
                 Já tenho conta
               </Button>
@@ -141,8 +141,8 @@ const Index = () => {
       </div>
 
       {/* Animated counters */}
-      <div className="px-6 py-8 scroll-reveal opacity-0 translate-y-6">
-        <div className="w-full max-w-sm mx-auto grid grid-cols-3 gap-4 bg-card border rounded-2xl p-6 shadow-sm">
+      <div className="px-6 py-8 md:py-12 scroll-reveal opacity-0 translate-y-6">
+        <div className="w-full max-w-sm md:max-w-3xl mx-auto grid grid-cols-3 gap-4 md:gap-8 bg-card border rounded-2xl p-6 md:p-10 shadow-sm">
           <AnimatedCounter target={1250} label="Usuários ativos" icon={<Users className="w-5 h-5 text-brand-blue" />} />
           <AnimatedCounter target={52} label="Avaliações" icon={<Heart className="w-5 h-5 text-destructive" />} />
           <AnimatedCounter target={98} label="% Satisfação" icon={<TrendingUp className="w-5 h-5 text-brand-green" />} />
@@ -150,15 +150,15 @@ const Index = () => {
       </div>
 
       {/* Why section with scroll reveal */}
-      <div className="px-6 py-10">
-        <h2 className="text-lg font-extrabold text-foreground text-center mb-2 scroll-reveal opacity-0 translate-y-6">
+      <div className="px-6 py-10 md:py-16">
+        <h2 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-foreground text-center mb-2 scroll-reveal opacity-0 translate-y-6">
           Por que usar o <span className="text-brand-green">Futuro Real</span>?
         </h2>
-        <p className="text-sm text-muted-foreground text-center mb-6 max-w-xs mx-auto scroll-reveal opacity-0 translate-y-6">
+        <p className="text-sm md:text-base text-muted-foreground text-center mb-6 md:mb-10 max-w-xs md:max-w-lg mx-auto scroll-reveal opacity-0 translate-y-6">
           Ferramentas simples para transformar sua vida financeira
         </p>
 
-        <div className="w-full max-w-sm mx-auto space-y-3">
+        <div className="w-full max-w-sm md:max-w-3xl mx-auto space-y-3 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
           {[
             { icon: TrendingUp, text: "Preveja riscos antes que aconteçam", color: "text-brand-green" },
             { icon: Heart, text: "Proteja quem depende de você", color: "text-destructive" },
@@ -179,8 +179,8 @@ const Index = () => {
       </div>
 
       {/* Features grid with scroll reveal */}
-      <div className="px-6 pb-10">
-        <div className="w-full max-w-sm mx-auto grid grid-cols-3 gap-3">
+      <div className="px-6 pb-10 md:pb-16">
+        <div className="w-full max-w-sm md:max-w-3xl mx-auto grid grid-cols-3 gap-3 md:gap-6">
           {[
             { icon: BarChart3, label: "Simulações", color: "bg-brand-blue/10 text-brand-blue" },
             { icon: Target, label: "Missões", color: "bg-brand-green/10 text-brand-green" },
