@@ -123,7 +123,7 @@ const Index = () => {
             </Button>
             {!user && (
               <Button
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/auth?mode=login")}
                 variant="outline"
                 className="w-full md:w-auto md:px-10 h-12 text-base font-semibold rounded-xl border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
               >
