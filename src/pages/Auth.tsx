@@ -64,7 +64,7 @@ const Auth = () => {
 
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
           <div className="text-center mb-8 animate-fade-up">
-            <img src={logo} alt="Futuro Real Brasil" className="w-44 mx-auto mb-4 drop-shadow-lg" />
+            <img src={logo} alt="Futuro Real Brasil" className="w-52 mx-auto mb-4 drop-shadow-lg" />
             <h1 className="text-2xl font-extrabold text-primary-foreground">
               {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
             </h1>

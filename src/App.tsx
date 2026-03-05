@@ -37,6 +37,8 @@ const AppRoutes = () => (
     <Route path="/emergencia" element={<ProtectedRoute><Emergencia /></ProtectedRoute>} />
     <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
     <Route path="/assinatura-confirmada" element={<ProtectedRoute><AssinaturaConfirmada /></ProtectedRoute>} />
+    <Route path="/termos" element={<Termos />} />
+    <Route path="/privacidade" element={<Privacidade />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

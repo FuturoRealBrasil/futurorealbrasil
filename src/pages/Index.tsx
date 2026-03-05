@@ -230,11 +230,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <div className="pb-8 pt-4 text-center mt-auto">
-        <p className="text-xs text-muted-foreground">
-          🔒 Seus dados ficam seguros. Sem anúncios. Sem julgamento.
-        </p>
-      </div>
+      <Footer />
     </div>
   );
 };
