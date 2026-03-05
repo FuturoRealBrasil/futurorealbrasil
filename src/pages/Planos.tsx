@@ -192,6 +192,26 @@ const Planos = () => {
                         plan.cta
                       )}
                     </Button>
+
+                    {/* Trust Seal */}
+                    <div className="mt-4 bg-safe/5 border border-safe/20 rounded-xl p-4 text-left space-y-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">🛡️</span>
+                        <span className="text-sm font-bold text-foreground">Plataforma segura</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Dados protegidos
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Pagamento seguro
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Tecnologia de análise financeira
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD
+                      </p>
+                    </div>
                   )}
                 </div>
               ) : (
