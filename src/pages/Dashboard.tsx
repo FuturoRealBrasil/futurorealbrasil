@@ -13,7 +13,8 @@ import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
 import { toast } from "sonner";
 import { generateTransactionsPDF } from "@/lib/pdfGenerator";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-transparent.png";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 const Dashboard = () => {
   const navigate = useNavigate();
