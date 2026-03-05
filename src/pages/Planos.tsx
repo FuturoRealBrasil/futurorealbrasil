@@ -41,6 +41,7 @@ const plans = [
 ];
 
 const Planos = () => {
+  const navigate = useNavigate();
   const { isPremium, user, refreshSubscription, subscriptionStart } = useAuth();
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
