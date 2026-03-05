@@ -6,7 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
 import ContentPreview from "@/components/ContentPreview";
+import Footer from "@/components/Footer";
 import logo from "@/assets/logo-transparent.png";
+
+// Base date: March 5, 2026
+const BASE_DATE = new Date(2026, 2, 5);
+const BASE_USERS = 1250;
+const BASE_REVIEWS = 52;
+const BASE_SATISFACTION = 98;
+
+function getDaysSinceBase() {
+  const now = new Date();
+  const diff = now.getTime() - BASE_DATE.getTime();
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+}
+
 
 const AnimatedCounter = ({ target, label, icon }: { target: number; label: string; icon: React.ReactNode }) => {
   const [count, setCount] = useState(0);
