@@ -181,6 +181,7 @@ const Planos = () => {
                       )}
                     </>
                   ) : (
+                    <>
                     <Button
                       className="w-full h-12 rounded-xl font-bold"
                       onClick={handleSubscribe}
@@ -212,6 +213,7 @@ const Planos = () => {
                         <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD
                       </p>
                     </div>
+                    </>
                   )}
                 </div>
               ) : (
