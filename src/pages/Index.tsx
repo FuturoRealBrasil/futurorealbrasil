@@ -118,7 +118,7 @@ const Index = () => {
             <img
               src={logo}
               alt="Futuro Real Brasil"
-              className="w-48 md:w-56 mx-auto mb-6 drop-shadow-lg rounded-2xl"
+              className="w-56 md:w-64 mx-auto mb-6 drop-shadow-lg rounded-2xl"
               style={{ mixBlendMode: "multiply" }}
             />
           </div>
