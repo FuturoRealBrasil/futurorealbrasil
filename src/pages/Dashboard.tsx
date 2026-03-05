@@ -4,7 +4,7 @@ import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
 import { useAuth } from "@/hooks/useAuth";
-import { TrendingUp, AlertTriangle, Shield, ChevronRight, LogOut, ChevronLeft, Wallet, PiggyBank, RefreshCw, DollarSign, Minus, FileDown } from "lucide-react";
+import { TrendingUp, AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, PiggyBank, RefreshCw, DollarSign, Minus, FileDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
 import { toast } from "sonner";
 import { generateTransactionsPDF } from "@/lib/pdfGenerator";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-transparent.png";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -155,19 +156,22 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <div className="px-5 py-6 pb-24 max-w-lg md:max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-            <img src={logo} alt="Logo" className="w-16 h-16 object-contain mix-blend-multiply shrink-0" />
-            <div className="min-w-0">
-              <h1 className="text-xl md:text-2xl font-extrabold text-foreground leading-tight truncate">Seu Futuro</h1>
-              <p className="text-xs md:text-sm text-muted-foreground truncate">Simulação financeira</p>
+      <div className="min-h-screen relative">
+        {/* Dark gradient header */}
+        <div className="bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)] px-5 pt-6 pb-10 relative">
+          <div className="max-w-lg md:max-w-5xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+              <img src={logo} alt="Logo" className="w-14 h-14 object-contain shrink-0 drop-shadow-lg" />
+              <div className="min-w-0">
+                <h1 className="text-xl md:text-2xl font-extrabold text-primary-foreground leading-tight truncate">Seu Futuro</h1>
+                <p className="text-xs md:text-sm text-primary-foreground/60 truncate">Simulação financeira</p>
+              </div>
             </div>
+            <HamburgerMenu />
           </div>
-          <button onClick={signOut} className="text-muted-foreground hover:text-foreground p-2">
-            <LogOut className="w-5 h-5" />
-          </button>
         </div>
+
+        <div className="px-5 pb-24 -mt-4 max-w-lg md:max-w-5xl mx-auto">
 
         {/* Month Navigation */}
         <div className="flex items-center justify-between bg-card rounded-xl border shadow-sm p-3 mb-6">
@@ -403,6 +407,7 @@ const Dashboard = () => {
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </button>
         )}
+      </div>
       </div>
     </AppLayout>
   );

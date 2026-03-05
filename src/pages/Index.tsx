@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen, Users } from "lucide-react";
+import HamburgerMenu from "@/components/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
@@ -50,7 +51,7 @@ const Index = () => {
   const parallaxRef = useRef<HTMLDivElement>(null);
 
   const handleStart = () => {
-    navigate(user ? "/dashboard" : "/auth");
+    navigate(user ? "/dashboard" : "/auth?mode=signup");
   };
 
   // Parallax scroll effect
@@ -93,6 +94,11 @@ const Index = () => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)]" />
 
+        {/* Hamburger menu top-right */}
+        <div className="absolute top-4 right-4 z-20">
+          <HamburgerMenu />
+        </div>
+
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 md:py-28 lg:py-36 text-center">
           <div className="animate-fade-up">
             <img
@@ -123,7 +129,7 @@ const Index = () => {
             </Button>
             {!user && (
               <Button
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/auth?mode=login")}
                 variant="outline"
                 className="w-full md:w-auto md:px-10 h-12 text-base font-semibold rounded-xl border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
               >
