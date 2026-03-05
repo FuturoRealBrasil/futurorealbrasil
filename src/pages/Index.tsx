@@ -50,7 +50,7 @@ const Index = () => {
   const parallaxRef = useRef<HTMLDivElement>(null);
 
   const handleStart = () => {
-    navigate(user ? "/dashboard" : "/auth");
+    navigate(user ? "/dashboard" : "/auth?mode=signup");
   };
 
   // Parallax scroll effect
