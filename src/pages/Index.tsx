@@ -6,7 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
 import ContentPreview from "@/components/ContentPreview";
+import Footer from "@/components/Footer";
 import logo from "@/assets/logo-transparent.png";
+
+// Base date: March 5, 2026
+const BASE_DATE = new Date(2026, 2, 5);
+const BASE_USERS = 1250;
+const BASE_REVIEWS = 52;
+const BASE_SATISFACTION = 98;
+
+function getDaysSinceBase() {
+  const now = new Date();
+  const diff = now.getTime() - BASE_DATE.getTime();
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+}
+
 
 const AnimatedCounter = ({ target, label, icon }: { target: number; label: string; icon: React.ReactNode }) => {
   const [count, setCount] = useState(0);
@@ -104,7 +118,7 @@ const Index = () => {
             <img
               src={logo}
               alt="Futuro Real Brasil"
-              className="w-48 md:w-56 mx-auto mb-6 drop-shadow-lg rounded-2xl"
+              className="w-56 md:w-64 mx-auto mb-6 drop-shadow-lg rounded-2xl"
               style={{ mixBlendMode: "multiply" }}
             />
           </div>
@@ -150,9 +164,9 @@ const Index = () => {
       {/* Animated counters */}
       <div className="px-6 py-8 md:py-12 scroll-reveal opacity-0 translate-y-6">
         <div className="w-full max-w-sm md:max-w-3xl mx-auto grid grid-cols-3 gap-4 md:gap-8 bg-card border rounded-2xl p-6 md:p-10 shadow-sm">
-          <AnimatedCounter target={1250} label="Usuários ativos" icon={<Users className="w-5 h-5 text-brand-blue" />} />
-          <AnimatedCounter target={52} label="Avaliações" icon={<Heart className="w-5 h-5 text-destructive" />} />
-          <AnimatedCounter target={98} label="% Satisfação" icon={<TrendingUp className="w-5 h-5 text-brand-green" />} />
+          <AnimatedCounter target={BASE_USERS + getDaysSinceBase() * 3} label="Usuários ativos" icon={<Users className="w-5 h-5 text-brand-blue" />} />
+          <AnimatedCounter target={BASE_REVIEWS + getDaysSinceBase() * 3} label="Avaliações" icon={<Heart className="w-5 h-5 text-destructive" />} />
+          <AnimatedCounter target={Math.min(100, BASE_SATISFACTION + getDaysSinceBase() * 3)} label="% Satisfação" icon={<TrendingUp className="w-5 h-5 text-brand-green" />} />
         </div>
       </div>
 
@@ -216,11 +230,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <div className="pb-8 pt-4 text-center mt-auto">
-        <p className="text-xs text-muted-foreground">
-          🔒 Seus dados ficam seguros. Sem anúncios. Sem julgamento.
-        </p>
-      </div>
+      <Footer />
     </div>
   );
 };

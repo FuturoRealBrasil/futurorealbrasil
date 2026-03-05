@@ -5,7 +5,7 @@ import AppLayout from "@/components/AppLayout";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 const plans = [
   {
@@ -41,6 +41,7 @@ const plans = [
 ];
 
 const Planos = () => {
+  const navigate = useNavigate();
   const { isPremium, user, refreshSubscription, subscriptionStart } = useAuth();
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
@@ -181,6 +182,7 @@ const Planos = () => {
                       )}
                     </>
                   ) : (
+                    <>
                     <Button
                       className="w-full h-12 rounded-xl font-bold"
                       onClick={handleSubscribe}
@@ -192,6 +194,27 @@ const Planos = () => {
                         plan.cta
                       )}
                     </Button>
+
+                    {/* Trust Seal */}
+                    <div className="mt-4 bg-safe/5 border border-safe/20 rounded-xl p-4 text-left space-y-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">🛡️</span>
+                        <span className="text-sm font-bold text-foreground">Plataforma segura</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Dados protegidos
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Pagamento seguro
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Tecnologia de análise financeira
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD
+                      </p>
+                    </div>
+                    </>
                   )}
                 </div>
               ) : (
@@ -210,6 +233,12 @@ const Planos = () => {
           <p className="text-xs text-muted-foreground">🔒 Não vendemos seus dados</p>
           <p className="text-xs text-muted-foreground">🚫 Sem anúncios bancários</p>
           <p className="text-xs text-muted-foreground">✅ Transparência total</p>
+          <button
+            onClick={() => navigate("/auth?mode=login")}
+            className="text-xs text-brand-gold font-semibold hover:underline mt-2 inline-block"
+          >
+            Ver todos os 52 depoimentos →
+          </button>
         </div>
       </div>
     </AppLayout>

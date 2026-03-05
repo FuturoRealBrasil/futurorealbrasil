@@ -102,7 +102,7 @@ const Cadastro = () => {
 
         {/* Logo */}
         <div className="flex justify-center mb-4">
-          <img src={logo} alt="Futuro Real Brasil" className="w-28 drop-shadow-lg" />
+          <img src={logo} alt="Futuro Real Brasil" className="w-36 drop-shadow-lg" />
         </div>
 
         {/* Content */}
