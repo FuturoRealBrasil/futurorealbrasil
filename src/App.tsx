@@ -14,6 +14,8 @@ import Emergencia from "./pages/Emergencia";
 import Planos from "./pages/Planos";
 import AssinaturaConfirmada from "./pages/AssinaturaConfirmada";
 import NotFound from "./pages/NotFound";
+import Termos from "./pages/Termos";
+import Privacidade from "./pages/Privacidade";
 
 const queryClient = new QueryClient();
 
