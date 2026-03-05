@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen, Users } from "lucide-react";
+import HamburgerMenu from "@/components/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
