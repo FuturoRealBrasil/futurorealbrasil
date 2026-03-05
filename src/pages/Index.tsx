@@ -94,6 +94,11 @@ const Index = () => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)]" />
 
+        {/* Hamburger menu top-right */}
+        <div className="absolute top-4 right-4 z-20">
+          <HamburgerMenu />
+        </div>
+
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 md:py-28 lg:py-36 text-center">
           <div className="animate-fade-up">
             <img
