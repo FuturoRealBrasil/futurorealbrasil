@@ -408,6 +408,7 @@ const Dashboard = () => {
           </button>
         )}
       </div>
+      </div>
     </AppLayout>
   );
 };
