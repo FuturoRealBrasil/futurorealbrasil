@@ -1,4 +1,4 @@
-import { Check, Star, AlertTriangle, Loader2 } from "lucide-react";
+import { Check, Star, AlertTriangle, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
