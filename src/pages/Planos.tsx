@@ -235,15 +235,12 @@ const Planos = () => {
           <p className="text-xs text-muted-foreground">🚫 Sem anúncios bancários</p>
           <p className="text-xs text-muted-foreground">✅ Transparência total</p>
           <button
-            onClick={() => navigate("/auth?mode=login")}
+            onClick={() => navigate("/#depoimentos")}
             className="text-xs text-brand-gold font-semibold hover:underline mt-2 inline-block"
           >
             Ver todos os 52 depoimentos →
           </button>
         </div>
-
-        {/* Formulário de Espera */}
-        <WaitListForm />
       </div>
     </AppLayout>
   );
