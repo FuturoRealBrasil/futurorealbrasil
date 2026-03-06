@@ -110,7 +110,8 @@ const Planos = () => {
           </button>
           <div className="text-center">
             <h1 className="text-2xl font-extrabold text-foreground">Planos</h1>
-          <p className="text-sm text-muted-foreground mt-1">Invista no seu futuro financeiro</p>
+            <p className="text-sm text-muted-foreground mt-1">Invista no seu futuro financeiro</p>
+          </div>
         </div>
 
         <div className="space-y-4">
