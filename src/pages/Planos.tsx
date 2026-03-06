@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import WaitListForm from "@/components/WaitListForm";
 
 const plans = [
   {
@@ -240,6 +241,9 @@ const Planos = () => {
             Ver todos os 52 depoimentos →
           </button>
         </div>
+
+        {/* Formulário de Espera */}
+        <WaitListForm />
       </div>
     </AppLayout>
   );

@@ -54,16 +54,21 @@ export function useDailyExpenses(selectedMonth?: number, selectedYear?: number) 
       }
     }
 
-    await supabase.from("weekly_expenses").insert({
+    const { error } = await supabase.from("weekly_expenses").insert({
       user_id: user.id,
       dia,
       mes,
       ano,
       nome,
       valor,
-      descricao,
+      descricao: descricao || null,
       receipt_url,
     } as any);
+
+    if (error) {
+      console.error("Insert expense error:", error);
+      throw error;
+    }
 
     await loadExpenses();
   }
