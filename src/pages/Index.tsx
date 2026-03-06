@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
 import ContentPreview from "@/components/ContentPreview";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import WaitListForm from "@/components/WaitListForm";
 import logo from "@/assets/logo-transparent.png";
 
 // Base date: March 5, 2026
@@ -225,12 +227,18 @@ const Index = () => {
       <ContentPreview />
 
       {/* Testimonials section */}
-      <div className="scroll-reveal opacity-0 translate-y-6">
+      <div id="depoimentos" className="scroll-reveal opacity-0 translate-y-6">
         <Testimonials />
+      </div>
+
+      {/* Waitlist Form */}
+      <div className="px-6 pb-10 max-w-sm md:max-w-3xl mx-auto">
+        <WaitListForm />
       </div>
 
       {/* Footer */}
       <Footer />
+      <WhatsAppButton />
     </div>
   );
 };
