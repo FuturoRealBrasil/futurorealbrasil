@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-transparent.png";
 
 const Auth = () => {
@@ -19,6 +20,21 @@ const Auth = () => {
   const [submitting, setSubmitting] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Digite seu email primeiro");
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +111,14 @@ const Auth = () => {
                 </button>
               </div>
             </div>
+
+            {isLogin && (
+              <div className="text-right">
+                <button type="button" onClick={handleForgotPassword} className="text-xs text-brand-gold hover:underline">
+                  Esqueci minha senha
+                </button>
+              </div>
+            )}
 
             <Button type="submit" disabled={submitting} className="w-full h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg" size="lg">
               {submitting ? "Aguarde..." : isLogin ? "Entrar" : "Criar conta"}
