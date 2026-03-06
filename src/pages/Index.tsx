@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Testimonials from "@/components/Testimonials";
 import ContentPreview from "@/components/ContentPreview";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import WaitListForm from "@/components/WaitListForm";
 import logo from "@/assets/logo-transparent.png";
 
 // Base date: March 5, 2026
