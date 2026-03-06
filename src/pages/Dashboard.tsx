@@ -171,7 +171,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="px-5 pb-24 -mt-4 max-w-lg md:max-w-5xl mx-auto">
+        <div className="px-5 pb-24 -mt-4 max-w-lg md:max-w-5xl mx-auto relative z-10">
 
         {/* Month Navigation */}
         <div className="flex items-center justify-between bg-card rounded-xl border shadow-sm p-3 mb-6">

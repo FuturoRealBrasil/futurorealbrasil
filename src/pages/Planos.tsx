@@ -240,6 +240,9 @@ const Planos = () => {
             Ver todos os 52 depoimentos →
           </button>
         </div>
+
+        {/* Formulário de Espera */}
+        <WaitListForm />
       </div>
     </AppLayout>
   );
