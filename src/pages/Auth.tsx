@@ -96,6 +96,14 @@ const Auth = () => {
               </div>
             </div>
 
+            {isLogin && (
+              <div className="text-right">
+                <button type="button" onClick={handleForgotPassword} className="text-xs text-brand-gold hover:underline">
+                  Esqueci minha senha
+                </button>
+              </div>
+            )}
+
             <Button type="submit" disabled={submitting} className="w-full h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg" size="lg">
               {submitting ? "Aguarde..." : isLogin ? "Entrar" : "Criar conta"}
             </Button>
