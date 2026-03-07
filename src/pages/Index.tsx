@@ -147,7 +147,7 @@ const Index = () => {
 
           {/* Ver como funciona */}
           <button
-            onClick={() => setShowHowItWorks(true)}
+            onClick={() => navigate("/como-funciona")}
             className="mt-4 flex items-center gap-2 text-sm text-brand-gold font-semibold hover:underline animate-fade-up"
             style={{ animationDelay: "0.55s" }}
           >
