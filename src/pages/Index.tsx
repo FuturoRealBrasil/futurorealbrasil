@@ -10,7 +10,6 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WaitListForm from "@/components/WaitListForm";
 import logo from "@/assets/logo-transparent.png";
-import logo from "@/assets/logo-transparent.png";
 import familiesImg from "@/assets/families-celebrating.jpg";
 
 // Base date: March 5, 2026
