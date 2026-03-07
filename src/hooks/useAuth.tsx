@@ -30,7 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.functions.invoke("check-subscription");
       if (error) {
         console.error("Error checking subscription:", error);
-        setIsPremium(false);
+        // Don't reset premium on network errors
+        return;
+      }
+      // If auth_error, don't change premium status (stale token, session expired temporarily)
+      if (data?.auth_error) {
+        console.warn("Auth error in subscription check, keeping current state");
         return;
       }
       setIsPremium(data?.subscribed === true);
@@ -38,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSubscriptionStart(data?.subscription_start ?? null);
     } catch (e) {
       console.error("Error checking subscription:", e);
-      setIsPremium(false);
+      // Don't reset premium on errors
     }
   }, []);
 

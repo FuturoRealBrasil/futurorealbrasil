@@ -24,7 +24,10 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { plan } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const plan = body?.plan || "premium";
+    
+    console.log("[CREATE-CHECKOUT] Plan requested:", plan);
 
     const priceIds: Record<string, string> = {
       premium: "price_1T6sIeDCQ4UlhGP6s6BNKn0q",
@@ -32,6 +35,7 @@ serve(async (req) => {
     };
 
     const priceId = priceIds[plan] || priceIds.premium;
+    console.log("[CREATE-CHECKOUT] Using price ID:", priceId);
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
