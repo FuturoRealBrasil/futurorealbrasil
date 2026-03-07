@@ -100,13 +100,27 @@ const ContentPreview = () => {
         </div>
       </div>
 
-      {/* CTA */}
+      {/* CTA with pricing */}
       <div className="scroll-reveal opacity-0 translate-y-6 text-center pt-8 md:pt-12 max-w-sm md:max-w-lg mx-auto">
         <div className="bg-gradient-to-br from-brand-green/10 via-brand-gold/5 to-brand-blue/10 rounded-2xl p-6 md:p-10 border">
           <Lock className="w-10 h-10 text-brand-gold mx-auto mb-3" />
-          <h3 className="text-lg md:text-xl font-extrabold text-foreground mb-2">
+          <h3 className="text-lg md:text-xl font-extrabold text-foreground mb-4">
             Menos que Um Café Por Semana
           </h3>
+
+          {/* Pricing info */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-4">
+            <div>
+              <p className="text-lg font-extrabold text-brand-gold">R$19,90 <span className="text-sm font-medium text-muted-foreground">por mês</span></p>
+              <p className="text-xs text-muted-foreground">ou R$0,66 por dia</p>
+            </div>
+            <div className="hidden sm:block w-px h-10 bg-border" />
+            <div>
+              <p className="text-lg font-extrabold text-brand-gold">R$219,90 <span className="text-sm font-medium text-muted-foreground">/Ano</span></p>
+              <p className="text-xs text-muted-foreground">ou R$0,59 por dia</p>
+            </div>
+          </div>
+
           <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
             Acesse todos os conteúdos, missões e planos de emergência
           </p>

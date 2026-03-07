@@ -24,6 +24,15 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
+    const { plan } = await req.json();
+
+    const priceIds: Record<string, string> = {
+      premium: "price_1T6sIeDCQ4UlhGP6s6BNKn0q",
+      premium_annual: "price_1T8L1sDCQ4UlhGP6jXMT6NFo",
+    };
+
+    const priceId = priceIds[plan] || priceIds.premium;
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
@@ -36,7 +45,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: "price_1T6sIeDCQ4UlhGP6s6BNKn0q", quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${origin}/assinatura-confirmada`,
       cancel_url: `${origin}/planos?canceled=true`,
