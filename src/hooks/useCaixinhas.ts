@@ -33,7 +33,6 @@ export function useCaixinhas() {
   async function createCaixinha(nome: string, imageFile?: File, metaValor?: number) {
     if (!user) return;
     let imagem_url: string | null = null;
-
     if (imageFile) {
       const ext = imageFile.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
@@ -43,10 +42,7 @@ export function useCaixinhas() {
         imagem_url = urlData.publicUrl;
       }
     }
-
-    await supabase.from("caixinhas").insert({
-      user_id: user.id, nome, imagem_url, meta_valor: metaValor || 0,
-    } as any);
+    await supabase.from("caixinhas").insert({ user_id: user.id, nome, imagem_url, meta_valor: metaValor || 0 } as any);
     await load();
   }
 
@@ -54,7 +50,6 @@ export function useCaixinhas() {
     if (!user) return;
     const updates: any = { nome };
     if (metaValor !== undefined) updates.meta_valor = metaValor;
-
     if (imageFile) {
       const ext = imageFile.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
@@ -64,7 +59,6 @@ export function useCaixinhas() {
         updates.imagem_url = urlData.publicUrl;
       }
     }
-
     await supabase.from("caixinhas").update(updates).eq("id", id);
     await load();
   }
@@ -77,9 +71,17 @@ export function useCaixinhas() {
   async function addToCaixinha(id: string, valor: number) {
     const cx = caixinhas.find(c => c.id === id);
     if (!cx) return;
-    await supabase.from("caixinhas").update({ valor_atual: cx.valor_atual + valor } as any).eq("id", id);
+    await supabase.from("caixinhas").update({ valor_atual: Number(cx.valor_atual) + valor } as any).eq("id", id);
     await load();
   }
 
-  return { caixinhas, loading, createCaixinha, updateCaixinha, deleteCaixinha, addToCaixinha };
+  async function withdrawFromCaixinha(id: string, valor: number) {
+    const cx = caixinhas.find(c => c.id === id);
+    if (!cx) return;
+    const newVal = Math.max(0, Number(cx.valor_atual) - valor);
+    await supabase.from("caixinhas").update({ valor_atual: newVal } as any).eq("id", id);
+    await load();
+  }
+
+  return { caixinhas, loading, createCaixinha, updateCaixinha, deleteCaixinha, addToCaixinha, withdrawFromCaixinha };
 }

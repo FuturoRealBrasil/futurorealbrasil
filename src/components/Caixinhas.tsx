@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
 import { useCaixinhas } from "@/hooks/useCaixinhas";
-import { Plus, Pencil, Trash2, PiggyBank, ImagePlus, X, Check, Target } from "lucide-react";
+import { Plus, Pencil, Trash2, PiggyBank, ImagePlus, X, Check, Target, Minus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
 export default function Caixinhas() {
-  const { caixinhas, loading, createCaixinha, updateCaixinha, deleteCaixinha, addToCaixinha } = useCaixinhas();
+  const { caixinhas, loading, createCaixinha, updateCaixinha, deleteCaixinha, addToCaixinha, withdrawFromCaixinha } = useCaixinhas();
   const [showCreate, setShowCreate] = useState(false);
   const [nome, setNome] = useState("");
   const [metaValor, setMetaValor] = useState("");
@@ -23,6 +23,9 @@ export default function Caixinhas() {
 
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositValor, setDepositValor] = useState("");
+
+  const [withdrawId, setWithdrawId] = useState<string | null>(null);
+  const [withdrawValor, setWithdrawValor] = useState("");
 
   async function handleCreate() {
     if (!nome.trim()) { toast.error("Informe o nome da caixinha"); return; }
@@ -55,6 +58,18 @@ export default function Caixinhas() {
     toast.success("Valor adicionado!");
   }
 
+  async function handleWithdraw(id: string) {
+    const v = parseFloat(withdrawValor.replace(",", "."));
+    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    const cx = caixinhas.find(c => c.id === id);
+    if (cx && v > Number(cx.valor_atual)) { toast.error("Saldo insuficiente"); return; }
+    setSaving(true);
+    await withdrawFromCaixinha(id, v);
+    setWithdrawId(null); setWithdrawValor("");
+    setSaving(false);
+    toast.success("Valor retirado!");
+  }
+
   async function handleDelete(id: string) {
     if (!confirm("Deseja apagar esta caixinha?")) return;
     await deleteCaixinha(id);
@@ -84,12 +99,8 @@ export default function Caixinhas() {
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
           </label>
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleCreate} disabled={saving} className="flex-1">
-              {saving ? "Salvando..." : "Criar"}
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => { setShowCreate(false); setNome(""); setMetaValor(""); setImageFile(null); }}>
-              Cancelar
-            </Button>
+            <Button size="sm" onClick={handleCreate} disabled={saving} className="flex-1">{saving ? "Salvando..." : "Criar"}</Button>
+            <Button size="sm" variant="outline" onClick={() => { setShowCreate(false); setNome(""); setMetaValor(""); setImageFile(null); }}>Cancelar</Button>
           </div>
         </div>
       )}
@@ -115,30 +126,20 @@ export default function Caixinhas() {
                     <input ref={editFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => setEditImageFile(e.target.files?.[0] || null)} />
                   </label>
                   <div className="flex gap-1">
-                    <Button size="sm" onClick={() => handleEdit(cx.id)} disabled={saving} className="flex-1 h-8 text-xs">
-                      <Check className="w-3 h-3 mr-1" /> Salvar
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditId(null)} className="h-8 text-xs">
-                      <X className="w-3 h-3" />
-                    </Button>
+                    <Button size="sm" onClick={() => handleEdit(cx.id)} disabled={saving} className="flex-1 h-8 text-xs"><Check className="w-3 h-3 mr-1" /> Salvar</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditId(null)} className="h-8 text-xs"><X className="w-3 h-3" /></Button>
                   </div>
                 </div>
               ) : (
                 <>
                   {cx.imagem_url ? (
-                    <div className="w-full h-20 bg-muted">
-                      <img src={cx.imagem_url} alt={cx.nome} className="w-full h-full object-cover" />
-                    </div>
+                    <div className="w-full h-20 bg-muted"><img src={cx.imagem_url} alt={cx.nome} className="w-full h-full object-cover" /></div>
                   ) : (
-                    <div className="w-full h-20 bg-primary/10 flex items-center justify-center">
-                      <PiggyBank className="w-8 h-8 text-primary/40" />
-                    </div>
+                    <div className="w-full h-20 bg-primary/10 flex items-center justify-center"><PiggyBank className="w-8 h-8 text-primary/40" /></div>
                   )}
                   <div className="p-3">
                     <p className="text-sm font-bold text-foreground truncate">{cx.nome}</p>
-                    <p className="text-lg font-black text-brand-green mt-1">
-                      R$ {Number(cx.valor_atual).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
+                    <p className="text-lg font-black text-brand-green mt-1">R$ {Number(cx.valor_atual).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
 
                     {cx.meta_valor > 0 && (
                       <div className="mt-2">
@@ -147,15 +148,10 @@ export default function Caixinhas() {
                           <span>R$ {Number(cx.meta_valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-brand-green transition-all duration-500"
-                            style={{ width: `${progress}%` }}
-                          />
+                          <div className="h-full rounded-full bg-brand-green transition-all duration-500" style={{ width: `${progress}%` }} />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {progress >= 100
-                            ? "🎉 Meta atingida!"
-                            : `Faltam R$ ${falta.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+                          {progress >= 100 ? "🎉 Meta atingida!" : `Faltam R$ ${falta.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
                         </p>
                       </div>
                     )}
@@ -164,18 +160,25 @@ export default function Caixinhas() {
                       <div className="mt-2 space-y-2">
                         <Input placeholder="Valor (R$)" value={depositValor} onChange={(e) => setDepositValor(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
                         <div className="flex gap-1">
-                          <Button size="sm" onClick={() => handleDeposit(cx.id)} disabled={saving} className="flex-1 h-7 text-xs">
-                            Depositar
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setDepositId(null)} className="h-7 text-xs">
-                            <X className="w-3 h-3" />
-                          </Button>
+                          <Button size="sm" onClick={() => handleDeposit(cx.id)} disabled={saving} className="flex-1 h-7 text-xs">Depositar</Button>
+                          <Button size="sm" variant="outline" onClick={() => setDepositId(null)} className="h-7 text-xs"><X className="w-3 h-3" /></Button>
+                        </div>
+                      </div>
+                    ) : withdrawId === cx.id ? (
+                      <div className="mt-2 space-y-2">
+                        <Input placeholder="Valor (R$)" value={withdrawValor} onChange={(e) => setWithdrawValor(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="destructive" onClick={() => handleWithdraw(cx.id)} disabled={saving} className="flex-1 h-7 text-xs">Retirar</Button>
+                          <Button size="sm" variant="outline" onClick={() => setWithdrawId(null)} className="h-7 text-xs"><X className="w-3 h-3" /></Button>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 mt-2">
+                      <div className="flex items-center gap-1 mt-2 flex-wrap">
                         <button onClick={() => setDepositId(cx.id)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
                           <Plus className="w-3 h-3" /> Depositar
+                        </button>
+                        <button onClick={() => setWithdrawId(cx.id)} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
+                          <Minus className="w-3 h-3" /> Retirar
                         </button>
                         <div className="ml-auto flex gap-1">
                           <button onClick={() => { setEditId(cx.id); setEditNome(cx.nome); setEditMeta(String(cx.meta_valor || "")); }} className="text-muted-foreground hover:text-primary p-1">

@@ -7,17 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-
 const plans = [
   {
     name: "Gratuito",
     price: "R$ 0",
     period: "",
     description: "Para começar a organizar sua vida financeira",
-    features: [
-      "1 simulação de 6 meses",
-      "Dados salvos na nuvem",
-    ],
+    features: ["1 simulação de 6 meses", "Dados salvos na nuvem"],
     cta: "Plano atual",
     highlight: false,
     planId: "free",
@@ -48,7 +44,6 @@ const Planos = () => {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [searchParams] = useSearchParams();
 
-  // Check for success/canceled redirect
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       toast.success("🎉 Plano Premium ativado com sucesso!");
@@ -75,9 +70,7 @@ const Planos = () => {
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout");
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
+      if (data?.url) window.open(data.url, "_blank");
     } catch (e: any) {
       toast.error("Erro ao iniciar checkout: " + (e.message || "Tente novamente"));
     } finally {
@@ -91,9 +84,7 @@ const Planos = () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
+      if (data?.url) window.open(data.url, "_blank");
     } catch (e: any) {
       toast.error("Erro ao abrir portal: " + (e.message || "Tente novamente"));
     } finally {
@@ -129,10 +120,10 @@ const Planos = () => {
               </div>
 
               {plan.highlight && (
-                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
-                    Este plano tem fidelidade de <strong>12 meses</strong> e poderá ser cancelado após esse período.
+                <div className="flex items-start gap-2 bg-brand-green/10 border border-brand-green/20 rounded-lg p-3 mb-4">
+                  <Star className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+                  <p className="text-xs text-brand-green leading-relaxed font-semibold">
+                    Plano anual com desconto especial
                   </p>
                 </div>
               )}
@@ -151,83 +142,41 @@ const Planos = () => {
                 <div className="space-y-2">
                   {isPremium ? (
                     <>
-                      <Button className="w-full h-12 rounded-xl font-bold" disabled>
-                        ✅ Plano ativo
-                      </Button>
+                      <Button className="w-full h-12 rounded-xl font-bold" disabled>✅ Plano ativo</Button>
                       {canCancel() ? (
                         <div className="space-y-2">
-                          <Button
-                            variant="destructive"
-                            className="w-full h-10 rounded-xl text-sm"
-                            onClick={handleManageSubscription}
-                            disabled={loadingPortal}
-                          >
-                            {loadingPortal ? (
-                              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Abrindo...</>
-                            ) : (
-                              "Cancelar Assinatura"
-                            )}
+                          <Button variant="destructive" className="w-full h-10 rounded-xl text-sm" onClick={handleManageSubscription} disabled={loadingPortal}>
+                            {loadingPortal ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Abrindo...</> : "Cancelar Assinatura"}
                           </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full h-10 rounded-xl text-sm border-primary text-primary"
-                            onClick={handleManageSubscription}
-                            disabled={loadingPortal}
-                          >
+                          <Button variant="outline" className="w-full h-10 rounded-xl text-sm border-primary text-primary" onClick={handleManageSubscription} disabled={loadingPortal}>
                             🔄 Renovar por mais 12 meses
                           </Button>
                         </div>
                       ) : (
-                        <Button
-                          variant="outline"
-                          className="w-full h-10 rounded-xl text-sm"
-                          disabled
-                        >
+                        <Button variant="outline" className="w-full h-10 rounded-xl text-sm" disabled>
                           🔒 Cancelamento disponível em {getRemainingMonths()} {getRemainingMonths() === 1 ? "mês" : "meses"}
                         </Button>
                       )}
                     </>
                   ) : (
                     <>
-                    <Button
-                      className="w-full h-12 rounded-xl font-bold"
-                      onClick={handleSubscribe}
-                      disabled={loadingCheckout}
-                    >
-                      {loadingCheckout ? (
-                        <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processando...</>
-                      ) : (
-                        plan.cta
-                      )}
-                    </Button>
-
-                    {/* Trust Seal */}
-                    <div className="mt-4 bg-safe/5 border border-safe/20 rounded-xl p-4 text-left space-y-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg">🛡️</span>
-                        <span className="text-sm font-bold text-foreground">Plataforma segura</span>
+                      <Button className="w-full h-12 rounded-xl font-bold" onClick={handleSubscribe} disabled={loadingCheckout}>
+                        {loadingCheckout ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processando...</> : plan.cta}
+                      </Button>
+                      <div className="mt-4 bg-safe/5 border border-safe/20 rounded-xl p-4 text-left space-y-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-lg">🛡️</span>
+                          <span className="text-sm font-bold text-foreground">Plataforma segura</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Dados protegidos</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Pagamento seguro</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD</p>
                       </div>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Dados protegidos
-                      </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Pagamento seguro
-                      </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Tecnologia de análise financeira
-                      </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD
-                      </p>
-                    </div>
                     </>
                   )}
                 </div>
               ) : (
-                <Button
-                  className="w-full h-12 rounded-xl font-bold bg-muted text-muted-foreground hover:bg-muted"
-                  disabled
-                >
+                <Button className="w-full h-12 rounded-xl font-bold bg-muted text-muted-foreground hover:bg-muted" disabled>
                   {isPremium ? "—" : plan.cta}
                 </Button>
               )}
@@ -239,11 +188,8 @@ const Planos = () => {
           <p className="text-xs text-muted-foreground">🔒 Não vendemos seus dados</p>
           <p className="text-xs text-muted-foreground">🚫 Sem anúncios bancários</p>
           <p className="text-xs text-muted-foreground">✅ Transparência total</p>
-          <button
-            onClick={() => navigate("/#depoimentos")}
-            className="text-xs text-brand-gold font-semibold hover:underline mt-2 inline-block"
-          >
-            Ver todos os 52 depoimentos →
+          <button onClick={() => navigate("/#depoimentos")} className="text-xs text-brand-gold font-semibold hover:underline mt-2 inline-block">
+            Ver todos os depoimentos →
           </button>
         </div>
       </div>

@@ -45,12 +45,20 @@ export function useDailyExpenses(selectedMonth?: number, selectedYear?: number) 
     let receipt_url: string | null = null;
 
     if (receiptFile) {
-      const ext = receiptFile.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("receipts").upload(path, receiptFile);
-      if (!error) {
-        const { data: urlData } = supabase.storage.from("receipts").getPublicUrl(path);
-        receipt_url = urlData.publicUrl;
+      try {
+        const ext = receiptFile.name.split(".").pop();
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from("receipts").upload(path, receiptFile);
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          // Continue without receipt - don't block the expense save
+        } else {
+          const { data: urlData } = supabase.storage.from("receipts").getPublicUrl(path);
+          receipt_url = urlData.publicUrl;
+        }
+      } catch (e) {
+        console.error("Receipt upload failed:", e);
+        // Continue without receipt
       }
     }
 

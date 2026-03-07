@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Zap, ChevronRight, Lock } from "lucide-react";
+import { AlertTriangle, Zap, ChevronRight, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,18 +16,15 @@ const Emergencia = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const { isPremium } = useAuth();
+  const navigate = useNavigate();
 
   const toggleCheck = (scenarioId: string, index: number) => {
     const key = `${scenarioId}-${index}`;
     setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-  const navigate = useNavigate();
 
   const handleSelect = (id: string) => {
-    if (!isPremium) {
-      navigate("/planos");
-      return;
-    }
+    if (!isPremium) { navigate("/planos"); return; }
     setSelected(id);
   };
 
@@ -37,6 +34,9 @@ const Emergencia = () => {
     <AppLayout>
       <div className="px-5 py-6 pb-24 max-w-lg mx-auto">
         <div className="mb-6">
+          <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors mb-3">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
           <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
             <Zap className="w-6 h-6 text-danger" /> Modo Emergência
           </h1>
@@ -77,16 +77,16 @@ const Emergencia = () => {
               <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-danger" /> Checklist Imediato</h3>
               <div className="space-y-2">
                 {scenario.checklist.map((item, i) => {
-                   const isChecked = checked[`${scenario.id}-${i}`];
-                   return (
-                     <button key={i} onClick={() => toggleCheck(scenario.id, i)} className="w-full flex items-start gap-3 bg-card rounded-lg p-3 border text-left transition-all">
-                       <span className={`w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${isChecked ? "bg-primary border-primary" : "border-muted-foreground"}`}>
-                         {isChecked && <span className="text-primary-foreground text-xs font-bold">✓</span>}
-                       </span>
-                       <span className={`text-sm transition-colors ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>{item}</span>
-                     </button>
-                   );
-                 })}
+                  const isChecked = checked[`${scenario.id}-${i}`];
+                  return (
+                    <button key={i} onClick={() => toggleCheck(scenario.id, i)} className="w-full flex items-start gap-3 bg-card rounded-lg p-3 border text-left transition-all">
+                      <span className={`w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${isChecked ? "bg-primary border-primary" : "border-muted-foreground"}`}>
+                        {isChecked && <span className="text-primary-foreground text-xs font-bold">✓</span>}
+                      </span>
+                      <span className={`text-sm transition-colors ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>{item}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div className="mb-6">
