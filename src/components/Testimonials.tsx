@@ -111,9 +111,9 @@ const Testimonials = () => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-bold text-foreground">{review.nome}</span>
-                  <Stars count={review.nota} />
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-sm font-bold text-foreground truncate">{review.nome}</span>
+                  <div className="shrink-0"><Stars count={review.nota} /></div>
                 </div>
                 {review.comentario && (
                   <p className="text-xs text-muted-foreground line-clamp-2">
