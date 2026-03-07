@@ -243,8 +243,6 @@ const Index = () => {
         <WaitListForm />
       </div>
 
-      {/* How it works modal */}
-      <HowItWorks open={showHowItWorks} onClose={() => setShowHowItWorks(false)} />
 
       <Footer />
       <WhatsAppButton />
