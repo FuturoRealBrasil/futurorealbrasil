@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
