@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import Termos from "./pages/Termos";
 import Privacidade from "./pages/Privacidade";
 import ResetPassword from "./pages/ResetPassword";
+import ComoFunciona from "./pages/ComoFunciona";
 
 const queryClient = new QueryClient();
 
