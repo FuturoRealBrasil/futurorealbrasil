@@ -15,7 +15,6 @@ const ContentPreview = () => {
       </p>
 
       <div className="w-full max-w-sm md:max-w-5xl mx-auto space-y-6 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
-
         {/* Educação Financeira */}
         <div className="scroll-reveal opacity-0 translate-y-6 bg-card rounded-2xl border shadow-sm p-5 md:p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -30,12 +29,7 @@ const ContentPreview = () => {
               </div>
             </div>
             <div className="space-y-2 mb-4">
-              {[
-                "Aprenda a controlar seus gastos",
-                "Investimentos para iniciantes",
-                "Saia das dívidas de vez",
-                "Construa sua reserva",
-              ].map((item, i) => (
+              {["Aprenda a controlar seus gastos", "Investimentos para iniciantes", "Saia das dívidas de vez", "Construa sua reserva"].map((item, i) => (
                 <div key={i} className="flex items-center gap-2 bg-muted/30 rounded-lg p-2.5">
                   <Sparkles className="w-3.5 h-3.5 text-brand-gold shrink-0" />
                   <span className="text-xs font-semibold text-foreground">{item}</span>
@@ -63,12 +57,7 @@ const ContentPreview = () => {
               </div>
             </div>
             <div className="space-y-2 mb-4">
-              {[
-                "Missões de economia diária",
-                "Desafios para criar reserva",
-                "Metas de renegociação",
-                "Hábitos financeiros saudáveis",
-              ].map((item, i) => (
+              {["Missões de economia diária", "Desafios para criar reserva", "Metas de renegociação", "Hábitos financeiros saudáveis"].map((item, i) => (
                 <div key={i} className="flex items-center gap-2 bg-muted/30 rounded-lg p-2.5">
                   <div className="w-3.5 h-3.5 rounded-full border-2 border-brand-green/50 shrink-0" />
                   <span className="text-xs font-semibold text-foreground">{item}</span>
@@ -96,12 +85,7 @@ const ContentPreview = () => {
               </div>
             </div>
             <div className="space-y-2 mb-4">
-              {[
-                "Plano para perda de renda",
-                "Guia para emergências médicas",
-                "Ação em desastres naturais",
-                "Estratégias contra inflação",
-              ].map((item, i) => (
+              {["Plano para perda de renda", "Guia para emergências médicas", "Ação em desastres naturais", "Estratégias contra inflação"].map((item, i) => (
                 <div key={i} className="flex items-center gap-2 bg-muted/30 rounded-lg p-2.5">
                   <span className="text-xs text-destructive shrink-0">⚡</span>
                   <span className="text-xs font-semibold text-foreground">{item}</span>
@@ -121,17 +105,17 @@ const ContentPreview = () => {
         <div className="bg-gradient-to-br from-brand-green/10 via-brand-gold/5 to-brand-blue/10 rounded-2xl p-6 md:p-10 border">
           <Lock className="w-10 h-10 text-brand-gold mx-auto mb-3" />
           <h3 className="text-lg md:text-xl font-extrabold text-foreground mb-2">
-            Desbloqueie tudo com o Premium
+            Menos que Um Café Por Semana
           </h3>
           <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
             Acesse todos os conteúdos, missões e planos de emergência
           </p>
           <Button
-            onClick={() => navigate("/auth")}
+            onClick={() => window.location.href = "/auth?mode=signup"}
             className="h-12 px-8 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg"
             size="lg"
           >
-            Começar agora <ArrowRight className="w-5 h-5 ml-1" />
+            Assinar Agora <ArrowRight className="w-5 h-5 ml-1" />
           </Button>
         </div>
       </div>

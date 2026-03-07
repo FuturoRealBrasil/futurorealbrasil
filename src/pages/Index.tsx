@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen, Users } from "lucide-react";
+import { TrendingUp, Heart, Shield, ArrowRight, BarChart3, Target, BookOpen, Users, ChevronDown, CheckCircle2 } from "lucide-react";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,12 +9,13 @@ import ContentPreview from "@/components/ContentPreview";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WaitListForm from "@/components/WaitListForm";
+import HowItWorks from "@/components/HowItWorks";
 import logo from "@/assets/logo-transparent.png";
 
 // Base date: March 5, 2026
 const BASE_DATE = new Date(2026, 2, 5);
 const BASE_USERS = 1250;
-const BASE_REVIEWS = 52;
+const BASE_REVIEWS = 552;
 const BASE_SATISFACTION = 98;
 
 function getDaysSinceBase() {
@@ -22,7 +23,6 @@ function getDaysSinceBase() {
   const diff = now.getTime() - BASE_DATE.getTime();
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 }
-
 
 const AnimatedCounter = ({ target, label, icon }: { target: number; label: string; icon: React.ReactNode }) => {
   const [count, setCount] = useState(0);
@@ -65,12 +65,12 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const parallaxRef = useRef<HTMLDivElement>(null);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   const handleStart = () => {
-    navigate(user ? "/dashboard" : "/auth?mode=signup");
+    navigate(user ? "/planos" : "/auth?mode=signup");
   };
 
-  // Parallax scroll effect
   useEffect(() => {
     const handleScroll = () => {
       if (!parallaxRef.current) return;
@@ -81,7 +81,6 @@ const Index = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Intersection Observer for scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -94,14 +93,13 @@ const Index = () => {
       },
       { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
     );
-
     document.querySelectorAll(".scroll-reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
-      {/* Hero Section with parallax */}
+      {/* Hero Section */}
       <div className="relative overflow-hidden bg-primary text-primary-foreground">
         <div ref={parallaxRef} className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -110,19 +108,13 @@ const Index = () => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)]" />
 
-        {/* Hamburger menu top-right */}
         <div className="absolute top-4 right-4 z-20">
           <HamburgerMenu />
         </div>
 
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-16 md:py-28 lg:py-36 text-center">
           <div className="animate-fade-up">
-            <img
-              src={logo}
-              alt="Futuro Real Brasil"
-              className="w-56 md:w-64 mx-auto mb-6 drop-shadow-lg rounded-2xl"
-              style={{ mixBlendMode: "multiply" }}
-            />
+            <img src={logo} alt="Futuro Real Brasil" className="w-56 md:w-64 mx-auto mb-6 drop-shadow-lg rounded-2xl" style={{ mixBlendMode: "multiply" }} />
           </div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-3 md:mb-5 animate-fade-up max-w-sm md:max-w-2xl" style={{ animationDelay: "0.15s" }}>
@@ -130,10 +122,19 @@ const Index = () => {
             <span className="text-brand-gold">Acessível</span>
           </h1>
 
-          <p className="text-base md:text-lg lg:text-xl opacity-90 font-medium leading-relaxed max-w-xs md:max-w-md mx-auto mb-8 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            Antes que a vida te pegue de surpresa,{" "}
-            <span className="text-brand-gold font-bold">veja o futuro.</span>
+          <p className="text-sm md:text-lg lg:text-xl opacity-90 font-medium leading-relaxed max-w-xs md:max-w-lg mx-auto mb-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+            Organize sua vida financeira de forma simples.
+            Sem planilhas complicadas. Sem precisar entender de investimentos.
           </p>
+          <p className="text-xs md:text-base opacity-75 leading-relaxed max-w-xs md:max-w-md mx-auto mb-8 animate-fade-up" style={{ animationDelay: "0.35s" }}>
+            O Futuro Real Brasil ajuda famílias brasileiras a sair das dívidas, organizar o dinheiro e construir segurança financeira.
+          </p>
+
+          {/* Pricing highlight */}
+          <div className="bg-white/10 border border-white/20 rounded-xl px-5 py-3 mb-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
+            <p className="text-lg md:text-xl font-extrabold text-brand-gold">R$19,90 <span className="text-sm font-medium text-primary-foreground/70">por mês</span></p>
+            <p className="text-xs text-primary-foreground/60">ou R$0,66 por dia</p>
+          </div>
 
           <div className="w-full max-w-sm md:max-w-md space-y-3 md:flex md:space-y-0 md:gap-4 animate-fade-up" style={{ animationDelay: "0.45s" }}>
             <Button
@@ -141,7 +142,7 @@ const Index = () => {
               className="w-full md:w-auto md:px-10 h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg"
               size="lg"
             >
-              {user ? "Ir para o Dashboard" : "Começar agora"} <ArrowRight className="w-5 h-5 ml-1" />
+              {user ? "Assinar Agora" : "Assinar Agora"} <ArrowRight className="w-5 h-5 ml-1" />
             </Button>
             {!user && (
               <Button
@@ -153,6 +154,15 @@ const Index = () => {
               </Button>
             )}
           </div>
+
+          {/* Ver como funciona */}
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="mt-4 flex items-center gap-2 text-sm text-brand-gold font-semibold hover:underline animate-fade-up"
+            style={{ animationDelay: "0.55s" }}
+          >
+            <ChevronDown className="w-4 h-4" /> Ver como funciona
+          </button>
         </div>
 
         {/* Wave divider */}
@@ -163,35 +173,37 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Animated counters */}
-      <div className="px-6 py-8 md:py-12 scroll-reveal opacity-0 translate-y-6">
-        <div className="w-full max-w-sm md:max-w-3xl mx-auto grid grid-cols-3 gap-4 md:gap-8 bg-card border rounded-2xl p-6 md:p-10 shadow-sm">
-          <AnimatedCounter target={BASE_USERS + getDaysSinceBase() * 3} label="Usuários ativos" icon={<Users className="w-5 h-5 text-brand-blue" />} />
-          <AnimatedCounter target={BASE_REVIEWS + getDaysSinceBase() * 3} label="Avaliações" icon={<Heart className="w-5 h-5 text-destructive" />} />
-          <AnimatedCounter target={Math.min(100, BASE_SATISFACTION + getDaysSinceBase() * 3)} label="% Satisfação" icon={<TrendingUp className="w-5 h-5 text-brand-green" />} />
-        </div>
-      </div>
-
-      {/* Why section with scroll reveal */}
+      {/* Problem statement section */}
       <div className="px-6 py-10 md:py-16">
         <h2 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-foreground text-center mb-2 scroll-reveal opacity-0 translate-y-6">
-          Por que usar o <span className="text-brand-green">Futuro Real</span>?
+          A maioria das famílias brasileiras <span className="text-destructive">vive assim</span>:
         </h2>
-        <p className="text-sm md:text-base text-muted-foreground text-center mb-6 md:mb-10 max-w-xs md:max-w-lg mx-auto scroll-reveal opacity-0 translate-y-6">
-          Ferramentas simples para transformar sua vida financeira
+        <div className="w-full max-w-sm md:max-w-lg mx-auto mt-6 space-y-3 scroll-reveal opacity-0 translate-y-6">
+          {[
+            "Salário acaba antes do mês",
+            "Dívidas no cartão",
+            "Nenhum dinheiro guardado",
+          ].map((item, i) => (
+            <div key={i} className="flex items-center gap-3 bg-destructive/5 border border-destructive/20 rounded-xl p-4">
+              <span className="text-destructive text-lg">•</span>
+              <span className="text-sm font-semibold text-foreground">{item}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm md:text-base text-brand-green font-bold text-center mt-6 max-w-xs md:max-w-lg mx-auto scroll-reveal opacity-0 translate-y-6">
+          O Futuro Real Brasil resolve isso com um método simples.
         </p>
+      </div>
 
+      {/* Why section */}
+      <div className="px-6 pb-10 md:pb-16">
         <div className="w-full max-w-sm md:max-w-3xl mx-auto space-y-3 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
           {[
             { icon: TrendingUp, text: "Preveja riscos antes que aconteçam", color: "text-brand-green" },
             { icon: Heart, text: "Proteja quem depende de você", color: "text-destructive" },
             { icon: Shield, text: "Sem julgamento. Só soluções.", color: "text-brand-blue" },
           ].map((item, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border scroll-reveal opacity-0 translate-y-6"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
+            <div key={i} className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border scroll-reveal opacity-0 translate-y-6" style={{ transitionDelay: `${i * 100}ms` }}>
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <item.icon className={`w-5 h-5 ${item.color}`} />
               </div>
@@ -201,7 +213,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Features grid with scroll reveal */}
+      {/* Features grid */}
       <div className="px-6 pb-10 md:pb-16">
         <div className="w-full max-w-sm md:max-w-3xl mx-auto grid grid-cols-3 gap-3 md:gap-6">
           {[
@@ -209,11 +221,7 @@ const Index = () => {
             { icon: Target, label: "Missões", color: "bg-brand-green/10 text-brand-green" },
             { icon: BookOpen, label: "Educação", color: "bg-brand-gold/10 text-brand-gold" },
           ].map((feat, i) => (
-            <div
-              key={i}
-              className="bg-card border rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm scroll-reveal opacity-0 translate-y-6"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
+            <div key={i} className="bg-card border rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm scroll-reveal opacity-0 translate-y-6" style={{ transitionDelay: `${i * 100}ms` }}>
               <div className={`w-10 h-10 rounded-full ${feat.color} flex items-center justify-center`}>
                 <feat.icon className="w-5 h-5" />
               </div>
@@ -226,6 +234,15 @@ const Index = () => {
       {/* Content Preview section */}
       <ContentPreview />
 
+      {/* Animated counters - ABOVE testimonials */}
+      <div className="px-6 py-8 md:py-12 scroll-reveal opacity-0 translate-y-6">
+        <div className="w-full max-w-sm md:max-w-3xl mx-auto grid grid-cols-3 gap-4 md:gap-8 bg-card border rounded-2xl p-6 md:p-10 shadow-sm">
+          <AnimatedCounter target={BASE_USERS + getDaysSinceBase() * 3} label="Usuários ativos" icon={<Users className="w-5 h-5 text-brand-blue" />} />
+          <AnimatedCounter target={BASE_REVIEWS + getDaysSinceBase() * 3} label="Avaliações" icon={<Heart className="w-5 h-5 text-destructive" />} />
+          <AnimatedCounter target={Math.min(100, BASE_SATISFACTION + getDaysSinceBase() * 3)} label="% Satisfação" icon={<TrendingUp className="w-5 h-5 text-brand-green" />} />
+        </div>
+      </div>
+
       {/* Testimonials section */}
       <div id="depoimentos" className="scroll-reveal opacity-0 translate-y-6">
         <Testimonials />
@@ -236,7 +253,9 @@ const Index = () => {
         <WaitListForm />
       </div>
 
-      {/* Footer */}
+      {/* How it works modal */}
+      <HowItWorks open={showHowItWorks} onClose={() => setShowHowItWorks(false)} />
+
       <Footer />
       <WhatsAppButton />
     </div>

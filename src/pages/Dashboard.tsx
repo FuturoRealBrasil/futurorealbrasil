@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
@@ -161,6 +162,9 @@ const Dashboard = () => {
         <div className="bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)] px-5 pt-6 pb-10 relative">
           <div className="max-w-lg md:max-w-5xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+              <button onClick={() => navigate(-1)} className="text-primary-foreground/70 hover:text-primary-foreground transition-colors shrink-0">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
               <img src={logo} alt="Logo" className="w-16 h-16 object-contain shrink-0 drop-shadow-lg" />
               <div className="min-w-0">
                 <h1 className="text-xl md:text-2xl font-extrabold text-primary-foreground leading-tight truncate">Seu Futuro</h1>
