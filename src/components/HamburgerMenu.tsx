@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { BarChart3, Target, BookOpen, Zap, CreditCard, LogOut, Menu, X } from "lucide-react";
+import { BarChart3, Target, BookOpen, Zap, CreditCard, LogOut, Menu, X, Home } from "lucide-react";
 
 const menuItems = [
+  { path: "/", icon: Home, label: "Início" },
   { path: "/dashboard", icon: BarChart3, label: "Futuro" },
   { path: "/missoes", icon: Target, label: "Missões" },
   { path: "/educacao", icon: BookOpen, label: "Aprender" },

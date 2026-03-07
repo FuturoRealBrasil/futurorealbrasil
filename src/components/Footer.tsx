@@ -31,7 +31,7 @@ const Footer = () => {
           <div>
             <p className="text-xs text-white/70 leading-relaxed">CNPJ: 55.276.743/0001-80</p>
             <p className="text-xs text-white/70 leading-relaxed mt-1">São João de Meriti – RJ, Brasil</p>
-            <p className="text-xs text-white/70 leading-relaxed mt-2">Contato: Rotinadeumtrabalhador@gmail.com</p>
+            <p className="text-xs text-white/70 leading-relaxed mt-2">Contato: futurorealbrasil@gmail.com</p>
           </div>
 
           {/* Links + Trust Seal */}

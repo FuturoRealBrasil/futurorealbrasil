@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
@@ -129,12 +128,15 @@ const Dashboard = () => {
     toast.success("Gastos atualizados!");
   }
 
-  // Savings projection
-  const monthlySavingsAmount = saldo > 0 ? saldo : 0;
-  const projection6m = monthlySavingsAmount * 6;
-  const projection1y = monthlySavingsAmount * 12;
-  const projection5y = monthlySavingsAmount * 60;
-  const projection10y = monthlySavingsAmount * 120;
+  // Savings projection based on reserve additions
+  const reserveMonthly = monthlySaving?.valor_reserva || 0;
+  const savingsMonthly = monthlySaving?.valor_guardado || 0;
+  const totalMonthlyContribution = reserveMonthly + savingsMonthly;
+  const projectionBase = totalMonthlyContribution > 0 ? totalMonthlyContribution : (saldo > 0 ? saldo : 0);
+  const projection6m = projectionBase * 6;
+  const projection1y = projectionBase * 12;
+  const projection5y = projectionBase * 60;
+  const projection10y = projectionBase * 120;
 
   const alerts: { text: string; type: "safe" | "warning" | "danger" }[] = [];
   if (saldo < 0) {
@@ -156,19 +158,16 @@ const Dashboard = () => {
   }
 
   return (
-    <AppLayout>
+    <AppLayout hideMenu>
       <div className="min-h-screen relative">
         {/* Dark gradient header */}
         <div className="bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)] px-5 pt-6 pb-10 relative">
           <div className="max-w-lg md:max-w-5xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-              <button onClick={() => navigate(-1)} className="text-primary-foreground/70 hover:text-primary-foreground transition-colors shrink-0">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
               <img src={logo} alt="Logo" className="w-16 h-16 object-contain shrink-0 drop-shadow-lg" />
               <div className="min-w-0">
                 <h1 className="text-xl md:text-2xl font-extrabold text-primary-foreground leading-tight truncate">Seu Futuro</h1>
-                <p className="text-xs md:text-sm text-primary-foreground/60 truncate">Simulação financeira</p>
+                <p className="text-xs md:text-sm text-primary-foreground/60 truncate">Gestão Financeira</p>
               </div>
             </div>
             <HamburgerMenu />
@@ -215,10 +214,10 @@ const Dashboard = () => {
           <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Economia
           </h2>
-          {saldo > 0 ? (
+          {projectionBase > 0 ? (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">
-                Se você guardar <span className="font-bold text-foreground">R$ {monthlySavingsAmount.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span>:
+                Se você guardar <span className="font-bold text-foreground">R$ {projectionBase.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span>:
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
@@ -249,7 +248,7 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Aumente sua renda ou reduza gastos para ver projeções de economia.</p>
+            <p className="text-sm text-muted-foreground">Adicione valores à reserva ou guardado para ver projeções de economia.</p>
           )}
         </div>
 
