@@ -179,30 +179,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Family celebration section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)]" />
-        <img src={familiesImg} alt="Famílias brasileiras comemorando resultados financeiros" className="absolute inset-0 w-full h-full object-cover opacity-25" loading="lazy" />
-        <div className="relative z-10 max-w-5xl mx-auto px-6 py-14 md:py-20 text-center">
-          <h2 className="text-xl md:text-3xl font-extrabold mb-4 text-primary-foreground">
-            Famílias reais, <span className="text-brand-gold">resultados reais</span>
-          </h2>
-          <p className="text-sm md:text-base text-primary-foreground/80 leading-relaxed mb-6 max-w-2xl mx-auto">
-            Milhares de famílias brasileiras já estão organizando suas finanças e construindo um futuro mais seguro com o Futuro Real Brasil.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-              <p className="text-lg font-extrabold text-brand-gold">{(BASE_USERS + getDaysSinceBase() * 3).toLocaleString("pt-BR")}+</p>
-              <p className="text-xs text-primary-foreground/60">Famílias ativas</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-              <p className="text-lg font-extrabold text-brand-green">98%</p>
-              <p className="text-xs text-primary-foreground/60">Satisfação</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Problem statement section */}
       <div className="px-6 py-10 md:py-16">
         <h2 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-foreground text-center mb-2 scroll-reveal opacity-0 translate-y-6">
