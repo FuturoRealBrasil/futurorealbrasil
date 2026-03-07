@@ -9,7 +9,7 @@ import ContentPreview from "@/components/ContentPreview";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WaitListForm from "@/components/WaitListForm";
-import HowItWorks from "@/components/HowItWorks";
+import logo from "@/assets/logo-transparent.png";
 import logo from "@/assets/logo-transparent.png";
 import familiesImg from "@/assets/families-celebrating.jpg";
 
