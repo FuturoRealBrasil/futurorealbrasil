@@ -9,7 +9,6 @@ import ContentPreview from "@/components/ContentPreview";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WaitListForm from "@/components/WaitListForm";
-import HowItWorks from "@/components/HowItWorks";
 import logo from "@/assets/logo-transparent.png";
 import familiesImg from "@/assets/families-celebrating.jpg";
 
@@ -66,7 +65,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const parallaxRef = useRef<HTMLDivElement>(null);
-  const [showHowItWorks, setShowHowItWorks] = useState(false);
+  
 
   const handleStart = () => {
     navigate(user ? "/planos" : "/auth?mode=signup");
@@ -115,8 +114,8 @@ const Index = () => {
           </div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-3 md:mb-5 animate-fade-up max-w-sm md:max-w-2xl" style={{ animationDelay: "0.15s" }}>
-            Educação Financeira{" "}
-            <span className="text-brand-gold">Acessível</span>
+            Gestão Financeira{" "}
+            <span className="text-brand-gold">Familiar</span>
           </h1>
 
           <p className="text-sm md:text-lg lg:text-xl opacity-90 font-medium leading-relaxed max-w-xs md:max-w-lg mx-auto mb-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
@@ -124,23 +123,8 @@ const Index = () => {
             Sem planilhas complicadas. Sem precisar entender de investimentos.
           </p>
           <p className="text-xs md:text-base opacity-75 leading-relaxed max-w-xs md:max-w-md mx-auto mb-8 animate-fade-up" style={{ animationDelay: "0.35s" }}>
-            O Futuro Real Brasil ajuda famílias brasileiras a sair das dívidas, organizar o dinheiro e construir segurança financeira.
+            Porque quando uma pessoa aprende a cuidar melhor do seu dinheiro, ela muda não apenas sua vida — mas o futuro da sua família.
           </p>
-
-          {/* Pricing highlight */}
-          <div className="bg-white/10 border border-white/20 rounded-xl px-5 py-3 mb-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            <div className="md:flex md:gap-8 md:items-center">
-              <div>
-                <p className="text-lg md:text-xl font-extrabold text-brand-gold">R$19,90 <span className="text-sm font-medium text-primary-foreground/70">por mês</span></p>
-                <p className="text-xs text-primary-foreground/60">ou R$0,66 por dia</p>
-              </div>
-              <div className="hidden md:block w-px h-10 bg-white/20" />
-              <div className="mt-2 md:mt-0">
-                <p className="text-lg md:text-xl font-extrabold text-brand-gold">R$219,90 <span className="text-sm font-medium text-primary-foreground/70">/Ano</span></p>
-                <p className="text-xs text-primary-foreground/60">ou R$0,59 por dia</p>
-              </div>
-            </div>
-          </div>
 
           <div className="w-full max-w-sm md:max-w-md space-y-3 md:flex md:space-y-0 md:gap-4 animate-fade-up" style={{ animationDelay: "0.45s" }}>
             <Button
@@ -163,7 +147,7 @@ const Index = () => {
 
           {/* Ver como funciona */}
           <button
-            onClick={() => setShowHowItWorks(true)}
+            onClick={() => navigate("/como-funciona")}
             className="mt-4 flex items-center gap-2 text-sm text-brand-gold font-semibold hover:underline animate-fade-up"
             style={{ animationDelay: "0.55s" }}
           >
@@ -259,8 +243,6 @@ const Index = () => {
         <WaitListForm />
       </div>
 
-      {/* How it works modal */}
-      <HowItWorks open={showHowItWorks} onClose={() => setShowHowItWorks(false)} />
 
       <Footer />
       <WhatsAppButton />
