@@ -11,6 +11,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import WaitListForm from "@/components/WaitListForm";
 import HowItWorks from "@/components/HowItWorks";
 import logo from "@/assets/logo-transparent.png";
+import familiesImg from "@/assets/families-celebrating.jpg";
 
 // Base date: March 5, 2026
 const BASE_DATE = new Date(2026, 2, 5);
@@ -132,8 +133,17 @@ const Index = () => {
 
           {/* Pricing highlight */}
           <div className="bg-white/10 border border-white/20 rounded-xl px-5 py-3 mb-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            <p className="text-lg md:text-xl font-extrabold text-brand-gold">R$19,90 <span className="text-sm font-medium text-primary-foreground/70">por mês</span></p>
-            <p className="text-xs text-primary-foreground/60">ou R$0,66 por dia</p>
+            <div className="md:flex md:gap-8 md:items-center">
+              <div>
+                <p className="text-lg md:text-xl font-extrabold text-brand-gold">R$19,90 <span className="text-sm font-medium text-primary-foreground/70">por mês</span></p>
+                <p className="text-xs text-primary-foreground/60">ou R$0,66 por dia</p>
+              </div>
+              <div className="hidden md:block w-px h-10 bg-white/20" />
+              <div className="mt-2 md:mt-0">
+                <p className="text-lg md:text-xl font-extrabold text-brand-gold">R$219,90 <span className="text-sm font-medium text-primary-foreground/70">/Ano</span></p>
+                <p className="text-xs text-primary-foreground/60">ou R$0,59 por dia</p>
+              </div>
+            </div>
           </div>
 
           <div className="w-full max-w-sm md:max-w-md space-y-3 md:flex md:space-y-0 md:gap-4 animate-fade-up" style={{ animationDelay: "0.45s" }}>
@@ -142,7 +152,7 @@ const Index = () => {
               className="w-full md:w-auto md:px-10 h-14 text-base font-bold rounded-xl bg-brand-green hover:bg-brand-green/90 text-primary-foreground shadow-lg"
               size="lg"
             >
-              {user ? "Assinar Agora" : "Assinar Agora"} <ArrowRight className="w-5 h-5 ml-1" />
+              Assinar Agora <ArrowRight className="w-5 h-5 ml-1" />
             </Button>
             {!user && (
               <Button
@@ -170,6 +180,33 @@ const Index = () => {
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0 40L48 36C96 32 192 24 288 28C384 32 480 48 576 52C672 56 768 48 864 40C960 32 1056 24 1152 28C1248 32 1344 48 1392 56L1440 64V80H0V40Z" fill="hsl(var(--background))" />
           </svg>
+        </div>
+      </div>
+
+      {/* Family celebration section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)]">
+        <div className="max-w-5xl mx-auto md:grid md:grid-cols-2 md:gap-8 items-center px-6 py-10 md:py-16">
+          <div className="mb-6 md:mb-0">
+            <img src={familiesImg} alt="Famílias brasileiras comemorando resultados financeiros" className="rounded-2xl shadow-2xl w-full object-cover max-h-72 md:max-h-96" loading="lazy" />
+          </div>
+          <div className="text-primary-foreground">
+            <h2 className="text-xl md:text-3xl font-extrabold mb-4">
+              Famílias reais, <span className="text-brand-gold">resultados reais</span>
+            </h2>
+            <p className="text-sm md:text-base opacity-80 leading-relaxed mb-4">
+              Milhares de famílias brasileiras já estão organizando suas finanças e construindo um futuro mais seguro com o Futuro Real Brasil.
+            </p>
+            <div className="flex gap-4">
+              <div className="bg-white/10 rounded-xl px-4 py-3 border border-white/20">
+                <p className="text-lg font-extrabold text-brand-gold">{(BASE_USERS + getDaysSinceBase() * 3).toLocaleString("pt-BR")}+</p>
+                <p className="text-xs text-primary-foreground/60">Famílias ativas</p>
+              </div>
+              <div className="bg-white/10 rounded-xl px-4 py-3 border border-white/20">
+                <p className="text-lg font-extrabold text-brand-green">98%</p>
+                <p className="text-xs text-primary-foreground/60">Satisfação</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

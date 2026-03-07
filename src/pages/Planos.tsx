@@ -2,10 +2,12 @@ import { Check, Star, AlertTriangle, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
+import Testimonials from "@/components/Testimonials";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 const plans = [
   {
@@ -17,9 +19,10 @@ const plans = [
     cta: "Plano atual",
     highlight: false,
     planId: "free",
+    isAnnual: false,
   },
   {
-    name: "Premium",
+    name: "Premium Mensal",
     price: "R$ 19,90",
     period: "/mês",
     description: "Proteção completa para você e sua família",
@@ -31,16 +34,34 @@ const plans = [
       "Histórico completo de progresso",
       "Sem limite de simulações",
     ],
-    cta: "Assinar Premium",
+    cta: "Assinar R$19,90/Por Mês",
     highlight: true,
     planId: "premium",
+    isAnnual: false,
+  },
+  {
+    name: "Premium Anual",
+    price: "R$ 219,90",
+    period: "/ano",
+    originalPrice: "R$ 238,80",
+    description: "Economize com o plano anual",
+    features: [
+      "Tudo do plano mensal",
+      "Economia de R$ 18,90 por ano",
+      "R$ 0,59 por dia",
+      "Suporte prioritário",
+    ],
+    cta: "Assinar R$219,90/Ao Ano",
+    highlight: false,
+    planId: "premium_annual",
+    isAnnual: true,
   },
 ];
 
 const Planos = () => {
   const navigate = useNavigate();
   const { isPremium, user, refreshSubscription, subscriptionStart } = useAuth();
-  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [searchParams] = useSearchParams();
 
@@ -64,17 +85,19 @@ const Planos = () => {
 
   const canCancel = () => getRemainingMonths() === 0;
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (planId: string) => {
     if (!user) return;
-    setLoadingCheckout(true);
+    setLoadingCheckout(planId);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout");
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { plan: planId },
+      });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (e: any) {
       toast.error("Erro ao iniciar checkout: " + (e.message || "Tente novamente"));
     } finally {
-      setLoadingCheckout(false);
+      setLoadingCheckout(null);
     }
   };
 
@@ -93,12 +116,15 @@ const Planos = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayout hideMenu>
       <div className="px-5 py-6 pb-24 max-w-lg mx-auto">
         <div className="mb-6">
-          <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors mb-4">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <HamburgerMenu />
+          </div>
           <div className="text-center">
             <h1 className="text-2xl font-extrabold text-foreground">Planos</h1>
             <p className="text-sm text-muted-foreground mt-1">Invista no seu futuro financeiro</p>
@@ -115,6 +141,9 @@ const Planos = () => {
               )}
               <h2 className="text-lg font-extrabold text-foreground">{plan.name}</h2>
               <div className="flex items-baseline gap-1 mt-1 mb-2">
+                {plan.isAnnual && plan.originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through mr-2">{plan.originalPrice}</span>
+                )}
                 <span className="text-3xl font-black text-foreground">{plan.price}</span>
                 {plan.period && <span className="text-sm text-muted-foreground">{plan.period}</span>}
               </div>
@@ -138,7 +167,7 @@ const Planos = () => {
                 ))}
               </div>
 
-              {plan.planId === "premium" ? (
+              {plan.planId === "premium" || plan.planId === "premium_annual" ? (
                 <div className="space-y-2">
                   {isPremium ? (
                     <>
@@ -160,18 +189,20 @@ const Planos = () => {
                     </>
                   ) : (
                     <>
-                      <Button className="w-full h-12 rounded-xl font-bold" onClick={handleSubscribe} disabled={loadingCheckout}>
-                        {loadingCheckout ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processando...</> : plan.cta}
+                      <Button className={`w-full h-12 rounded-xl font-bold ${plan.isAnnual ? 'bg-brand-gold hover:bg-brand-gold/90' : ''}`} onClick={() => handleSubscribe(plan.planId)} disabled={loadingCheckout !== null}>
+                        {loadingCheckout === plan.planId ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processando...</> : plan.cta}
                       </Button>
-                      <div className="mt-4 bg-safe/5 border border-safe/20 rounded-xl p-4 text-left space-y-2">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-lg">🛡️</span>
-                          <span className="text-sm font-bold text-foreground">Plataforma segura</span>
+                      {plan.highlight && (
+                        <div className="mt-4 bg-safe/5 border border-safe/20 rounded-xl p-4 text-left space-y-2">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">🛡️</span>
+                            <span className="text-sm font-bold text-foreground">Plataforma segura</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Dados protegidos</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Pagamento seguro</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD</p>
                         </div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Dados protegidos</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Pagamento seguro</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-safe shrink-0" /> Conforme normas da LGPD</p>
-                      </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -184,13 +215,15 @@ const Planos = () => {
           ))}
         </div>
 
+        {/* Testimonials */}
+        <div className="mt-8">
+          <Testimonials />
+        </div>
+
         <div className="mt-8 text-center space-y-2">
           <p className="text-xs text-muted-foreground">🔒 Não vendemos seus dados</p>
           <p className="text-xs text-muted-foreground">🚫 Sem anúncios bancários</p>
           <p className="text-xs text-muted-foreground">✅ Transparência total</p>
-          <button onClick={() => navigate("/#depoimentos")} className="text-xs text-brand-gold font-semibold hover:underline mt-2 inline-block">
-            Ver todos os depoimentos →
-          </button>
         </div>
       </div>
     </AppLayout>
