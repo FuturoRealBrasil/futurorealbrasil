@@ -172,6 +172,14 @@ const Planos = () => {
                   {isPremium ? (
                     <>
                       <Button className="w-full h-12 rounded-xl font-bold" disabled>✅ Plano ativo</Button>
+                      <Button
+                        variant="outline"
+                        className={`w-full h-10 rounded-xl text-sm font-semibold ${plan.isAnnual ? 'border-brand-gold text-brand-gold' : 'border-primary text-primary'}`}
+                        onClick={() => handleSubscribe(plan.planId)}
+                        disabled={loadingCheckout !== null}
+                      >
+                        {loadingCheckout === plan.planId ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processando...</> : `Migrar para ${plan.name}`}
+                      </Button>
                       {canCancel() ? (
                         <div className="space-y-2">
                           <Button variant="destructive" className="w-full h-10 rounded-xl text-sm" onClick={handleManageSubscription} disabled={loadingPortal}>
