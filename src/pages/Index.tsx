@@ -65,7 +65,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const parallaxRef = useRef<HTMLDivElement>(null);
-  const [, setShowHowItWorks] = useState(false);
+  
 
   const handleStart = () => {
     navigate(user ? "/planos" : "/auth?mode=signup");
