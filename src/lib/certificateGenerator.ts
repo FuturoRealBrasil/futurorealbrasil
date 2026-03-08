@@ -298,21 +298,21 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   drawBorder(doc, W, H);
 
   // Logo — medium
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 9, 28, 28);
+  doc.addImage(logoDataUrl, "PNG", W / 2 - 12, 10, 24, 24);
 
   // Title
-  doc.setFontSize(22);
+  doc.setFontSize(24);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("CONTEUDO PROGRAMATICO", W / 2, 44, { align: "center" });
+  doc.text("CONTEUDO PROGRAMATICO", W / 2, 40, { align: "center" });
 
   // Student info
-  doc.setFontSize(10);
+  doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 51, { align: "center" });
+  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 47, { align: "center" });
 
-  drawDivider(doc, W / 2, 55, 105);
+  drawDivider(doc, W / 2, 51, 105);
 
   // ---- MODULES 2x2 ----
   const modLabels: Record<string, string> = {
