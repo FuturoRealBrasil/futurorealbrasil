@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Search } from "lucide-react";
+import { CheckCircle2, XCircle, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -22,6 +22,7 @@ const moduleLabels: Record<string, string> = {
 };
 
 const VerificarCertificado = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const codeParam = searchParams.get("code") || "";
   const [code, setCode] = useState(codeParam);
@@ -64,7 +65,10 @@ const VerificarCertificado = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(213,40%,12%)] via-[hsl(213,35%,18%)] to-[hsl(160,30%,15%)] flex items-center justify-center p-4">
-      <div className="bg-card rounded-2xl border shadow-lg p-6 max-w-md w-full">
+      <div className="bg-card rounded-2xl border shadow-lg p-6 max-w-md w-full relative">
+        <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => navigate(-1)}>
+          <X className="w-5 h-5" />
+        </Button>
         <h1 className="text-xl font-extrabold text-foreground text-center mb-1">Verificar Certificado</h1>
         <p className="text-sm text-muted-foreground text-center mb-6">Futuro Real Brasil</p>
 
