@@ -44,6 +44,7 @@ const AppRoutes = () => (
     <Route path="/como-funciona" element={<ComoFunciona />} />
     <Route path="/termos" element={<Termos />} />
     <Route path="/privacidade" element={<Privacidade />} />
+    <Route path="/verificar-certificado" element={<VerificarCertificado />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
