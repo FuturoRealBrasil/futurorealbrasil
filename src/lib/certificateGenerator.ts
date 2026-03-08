@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import logoImg from "@/assets/logo-transparent.png";
+import cornerImg from "@/assets/cert-corner.png";
 
 interface CertificateData {
   userName: string;
