@@ -746,6 +746,34 @@ const Educacao = () => {
           </div>
         )}
 
+        {/* Certificate Section */}
+        {canGetCertificate && (
+          <div className="bg-gradient-to-br from-brand-gold/10 to-brand-green/10 border border-brand-gold/30 rounded-2xl p-5 mb-6 text-center animate-fade-up">
+            <Award className="w-10 h-10 text-brand-gold mx-auto mb-2" />
+            <p className="text-lg font-extrabold text-foreground mb-1">🎓 Certificado Disponível!</p>
+            <p className="text-sm text-muted-foreground mb-4">Você concluiu todos os módulos de Educação Financeira e todas as Missões. Parabéns!</p>
+            {existingCert ? (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Código: <span className="font-mono font-bold text-foreground">{existingCert}</span></p>
+                <Button onClick={handleRedownloadCertificate} disabled={certLoading} className="w-full">
+                  {certLoading ? "Gerando..." : "📄 Baixar Certificado Novamente"}
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => setShowCertDialog(true)} className="w-full bg-brand-gold text-white hover:bg-brand-gold/90">
+                📄 Gerar Meu Certificado
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!canGetCertificate && allModulesCompleted && !allMissionsCompleted && (
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 mb-6 text-center animate-fade-up">
+            <p className="text-sm font-bold text-warning">📋 Complete todas as Missões para liberar seu certificado</p>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate("/missoes")}>Ir para Missões</Button>
+          </div>
+        )}
+
         {levels.map((level) => {
           const lvl = levelInfo[level];
           const levelArticles = articles.map((a, i) => ({ ...a, index: i })).filter(a => a.level === level);
