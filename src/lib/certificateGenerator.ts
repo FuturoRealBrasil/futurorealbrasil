@@ -36,21 +36,14 @@ function formatStudyTime(totalSeconds: number): string {
 // Regions to clear on the front template (relative percentages of image dimensions)
 // Each region: [xPercent, yPercent, widthPercent, heightPercent]
 const FRONT_CLEAR_REGIONS = [
-  // "Nome do(a) Aluno(a)" placeholder text area
-  [0.185, 0.465, 0.63, 0.065],
+  // Student name placeholder area
+  [0.185, 0.44, 0.63, 0.08],
   // "Certificamos que..." body text area
-  [0.12, 0.545, 0.76, 0.1],
-  // Left signature name area (below "Nome do Instrutor")
-  [0.22, 0.72, 0.2, 0.045],
-  // Right signature name area (below "Nome do Coordenador")
-  [0.55, 0.72, 0.2, 0.045],
-];
-
-// Regions to clear on the back template for course content overlay
-// Clears the 4 text sections (Conteúdo, Benefícios, Continuação, Conecte-se) body text
-const BACK_CLEAR_REGIONS = [
-  // Main content area - all 4 sections text (below headers, above footer)
-  [0.08, 0.28, 0.58, 0.62],
+  [0.12, 0.53, 0.76, 0.12],
+  // Left signature name area
+  [0.18, 0.70, 0.25, 0.06],
+  // Right signature name area
+  [0.52, 0.70, 0.25, 0.06],
 ];
 
 // Load image, clear specified regions by sampling surrounding pixels, return data URL
@@ -65,14 +58,13 @@ async function loadAndCleanImage(src: string, clearRegions: number[][] = []): Pr
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
 
-      // Clear each region by sampling color from nearby pixels
       for (const [xPct, yPct, wPct, hPct] of clearRegions) {
         const x = Math.floor(xPct * canvas.width);
         const y = Math.floor(yPct * canvas.height);
         const w = Math.floor(wPct * canvas.width);
         const h = Math.floor(hPct * canvas.height);
 
-        // Sample color from top-left corner of region (background color)
+        // Sample background color from left edge of region
         const sampleX = Math.max(0, x - 5);
         const sampleY = Math.max(0, y + Math.floor(h / 2));
         const pixel = ctx.getImageData(sampleX, sampleY, 1, 1).data;
@@ -105,58 +97,6 @@ async function loadImageAsDataUrl(src: string): Promise<string> {
   });
 }
 
-// All 40 course topics organized by module
-const COURSE_MODULES = {
-  "Modulo 1 - Iniciante": [
-    "O que e Educacao Financeira",
-    "Renda vs Despesas",
-    "Orcamento Familiar",
-    "Habitos de Consumo",
-    "Economia Domestica",
-    "Metas Financeiras",
-    "Conta Bancaria Basica",
-    "Direitos do Consumidor",
-    "Inflacao no Dia a Dia",
-    "Primeiros Passos para Poupar",
-  ],
-  "Modulo 2 - Organizado": [
-    "Planejamento Mensal",
-    "Controle de Gastos",
-    "Fundo de Emergencia",
-    "Dividas e Juros",
-    "Negociacao de Dividas",
-    "Credito Consciente",
-    "Compras Inteligentes",
-    "Seguros Essenciais",
-    "Imposto de Renda Basico",
-    "Organizacao Financeira Digital",
-  ],
-  "Modulo 3 - Investidor": [
-    "Introducao aos Investimentos",
-    "Renda Fixa",
-    "Tesouro Direto",
-    "CDB, LCI e LCA",
-    "Fundos de Investimento",
-    "Acoes para Iniciantes",
-    "Diversificacao",
-    "Perfil de Investidor",
-    "Riscos e Retornos",
-    "Previdencia Privada",
-  ],
-  "Modulo 4 - Independente": [
-    "Liberdade Financeira",
-    "Renda Passiva",
-    "Empreendedorismo",
-    "Investimentos Avancados",
-    "Protecao Patrimonial",
-    "Planejamento Sucessorio",
-    "Educacao Financeira Infantil",
-    "Financas e Bem-estar",
-    "Economia e Sociedade",
-    "Seu Plano de Acao",
-  ],
-};
-
 export async function generateCertificatePDF(data: CertificateData, _siteUrl: string) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const W = 297;
@@ -164,50 +104,51 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   const verifyUrl = `${PUBLISHED_URL}/verificar-certificado?code=${data.verificationCode}`;
 
-  // Load front image with cleared placeholder regions, back image as-is, and QR code
+  // Load front with cleared regions, back as-is (new template), and QR code
   const [frontDataUrl, backDataUrl, qrDataUrl] = await Promise.all([
     loadAndCleanImage(certFrenteImg, FRONT_CLEAR_REGIONS),
-    loadAndCleanImage(certVersoImg, BACK_CLEAR_REGIONS),
+    loadImageAsDataUrl(certVersoImg),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
   ]);
 
   // ===== FRONT PAGE =====
   doc.addImage(frontDataUrl, "PNG", 0, 0, W, H);
 
-  // Student name - centered on the name line area
+  // Student name - centered
   const fullName = data.userName.toUpperCase();
-  doc.setFontSize(20);
+  doc.setFontSize(18);
   doc.setFont("helvetica", "bolditalic");
   doc.setTextColor(40, 30, 20);
-  doc.text(fullName, W / 2, 103, { align: "center" });
+  doc.text(fullName, W / 2, 100, { align: "center" });
 
   // CPF below name
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(80, 70, 55);
-  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 109, { align: "center" });
+  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 106, { align: "center" });
 
   // Body text - certification paragraph
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(40, 30, 20);
-  const bodyText = `Certificamos que o(a) aluno(a) acima concluiu com exito o curso de Educacao Financeira oferecido pelo ${COMPANY}, com a carga horaria de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicacao aos estudos.`;
-  const bodyLines = doc.splitTextToSize(bodyText, 200);
-  doc.text(bodyLines, W / 2, 118, { align: "center" });
+  const bodyText = `Certificamos que o(a) aluno(a) acima concluiu com exito o curso de Educacao Financeira oferecido pelo ${COMPANY}, com carga horaria de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicacao aos estudos.`;
+  const bodyLines = doc.splitTextToSize(bodyText, 190);
+  doc.text(bodyLines, W / 2, 116, { align: "center" });
 
-  // Left signature (Instrutor) - positioned below the line
-  doc.setFontSize(9);
+  // Left signature - Student name ABOVE the line
+  doc.setFontSize(8);
   doc.setFont("helvetica", "italic");
   doc.setTextColor(40, 30, 20);
-  doc.text("Monteiro", 105, 155, { align: "center" });
+  doc.text(data.userName, 95, 150, { align: "center" });
 
-  // Right signature (Coordenador)
-  doc.setFontSize(9);
+  // Right signature - Company name ABOVE the line
+  doc.setFontSize(8);
   doc.setFont("helvetica", "italic");
-  doc.text(COMPANY, 200, 155, { align: "center" });
+  doc.setTextColor(40, 30, 20);
+  doc.text(COMPANY, 200, 150, { align: "center" });
 
-  // Date - bottom left inside the frame
+  // Date - bottom left
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(80, 70, 55);
@@ -218,75 +159,17 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.setTextColor(80, 70, 55);
   doc.text(`Codigo: ${data.verificationCode}`, W - 40, H - 12, { align: "center" });
 
-  // QR Code - bottom right corner over template placeholder
+  // QR Code - bottom right corner (for verification)
   if (qrDataUrl) {
-    doc.setFillColor(255, 255, 255);
-    doc.rect(W - 55, H - 48, 30, 30, "F");
     doc.addImage(qrDataUrl, "PNG", W - 54, H - 47, 28, 28);
   }
 
   // ===== BACK PAGE =====
+  // Use the new template image as-is (no QR code, no dynamic content overlay)
   doc.addPage("a4", "landscape");
   doc.addImage(backDataUrl, "PNG", 0, 0, W, H);
 
-  // Replace the template's existing QR code with our dynamic one (same position, no white box)
-  if (qrDataUrl) {
-    doc.addImage(qrDataUrl, "PNG", W - 68, 57, 38, 38);
-  }
-
-  // Verification URL under the QR code area
-  doc.setFontSize(5.5);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(0, 80, 40);
-  doc.text(`${PUBLISHED_URL}/verificar-certificado`, W - 49, 100, { align: "center" });
-
-  // --- Course content: positioned over the cleared template area ---
-  // Title
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(0, 80, 40);
-  doc.text("Conteudo Programatico do Curso", 120, 68, { align: "center" });
-
-  doc.setDrawColor(139, 119, 42);
-  doc.setLineWidth(0.3);
-  doc.line(45, 70, 195, 70);
-
-  const modules = Object.entries(COURSE_MODULES);
-  const leftCol = 30;
-  const rightCol = 120;
-  const colWidth = 85;
-
-  // Row 1: Modules 1 & 2, Row 2: Modules 3 & 4
-  for (let row = 0; row < 2; row++) {
-    for (let col = 0; col < 2; col++) {
-      const idx = row * 2 + col;
-      if (idx >= modules.length) break;
-      const [moduleName, topics] = modules[idx];
-      const x = col === 0 ? leftCol : rightCol;
-      const baseY = 78 + row * 52;
-
-      // Module title
-      doc.setFontSize(7.5);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(0, 80, 40);
-      doc.text(moduleName, x, baseY);
-
-      // Underline
-      doc.setDrawColor(180, 160, 80);
-      doc.setLineWidth(0.15);
-      doc.line(x, baseY + 1, x + colWidth, baseY + 1);
-
-      // Topics
-      doc.setFontSize(5.8);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(50, 40, 30);
-      for (let t = 0; t < topics.length; t++) {
-        doc.text(`• ${topics[t]}`, x + 1, baseY + 5 + t * 4.5);
-      }
-    }
-  }
-
-  // Verification code at bottom
+  // Only add verification code at bottom
   doc.setFontSize(6);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 90, 75);
