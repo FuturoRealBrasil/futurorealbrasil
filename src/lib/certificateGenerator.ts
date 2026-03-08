@@ -402,7 +402,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   });
 
   // ---- MISSIONS ----
-  const missionsStartY = 140;
+  const missionsStartY = 145;
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
