@@ -297,22 +297,19 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   drawBgPattern(doc, W, H);
   drawBorder(doc, W, H);
 
-  // Logo — medium
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 12, 10, 24, 24);
-
   // Title
-  doc.setFontSize(24);
+  doc.setFontSize(26);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("CONTEUDO PROGRAMATICO", W / 2, 40, { align: "center" });
+  doc.text("CONTEUDO PROGRAMATICO", W / 2, 22, { align: "center" });
 
   // Student info
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 47, { align: "center" });
+  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 30, { align: "center" });
 
-  drawDivider(doc, W / 2, 51, 105);
+  drawDivider(doc, W / 2, 34, 105);
 
   // ---- MODULES 2x2 ----
   const modLabels: Record<string, string> = {
@@ -379,7 +376,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   keys.forEach((key, idx) => {
     const col = idx % 2 === 0 ? lCol : rCol;
-    const startY = idx < 2 ? 55 : 100;
+    const startY = idx < 2 ? 39 : 86;
 
     // Module title
     doc.setFontSize(11);
@@ -402,7 +399,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   });
 
   // ---- MISSIONS ----
-  const missionsStartY = 145;
+  const missionsStartY = 132;
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
