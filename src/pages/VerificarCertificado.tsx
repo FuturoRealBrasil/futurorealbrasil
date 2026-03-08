@@ -22,6 +22,7 @@ const moduleLabels: Record<string, string> = {
 };
 
 const VerificarCertificado = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const codeParam = searchParams.get("code") || "";
   const [code, setCode] = useState(codeParam);
