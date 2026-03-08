@@ -295,26 +295,24 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawStripes(doc, W, 0, 1);
-  drawStripes(doc, W, H - 5.5, -1);
   drawBorder(doc, W, H);
 
   // Logo — medium
   doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 9, 28, 28);
 
   // Title
-  doc.setFontSize(18);
+  doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
   doc.text("CONTEUDO PROGRAMATICO", W / 2, 44, { align: "center" });
 
   // Student info
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 50, { align: "center" });
+  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 51, { align: "center" });
 
-  drawDivider(doc, W / 2, 54, 105);
+  drawDivider(doc, W / 2, 55, 105);
 
   // ---- MODULES 2x2 ----
   const modLabels: Record<string, string> = {
