@@ -786,9 +786,9 @@ const Educacao = () => {
 
           return (
             <div key={level} className="mb-6">
-              <div className={`rounded-xl p-3 mb-3 border ${moduleCompleted ? lvl.completedColor : lvl.color}`}>
+              <div className={`rounded-xl p-3 mb-3 border ${moduleCompleted && !canGetCertificate ? lvl.completedColor : lvl.color}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold">{moduleCompleted ? "✅ " : ""}{lvl.label}</span>
+                  <span className="text-sm font-bold">{moduleCompleted && !canGetCertificate ? "✅ " : ""}{lvl.label}</span>
                   <span className="text-xs font-medium">{completedInModule}/{levelArticles.length}</span>
                 </div>
                 <p className="text-xs mt-1 opacity-80">{lvl.desc}</p>
@@ -804,15 +804,15 @@ const Educacao = () => {
                     <button
                       key={article.index}
                       onClick={() => handleOpenArticle(article.index)}
-                      className={`w-full text-left rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all ${completed ? "bg-safe/5 border-safe/20" : "bg-card"}`}
+                      className={`w-full text-left rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all ${completed && !canGetCertificate ? "bg-safe/5 border-safe/20" : "bg-card"}`}
                     >
                       <div className="flex items-center gap-3 p-4">
-                        <span className="text-2xl">{completed ? "✅" : article.emoji}</span>
+                        <span className="text-2xl">{completed && !canGetCertificate ? "✅" : article.emoji}</span>
                         <div className="flex-1 min-w-0">
-                          <span className={`text-sm font-bold block ${completed ? "text-safe" : "text-foreground"}`}>{article.title}</span>
-                          <span className="text-xs text-muted-foreground">{article.pages.length} telas • {completed ? "Concluído" : "Toque para ler"}</span>
+                          <span className={`text-sm font-bold block ${completed && !canGetCertificate ? "text-safe" : "text-foreground"}`}>{article.title}</span>
+                          <span className="text-xs text-muted-foreground">{article.pages.length} telas • {completed && !canGetCertificate ? "Concluído" : "Toque para ler"}</span>
                         </div>
-                        {completed ? (
+                        {completed && !canGetCertificate ? (
                           <CheckCircle2 className="w-5 h-5 text-safe shrink-0" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
