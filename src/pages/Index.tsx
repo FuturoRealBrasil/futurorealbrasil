@@ -238,6 +238,28 @@ const Index = () => {
         <Testimonials />
       </div>
 
+      {/* Certificate Preview Section */}
+      <div className="px-6 py-10 md:py-16 scroll-reveal opacity-0 translate-y-6">
+        <div className="w-full max-w-sm md:max-w-3xl mx-auto text-center">
+          <h2 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-foreground mb-3">
+            🎓 Certificado de <span className="text-brand-green">Conclusão</span>
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground mb-6 max-w-lg mx-auto">
+            Este é o Certificado de Conclusão do Curso Livre que irá receber após concluir todos os Módulos do Curso de Educação Financeira Familiar!
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border shadow-md overflow-hidden">
+              <p className="text-xs font-bold text-muted-foreground py-2 bg-muted">Frente</p>
+              <img src={certFrenteImg} alt="Certificado Frente" className="w-full" loading="lazy" />
+            </div>
+            <div className="rounded-xl border shadow-md overflow-hidden">
+              <p className="text-xs font-bold text-muted-foreground py-2 bg-muted">Verso</p>
+              <img src={certVersoImg} alt="Certificado Verso" className="w-full" loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Waitlist Form */}
       <div className="px-6 pb-10 max-w-sm md:max-w-3xl mx-auto">
         <WaitListForm />
