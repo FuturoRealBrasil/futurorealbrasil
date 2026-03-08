@@ -90,7 +90,7 @@ async function drawOrnamentalBorder(doc: jsPDF, W: number, H: number, cornerData
   doc.rect(12, 12, W - 24, H - 24);
 
   // Corner ornament images (the uploaded ornate flourish)
-  const cs = 35; // corner size in mm
+  const cs = 24; // corner size in mm
 
   // Top-left (original orientation)
   doc.addImage(cornerDataUrl, "PNG", 4, 4, cs, cs);
