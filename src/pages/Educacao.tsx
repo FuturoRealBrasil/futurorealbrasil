@@ -404,6 +404,7 @@ const Educacao = () => {
   const [showModuleComplete, setShowModuleComplete] = useState<string | null>(null);
   const [studyDuration, setStudyDuration] = useState<number | null>(null);
   const [showCertDialog, setShowCertDialog] = useState(false);
+  const [certName, setCertName] = useState("");
   const [certCpf, setCertCpf] = useState("");
   const [certLoading, setCertLoading] = useState(false);
   const [existingCert, setExistingCert] = useState<string | null>(null);
