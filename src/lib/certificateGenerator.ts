@@ -64,55 +64,90 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
   ]);
 
+  // Background color matching the certificate parchment
+  const bgColor = { r: 228, g: 218, b: 190 };
+
   // ===== FRONT PAGE =====
-  // Full background image
   doc.addImage(frontDataUrl, "PNG", 0, 0, W, H);
 
-  // Student name - positioned over the "Nome do(a) Aluno(a)" area
+  // --- Clear placeholder areas before writing dynamic text ---
+
+  // Clear student name area
+  doc.setFillColor(bgColor.r, bgColor.g, bgColor.b);
+  doc.rect(55, 98, 187, 12, "F");
+
+  // Clear CPF area
+  doc.rect(110, 111, 77, 6, "F");
+
+  // Clear body text area
+  doc.rect(45, 118, 207, 22, "F");
+
+  // Clear left signature name area
+  doc.rect(65, 146, 80, 8, "F");
+
+  // Clear right signature name area
+  doc.rect(160, 146, 80, 8, "F");
+
+  // Clear date area
+  doc.rect(20, H - 22, 70, 8, "F");
+
+  // Clear verification code area
+  doc.rect(W - 65, H - 18, 55, 8, "F");
+
+  // --- Write dynamic text ---
+
+  // Student name
   const fullName = data.userName.toUpperCase();
-  doc.setFontSize(20);
+  doc.setFontSize(18);
   doc.setFont("helvetica", "bolditalic");
   doc.setTextColor(40, 30, 20);
-  doc.text(fullName, W / 2, 108, { align: "center" });
+  doc.text(fullName, W / 2, 105, { align: "center" });
 
-  // CPF below name
+  // CPF
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 90, 75);
-  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 114, { align: "center" });
+  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 115, { align: "center" });
 
-  // Body text over the certification paragraph area
+  // Body text
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(40, 30, 20);
   const bodyText = `Certificamos que o(a) aluno(a) acima concluiu com exito o curso de Educacao Financeira oferecido pelo ${COMPANY}, com a carga horaria de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicacao aos estudos.`;
-  const bodyLines = doc.splitTextToSize(bodyText, 190);
-  doc.text(bodyLines, W / 2, 122, { align: "center" });
+  const bodyLines = doc.splitTextToSize(bodyText, 185);
+  doc.text(bodyLines, W / 2, 124, { align: "center" });
 
-  // Left signature name (Aluno)
-  doc.setFontSize(9);
+  // Left signature (Instrutor)
+  doc.setFontSize(8);
   doc.setFont("helvetica", "italic");
   doc.setTextColor(40, 30, 20);
-  doc.text(data.userName, 105, 152, { align: "center" });
+  doc.text("Monteiro", 105, 150, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.text("Instrutor", 105, 154, { align: "center" });
 
-  // Right signature name (Coordenador)
-  doc.text(COMPANY, 200, 152, { align: "center" });
+  // Right signature (Coordenador)
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "italic");
+  doc.text(COMPANY, 200, 150, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.text("Coordenador(a)", 200, 154, { align: "center" });
 
   // Date
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 90, 75);
-  doc.text(`Data: ${data.completionDate}`, 55, H - 18, { align: "center" });
+  doc.text(`Data: ${data.completionDate}`, 55, H - 17, { align: "center" });
 
-  // Verification code near QR area
+  // Verification code
   doc.setFontSize(6);
   doc.setTextColor(100, 90, 75);
   doc.text(`Codigo: ${data.verificationCode}`, W - 38, H - 14, { align: "center" });
 
-  // QR Code overlay on bottom right (over the template QR placeholder)
+  // QR Code
   if (qrDataUrl) {
-    // White background to cover template QR
     doc.setFillColor(255, 255, 255);
     doc.rect(W - 56, H - 50, 32, 32, "F");
     doc.addImage(qrDataUrl, "PNG", W - 55, H - 49, 30, 30);
@@ -122,24 +157,27 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.addPage("a4", "landscape");
   doc.addImage(backDataUrl, "PNG", 0, 0, W, H);
 
-  // QR Code overlay on back page (right side area)
+  // Clear QR area on back page
   if (qrDataUrl) {
     doc.setFillColor(255, 255, 255);
     doc.rect(W - 68, 78, 40, 40, "F");
     doc.addImage(qrDataUrl, "PNG", W - 66, 80, 36, 36);
   }
 
-  // Verification URL under QR
-  doc.setFontSize(6.5);
+  // Clear and rewrite verification URL
+  doc.setFillColor(bgColor.r, bgColor.g, bgColor.b);
+  doc.rect(W - 78, 119, 60, 6, "F");
+  doc.setFontSize(6);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 80, 40);
-  doc.text(`${PUBLISHED_URL}/verificar-certificado`, W - 48, 122, { align: "center" });
+  doc.text(`${PUBLISHED_URL}/verificar-certificado`, W - 48, 123, { align: "center" });
 
-  // Verification code at bottom
-  doc.setFontSize(6.5);
+  // Clear and rewrite verification code at bottom
+  doc.rect(W / 2 - 40, H - 18, 80, 8, "F");
+  doc.setFontSize(6);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(120, 110, 100);
-  doc.text(`Codigo: ${data.verificationCode}`, W / 2, H - 14, { align: "center" });
+  doc.text(`Codigo: ${data.verificationCode}`, W / 2, H - 13, { align: "center" });
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
 }
