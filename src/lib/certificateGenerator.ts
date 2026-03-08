@@ -218,16 +218,17 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   const H = 210;
   const verifyUrl = `${PUBLISHED_URL}/verificar-certificado?code=${data.verificationCode}`;
 
-  const [logoDataUrl, qrDataUrl] = await Promise.all([
+  const [logoDataUrl, qrDataUrl, cornerDataUrl] = await Promise.all([
     loadImg(logoImg),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
+    loadImg(cornerImg),
   ]);
 
   // ==================== FRONT PAGE ====================
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawOrnamentalBorder(doc, W, H);
+  await drawOrnamentalBorder(doc, W, H, cornerDataUrl);
 
   // Logo
   doc.addImage(logoDataUrl, "PNG", W / 2 - 22, 14, 44, 44);
