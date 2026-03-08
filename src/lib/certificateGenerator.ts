@@ -33,18 +33,6 @@ function formatStudyTime(totalSeconds: number): string {
   return "1h";
 }
 
-// Regions to clear on the front template (relative percentages of image dimensions)
-// Each region: [xPercent, yPercent, widthPercent, heightPercent]
-const FRONT_CLEAR_REGIONS = [
-  // Student name placeholder area
-  [0.185, 0.44, 0.63, 0.08],
-  // "Certificamos que..." body text area
-  [0.12, 0.53, 0.76, 0.12],
-  // Left signature name area
-  [0.18, 0.70, 0.25, 0.06],
-  // Right signature name area
-  [0.52, 0.70, 0.25, 0.06],
-];
 
 // Load image, clear specified regions by sampling surrounding pixels, return data URL
 async function loadAndCleanImage(src: string, clearRegions: number[][] = []): Promise<string> {
@@ -106,7 +94,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   // Load front with cleared regions, back as-is (new template), and QR code
   const [frontDataUrl, backDataUrl, qrDataUrl] = await Promise.all([
-    loadAndCleanImage(certFrenteImg, FRONT_CLEAR_REGIONS),
+    loadImageAsDataUrl(certFrenteImg),
     loadImageAsDataUrl(certVersoImg),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
   ]);
