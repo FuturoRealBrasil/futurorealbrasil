@@ -812,7 +812,7 @@ const Educacao = () => {
                           <span className={`text-sm font-bold block ${completed && !canGetCertificate ? "text-safe" : "text-foreground"}`}>{article.title}</span>
                           <span className="text-xs text-muted-foreground">{article.pages.length} telas • {completed && !canGetCertificate ? "Concluído" : "Toque para ler"}</span>
                         </div>
-                        {completed ? (
+                        {completed && !canGetCertificate ? (
                           <CheckCircle2 className="w-5 h-5 text-safe shrink-0" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
