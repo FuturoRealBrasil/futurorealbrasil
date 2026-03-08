@@ -379,10 +379,10 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   keys.forEach((key, idx) => {
     const col = idx % 2 === 0 ? lCol : rCol;
-    const startY = idx < 2 ? 60 : 122;
+    const startY = idx < 2 ? 59 : 105;
 
     // Module title
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
     tc(doc, C.brandGreen);
     doc.text(modLabels[key], col, startY);
@@ -390,57 +390,58 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
     // Underline
     dc(doc, C.brandGreen);
     doc.setLineWidth(0.3);
-    doc.line(col, startY + 1.5, col + 60, startY + 1.5);
+    doc.line(col, startY + 1.2, col + 60, startY + 1.2);
 
     // Topics
-    doc.setFontSize(7);
+    doc.setFontSize(6.5);
     doc.setFont("helvetica", "normal");
     tc(doc, C.cream);
     (modTopics[key] || []).forEach((topic, i) => {
-      doc.text(`-  ${topic}`, col + 1, startY + 6 + i * 5.5);
+      doc.text(`-  ${topic}`, col + 1, startY + 5 + i * 4);
     });
   });
 
   // ---- MISSIONS ----
-  doc.setFontSize(14);
+  const missionsStartY = 150;
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("MISSOES CONCLUIDAS", W / 2, 180, { align: "center" });
+  doc.text("MISSOES CONCLUIDAS", W / 2, missionsStartY, { align: "center" });
 
-  drawDivider(doc, W / 2, 183, 55);
+  drawDivider(doc, W / 2, missionsStartY + 3, 55);
 
   const missions = data.missionsCompleted.map(m => safe(m));
   const perCol = Math.ceil(missions.length / 3);
   const mCols = [25, W / 3 + 10, (2 * W) / 3 - 5];
 
-  doc.setFontSize(6.5);
+  doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
   tc(doc, C.cream);
   missions.forEach((m, i) => {
     const ci = Math.floor(i / perCol);
     const row = i % perCol;
-    doc.text(`-  ${m}`, mCols[Math.min(ci, 2)], 188 + row * 4);
+    doc.text(`-  ${m}`, mCols[Math.min(ci, 2)], missionsStartY + 7 + row * 3.2);
   });
 
   // ---- SOCIAL & FOOTER ----
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("Siga-nos:", W / 2, H - 20, { align: "center" });
+  doc.text("Siga-nos:", W / 2, H - 16, { align: "center" });
 
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   tc(doc, C.white);
-  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 15, { align: "center" });
+  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 12, { align: "center" });
 
-  doc.setFontSize(6);
+  doc.setFontSize(5);
   tc(doc, C.muted);
   doc.text(
     "Este certificado refere-se a um Curso Livre, conforme Lei n. 9.394/96, Art. 42. Nao substitui cursos tecnicos, de graduacao ou pos-graduacao.",
-    W / 2, H - 9, { align: "center" }
+    W / 2, H - 8, { align: "center" }
   );
 
-  doc.setFontSize(6);
+  doc.setFontSize(5);
   tc(doc, C.muted);
   doc.text(
     `Codigo de Verificacao: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
