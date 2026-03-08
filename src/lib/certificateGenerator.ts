@@ -16,23 +16,22 @@ const COMPANY = "Futuro Real Brasil";
 const PUBLISHED_URL = "https://futurorealbrasil.lovable.app";
 const CNPJ = "55.276.743/0001-80";
 
-// Site dark theme colors (RGB)
 const COLORS = {
-  bgDark: [14, 18, 27] as [number, number, number],
-  bgCard: [22, 28, 40] as [number, number, number],
-  brandBlue: [40, 100, 180] as [number, number, number],
-  brandGreen: [51, 153, 102] as [number, number, number],
-  brandGold: [245, 180, 30] as [number, number, number],
+  bgDark: [12, 15, 24] as [number, number, number],
+  bgPanel: [18, 22, 34] as [number, number, number],
+  brandBlue: [45, 110, 195] as [number, number, number],
+  brandGreen: [46, 160, 105] as [number, number, number],
+  brandGold: [235, 175, 35] as [number, number, number],
+  goldLight: [255, 215, 100] as [number, number, number],
   white: [255, 255, 255] as [number, number, number],
-  lightGray: [200, 210, 220] as [number, number, number],
-  mutedText: [140, 150, 170] as [number, number, number],
+  lightGray: [195, 205, 215] as [number, number, number],
+  mutedText: [120, 135, 160] as [number, number, number],
 };
 
 function formatCPF(cpf: string): string {
   const digits = cpf.replace(/\D/g, "");
-  if (digits.length === 11) {
+  if (digits.length === 11)
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-  }
   return cpf;
 }
 
@@ -62,80 +61,133 @@ async function loadImageAsDataUrl(src: string): Promise<string> {
   });
 }
 
-function setColor(doc: jsPDF, color: [number, number, number]) {
-  doc.setTextColor(color[0], color[1], color[2]);
+function sc(doc: jsPDF, c: [number, number, number]) {
+  doc.setTextColor(c[0], c[1], c[2]);
 }
 
-function drawGoldBorder(doc: jsPDF, W: number, H: number) {
+// Elegant double border with ornamental corners
+function drawElegantBorder(doc: jsPDF, W: number, H: number) {
   const [r, g, b] = COLORS.brandGold;
-  // Outer border
   doc.setDrawColor(r, g, b);
-  doc.setLineWidth(1.5);
-  doc.rect(8, 8, W - 16, H - 16);
-  // Inner border
-  doc.setLineWidth(0.5);
-  doc.rect(12, 12, W - 24, H - 24);
-  // Corner accents
-  const cornerLen = 15;
-  doc.setLineWidth(1);
-  // Top-left
-  doc.line(8, 8, 8 + cornerLen, 8);
-  doc.line(8, 8, 8, 8 + cornerLen);
-  // Top-right
-  doc.line(W - 8, 8, W - 8 - cornerLen, 8);
-  doc.line(W - 8, 8, W - 8, 8 + cornerLen);
-  // Bottom-left
-  doc.line(8, H - 8, 8 + cornerLen, H - 8);
-  doc.line(8, H - 8, 8, H - 8 - cornerLen);
-  // Bottom-right
-  doc.line(W - 8, H - 8, W - 8 - cornerLen, H - 8);
-  doc.line(W - 8, H - 8, W - 8, H - 8 - cornerLen);
+
+  // Outer frame
+  doc.setLineWidth(1.2);
+  doc.rect(6, 6, W - 12, H - 12);
+
+  // Inner frame
+  doc.setLineWidth(0.4);
+  doc.rect(10, 10, W - 20, H - 20);
+
+  // Ornamental corner brackets (L-shapes with dots)
+  const cLen = 18;
+  const offset = 6;
+  doc.setLineWidth(0.8);
+
+  const corners = [
+    { x: offset, y: offset, dx: 1, dy: 1 },
+    { x: W - offset, y: offset, dx: -1, dy: 1 },
+    { x: offset, y: H - offset, dx: 1, dy: -1 },
+    { x: W - offset, y: H - offset, dx: -1, dy: -1 },
+  ];
+
+  corners.forEach(({ x, y, dx, dy }) => {
+    doc.line(x, y, x + dx * cLen, y);
+    doc.line(x, y, x, y + dy * cLen);
+    // Small diamond at corner
+    const cx = x + dx * 3;
+    const cy = y + dy * 3;
+    doc.setFillColor(r, g, b);
+    doc.circle(cx, cy, 0.8, "F");
+  });
+
+  // Mid-edge diamonds
+  doc.setFillColor(r, g, b);
+  doc.circle(W / 2, 6, 1, "F");
+  doc.circle(W / 2, H - 6, 1, "F");
+  doc.circle(6, H / 2, 1, "F");
+  doc.circle(W - 6, H / 2, 1, "F");
 }
 
+// Elegant horizontal divider with center diamond
+function drawDivider(doc: jsPDF, cx: number, y: number, halfW: number) {
+  const [r, g, b] = COLORS.brandGold;
+  doc.setDrawColor(r, g, b);
+  doc.setLineWidth(0.3);
+  doc.line(cx - halfW, y, cx - 3, y);
+  doc.line(cx + 3, y, cx + halfW, y);
+  // Center diamond
+  doc.setFillColor(r, g, b);
+  const d = 1.5;
+  doc.triangle(cx, y - d, cx + d, y, cx, y + d, "F");
+  doc.triangle(cx, y - d, cx - d, y, cx, y + d, "F");
+}
+
+// Ornate seal with double ring and star burst effect
 function drawSeal(doc: jsPDF, x: number, y: number, radius: number) {
   const [r, g, b] = COLORS.brandGold;
-  // Outer star-burst seal
   doc.setDrawColor(r, g, b);
-  doc.setFillColor(r, g, b);
-  
-  // Draw circle
-  doc.setLineWidth(0.8);
+
+  // Outer serrated ring (simulated with small lines)
+  const teeth = 24;
+  for (let i = 0; i < teeth; i++) {
+    const angle = (i / teeth) * Math.PI * 2;
+    const innerR = radius - 1;
+    const outerR = radius + 1;
+    const x1 = x + Math.cos(angle) * innerR;
+    const y1 = y + Math.sin(angle) * innerR;
+    const x2 = x + Math.cos(angle) * outerR;
+    const y2 = y + Math.sin(angle) * outerR;
+    doc.setLineWidth(0.4);
+    doc.line(x1, y1, x2, y2);
+  }
+
+  // Outer circle
+  doc.setLineWidth(0.6);
   doc.circle(x, y, radius, "S");
-  doc.circle(x, y, radius - 1.5, "S");
-  
-  // Inner circle with fill
+  // Inner circle
+  doc.setLineWidth(0.3);
+  doc.circle(x, y, radius - 2, "S");
+
+  // Dark fill center
   doc.setFillColor(COLORS.bgDark[0], COLORS.bgDark[1], COLORS.bgDark[2]);
   doc.circle(x, y, radius - 3, "F");
   doc.setDrawColor(r, g, b);
+  doc.setLineWidth(0.3);
   doc.circle(x, y, radius - 3, "S");
-  
-  // Seal text
-  doc.setFontSize(5);
+
+  // Text
   doc.setFont("helvetica", "bold");
-  setColor(doc, COLORS.brandGold);
-  doc.text("CURSO", x, y - 3, { align: "center" });
-  doc.text("LIVRE", x, y + 0.5, { align: "center" });
-  doc.setFontSize(3.5);
+  sc(doc, COLORS.brandGold);
+  doc.setFontSize(4.5);
+  doc.text("CURSO", x, y - 2.5, { align: "center" });
+  doc.text("LIVRE", x, y + 1, { align: "center" });
+  doc.setFontSize(3);
   doc.text("CERTIFICADO", x, y + 4, { align: "center" });
 }
 
-function drawSignatureLine(doc: jsPDF, x: number, y: number, width: number, label: string, name: string) {
-  // Name above line
+function drawSignatureLine(doc: jsPDF, x: number, y: number, w: number, label: string, name: string) {
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  setColor(doc, COLORS.white);
-  doc.text(name, x, y - 3, { align: "center" });
-  
-  // Line
+  sc(doc, COLORS.white);
+  doc.text(name, x, y - 4, { align: "center" });
+
   doc.setDrawColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
   doc.setLineWidth(0.3);
-  doc.line(x - width / 2, y, x + width / 2, y);
-  
-  // Label below line
+  doc.line(x - w / 2, y, x + w / 2, y);
+
   doc.setFontSize(6);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.mutedText);
-  doc.text(label, x, y + 4, { align: "center" });
+  sc(doc, COLORS.mutedText);
+  doc.text(label, x, y + 5, { align: "center" });
+}
+
+// Subtle background pattern (diagonal thin lines)
+function drawBgPattern(doc: jsPDF, W: number, H: number) {
+  doc.setDrawColor(25, 30, 45);
+  doc.setLineWidth(0.1);
+  for (let i = -H; i < W + H; i += 12) {
+    doc.line(i, 0, i + H, H);
+  }
 }
 
 export async function generateCertificatePDF(data: CertificateData, _siteUrl: string) {
@@ -151,148 +203,169 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   ]);
 
   // ==================== FRONT PAGE ====================
-  // Dark background
+  // Background
   doc.setFillColor(COLORS.bgDark[0], COLORS.bgDark[1], COLORS.bgDark[2]);
   doc.rect(0, 0, W, H, "F");
+  drawBgPattern(doc, W, H);
 
-  // Subtle gradient bar at top
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, 0, W, 3, "F");
+  // Top accent stripe (Brazil colors)
   doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, 3, W, 1.5, "F");
+  doc.rect(0, 0, W, 2.5, "F");
   doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, 4.5, W, 1, "F");
+  doc.rect(0, 2.5, W, 1.2, "F");
+  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
+  doc.rect(0, 3.7, W, 1.8, "F");
 
-  // Gold border
-  drawGoldBorder(doc, W, H);
+  // Bottom accent stripe
+  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
+  doc.rect(0, H - 5.5, W, 1.8, "F");
+  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
+  doc.rect(0, H - 3.7, W, 1.2, "F");
+  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
+  doc.rect(0, H - 2.5, W, 2.5, "F");
 
-  // Logo centered at top
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 15, 14, 30, 30);
+  drawElegantBorder(doc, W, H);
+
+  // Logo
+  doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 12, 28, 28);
 
   // Title
-  doc.setFontSize(22);
+  doc.setFontSize(24);
   doc.setFont("helvetica", "bold");
-  setColor(doc, COLORS.brandGold);
-  doc.text("CERTIFICADO DE CONCLUSÃO", W / 2, 55, { align: "center" });
+  sc(doc, COLORS.brandGold);
+  doc.text("CERTIFICADO DE CONCLUSÃO", W / 2, 52, { align: "center" });
 
-  // Subtitle - Curso Livre
+  // Subtitle
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.mutedText);
-  doc.text("Curso Livre de Educação Financeira", W / 2, 62, { align: "center" });
+  sc(doc, COLORS.mutedText);
+  doc.text("Curso Livre de Educação Financeira Familiar", W / 2, 59, { align: "center" });
 
-  // Decorative line
-  doc.setDrawColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.setLineWidth(0.4);
-  doc.line(W / 2 - 60, 66, W / 2 + 60, 66);
+  drawDivider(doc, W / 2, 64, 70);
 
   // "Certificamos que"
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.lightGray);
-  doc.text("Certificamos que", W / 2, 76, { align: "center" });
+  sc(doc, COLORS.lightGray);
+  doc.text("Certificamos que", W / 2, 73, { align: "center" });
 
   // Student name
-  const fullName = data.userName.toUpperCase();
-  doc.setFontSize(20);
+  doc.setFontSize(22);
   doc.setFont("helvetica", "bolditalic");
-  setColor(doc, COLORS.white);
-  doc.text(fullName, W / 2, 87, { align: "center" });
+  sc(doc, COLORS.white);
+  doc.text(data.userName.toUpperCase(), W / 2, 84, { align: "center" });
+
+  // Underline below name
+  const nameWidth = doc.getTextWidth(data.userName.toUpperCase());
+  drawDivider(doc, W / 2, 87, Math.min(nameWidth / 2 + 10, 80));
 
   // CPF
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.mutedText);
+  sc(doc, COLORS.mutedText);
   doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 93, { align: "center" });
 
   // Body text
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.lightGray);
-  const bodyText = `concluiu com êxito o Curso Livre de Educação Financeira Familiar oferecido pelo ${COMPANY} (CNPJ: ${CNPJ}), com carga horária total de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicação aos estudos. Este certificado não possui valor de curso técnico ou graduação, sendo referente a um Curso Livre conforme Lei nº 9.394/96.`;
-  const bodyLines = doc.splitTextToSize(bodyText, 200);
-  doc.text(bodyLines, W / 2, 102, { align: "center" });
+  sc(doc, COLORS.lightGray);
+  const bodyText = `concluiu com êxito o Curso Livre de Educação Financeira Familiar oferecido pelo ${COMPANY} (CNPJ: ${CNPJ}), com carga horária total de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicação aos estudos.`;
+  const bodyLines = doc.splitTextToSize(bodyText, 210);
+  doc.text(bodyLines, W / 2, 101, { align: "center" });
+
+  // Curso livre notice (smaller, separate)
+  doc.setFontSize(6.5);
+  sc(doc, COLORS.mutedText);
+  doc.text(
+    "Este certificado refere-se a um Curso Livre conforme Lei nº 9.394/96, Art. 42.",
+    W / 2,
+    118,
+    { align: "center" }
+  );
 
   // Date
-  doc.setFontSize(8);
-  setColor(doc, COLORS.mutedText);
-  doc.text(`Data de Conclusão: ${data.completionDate}`, W / 2, 130, { align: "center" });
+  doc.setFontSize(7.5);
+  sc(doc, COLORS.lightGray);
+  doc.text(`Data de Conclusão: ${data.completionDate}`, W / 2, 126, { align: "center" });
 
-  // Signatures
-  drawSignatureLine(doc, 95, 155, 60, "Nome do Aluno", data.userName);
-  drawSignatureLine(doc, 200, 155, 60, "Coordenação", COMPANY);
+  drawDivider(doc, W / 2, 132, 60);
 
-  // Seal
-  drawSeal(doc, W / 2, 152, 12);
+  // Signatures — well spaced from seal
+  drawSignatureLine(doc, 80, 158, 55, "Nome do Aluno", data.userName);
+  drawSignatureLine(doc, W - 80, 158, 55, "Coordenação", COMPANY);
 
-  // QR Code bottom-right
+  // Seal — centered between signatures, vertically aligned
+  drawSeal(doc, W / 2, 155, 13);
+
+  // QR Code — bottom-right, inside border
   if (qrDataUrl) {
-    doc.addImage(qrDataUrl, "PNG", W - 44, H - 40, 24, 24);
-    doc.setFontSize(5);
-    setColor(doc, COLORS.mutedText);
-    doc.text("Validar", W - 32, H - 14, { align: "center" });
+    doc.addImage(qrDataUrl, "PNG", W - 42, H - 38, 22, 22);
+    doc.setFontSize(4.5);
+    sc(doc, COLORS.mutedText);
+    doc.text("Validar Certificado", W - 31, H - 14.5, { align: "center" });
   }
 
-  // Verification code bottom-left
-  doc.setFontSize(6);
-  setColor(doc, COLORS.mutedText);
-  doc.text(`Código: ${data.verificationCode}`, 40, H - 16, { align: "center" });
-
-  // Bottom bars
-  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, H - 1, W, 1, "F");
-  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, H - 2.5, W, 1.5, "F");
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, H - 5.5, W, 3, "F");
+  // Verification code — bottom-left
+  doc.setFontSize(5.5);
+  sc(doc, COLORS.mutedText);
+  doc.text(`Código: ${data.verificationCode}`, 38, H - 16, { align: "center" });
 
   // ==================== BACK PAGE ====================
   doc.addPage("a4", "landscape");
 
-  // Dark background
   doc.setFillColor(COLORS.bgDark[0], COLORS.bgDark[1], COLORS.bgDark[2]);
   doc.rect(0, 0, W, H, "F");
+  drawBgPattern(doc, W, H);
 
-  // Top bars
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, 0, W, 3, "F");
+  // Top/bottom stripes
   doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, 3, W, 1.5, "F");
+  doc.rect(0, 0, W, 2.5, "F");
   doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, 4.5, W, 1, "F");
+  doc.rect(0, 2.5, W, 1.2, "F");
+  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
+  doc.rect(0, 3.7, W, 1.8, "F");
 
-  drawGoldBorder(doc, W, H);
+  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
+  doc.rect(0, H - 5.5, W, 1.8, "F");
+  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
+  doc.rect(0, H - 3.7, W, 1.2, "F");
+  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
+  doc.rect(0, H - 2.5, W, 2.5, "F");
 
-  // Logo small top
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 10, 10, 20, 20);
+  drawElegantBorder(doc, W, H);
+
+  // Logo
+  doc.addImage(logoDataUrl, "PNG", W / 2 - 10, 9, 20, 20);
 
   // Title
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  setColor(doc, COLORS.brandGold);
-  doc.text("CONTEÚDO PROGRAMÁTICO", W / 2, 38, { align: "center" });
+  sc(doc, COLORS.brandGold);
+  doc.text("CONTEÚDO PROGRAMÁTICO", W / 2, 36, { align: "center" });
 
   // Student info
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.mutedText);
-  doc.text(`Aluno(a): ${data.userName}  |  Código: ${data.verificationCode}`, W / 2, 44, { align: "center" });
+  sc(doc, COLORS.mutedText);
+  doc.text(`Aluno(a): ${data.userName}  |  Código: ${data.verificationCode}`, W / 2, 42, { align: "center" });
 
-  // Decorative line
-  doc.setDrawColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.setLineWidth(0.3);
-  doc.line(20, 47, W - 20, 47);
+  drawDivider(doc, W / 2, 45, 100);
 
-  // ---- MODULES SECTION ----
+  // ---- MODULES (2x2 grid) ----
   const moduleLabels: Record<string, string> = {
-    iniciante: "🌱 Módulo Iniciante",
-    organizado: "📋 Módulo Organizado",
-    investidor: "📈 Módulo Investidor",
-    independente: "🏆 Módulo Independente",
+    iniciante: "Módulo Iniciante",
+    organizado: "Módulo Organizado",
+    investidor: "Módulo Investidor",
+    independente: "Módulo Independente",
+  };
+  const moduleEmojis: Record<string, string> = {
+    iniciante: "🌱",
+    organizado: "📋",
+    investidor: "📈",
+    independente: "🏆",
   };
 
-  // Module topics - complete list
   const moduleTopics: Record<string, string[]> = {
     iniciante: [
       "Por que o dinheiro acaba antes do mês",
@@ -344,87 +417,93 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
     ],
   };
 
-  let yPos = 52;
-  const colWidth = 130;
-  const leftCol = 22;
-  const rightCol = W / 2 + 5;
-
+  const leftCol = 20;
+  const rightCol = W / 2 + 8;
   const moduleKeys = Object.keys(moduleLabels);
 
   moduleKeys.forEach((key, idx) => {
     const col = idx % 2 === 0 ? leftCol : rightCol;
-    const startY = idx < 2 ? 52 : 118;
+    const startY = idx < 2 ? 50 : 108;
 
-    // Module title
-    doc.setFontSize(8);
+    // Module title with colored underline
+    doc.setFontSize(7.5);
     doc.setFont("helvetica", "bold");
-    setColor(doc, COLORS.brandGreen);
-    doc.text(moduleLabels[key], col, startY);
+    sc(doc, COLORS.brandGreen);
+    doc.text(`${moduleEmojis[key]}  ${moduleLabels[key]}`, col, startY);
+
+    // Small underline
+    doc.setDrawColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
+    doc.setLineWidth(0.2);
+    doc.line(col, startY + 1.5, col + 50, startY + 1.5);
 
     // Topics
-    doc.setFontSize(5.5);
+    doc.setFontSize(5.2);
     doc.setFont("helvetica", "normal");
-    setColor(doc, COLORS.lightGray);
+    sc(doc, COLORS.lightGray);
     const topics = moduleTopics[key] || [];
     topics.forEach((topic, i) => {
-      doc.text(`• ${topic}`, col + 2, startY + 5 + i * 4.5);
+      doc.text(`•  ${topic}`, col + 1, startY + 5.5 + i * 4.8);
     });
   });
 
-  // ---- MISSIONS SECTION ----
-  doc.setFontSize(10);
+  // ---- MISSIONS ----
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  setColor(doc, COLORS.brandGold);
-  doc.text("MISSÕES CONCLUÍDAS", W / 2, 170, { align: "center" });
+  sc(doc, COLORS.brandGold);
+  doc.text("MISSÕES CONCLUÍDAS", W / 2, 162, { align: "center" });
 
-  doc.setDrawColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.setLineWidth(0.2);
-  doc.line(60, 172, W - 60, 172);
+  drawDivider(doc, W / 2, 164.5, 50);
 
-  // List missions in 2 columns
-  doc.setFontSize(5);
-  doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.lightGray);
+  // Missions in 3 columns to fit better
   const missions = data.missionsCompleted;
-  const midpoint = Math.ceil(missions.length / 2);
-  const missionLeftCol = 30;
-  const missionRightCol = W / 2 + 10;
+  const colCount = 3;
+  const perCol = Math.ceil(missions.length / colCount);
+  const mCols = [25, W / 3 + 10, (2 * W) / 3 - 5];
+
+  doc.setFontSize(4.8);
+  doc.setFont("helvetica", "normal");
+  sc(doc, COLORS.lightGray);
 
   missions.forEach((mission, i) => {
-    const col = i < midpoint ? missionLeftCol : missionRightCol;
-    const row = i < midpoint ? i : i - midpoint;
-    doc.text(`✓ ${mission}`, col, 176 + row * 3.5);
+    const colIdx = Math.floor(i / perCol);
+    const row = i % perCol;
+    const x = mCols[Math.min(colIdx, 2)];
+    doc.text(`✓  ${mission}`, x, 169 + row * 3.2);
   });
 
-  // ---- SOCIAL MEDIA & FOOTER ----
-  // Bottom bars
-  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, H - 1, W, 1, "F");
-  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, H - 2.5, W, 1.5, "F");
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, H - 5.5, W, 3, "F");
-
-  // Social media info
-  doc.setFontSize(7);
+  // ---- SOCIAL & FOOTER ----
+  doc.setFontSize(6.5);
   doc.setFont("helvetica", "bold");
-  setColor(doc, COLORS.brandGold);
-  doc.text("Siga-nos nas redes sociais:", W / 2, H - 22, { align: "center" });
+  sc(doc, COLORS.brandGold);
+  doc.text("Siga-nos:", W / 2, H - 20, { align: "center" });
 
-  doc.setFontSize(7);
+  doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLORS.white);
-  doc.text("Instagram: @futurorealbrasil  |  YouTube: Futuro Real Brasil", W / 2, H - 17, { align: "center" });
+  sc(doc, COLORS.white);
+  doc.text(
+    "Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil",
+    W / 2,
+    H - 15.5,
+    { align: "center" }
+  );
 
-  // Curso livre notice
-  doc.setFontSize(5);
-  setColor(doc, COLORS.mutedText);
-  doc.text("Este certificado refere-se a um Curso Livre, conforme Lei nº 9.394/96, Art. 42. Não substitui cursos técnicos, de graduação ou pós-graduação.", W / 2, H - 10, { align: "center" });
+  doc.setFontSize(4.5);
+  sc(doc, COLORS.mutedText);
+  doc.text(
+    "Este certificado refere-se a um Curso Livre, conforme Lei nº 9.394/96, Art. 42. Não substitui cursos técnicos, de graduação ou pós-graduação.",
+    W / 2,
+    H - 10,
+    { align: "center" }
+  );
 
-  // Verification code
-  doc.setFontSize(5);
-  setColor(doc, COLORS.mutedText);
-  doc.text(`Código de Verificação: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`, W / 2, H - 7, { align: "center" });
+  doc.setFontSize(4.5);
+  sc(doc, COLORS.mutedText);
+  doc.text(
+    `Código: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
+    W / 2,
+    H - 7,
+    { align: "center" }
+  );
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
 }
