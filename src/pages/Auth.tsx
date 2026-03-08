@@ -148,6 +148,13 @@ const Auth = () => {
               </div>
             )}
 
+            {!isLogin && (
+              <div>
+                <Label className="text-sm font-semibold text-primary-foreground/90">Celular / WhatsApp</Label>
+                <Input type="tel" placeholder="(11) 99999-9999" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="h-12 rounded-xl bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/40 mt-1" inputMode="tel" required />
+              </div>
+            )}
+
             <div>
               <Label className="text-sm font-semibold text-primary-foreground/90">Email</Label>
               <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-xl bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/40 mt-1" required />
