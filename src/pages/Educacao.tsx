@@ -459,7 +459,7 @@ const Educacao = () => {
   }
 
   async function handleGenerateCertificate() {
-    if (!user || !certCpf.trim()) return;
+    if (!user || !certCpf.trim() || !certName.trim()) return;
     setCertLoading(true);
 
     const verificationCode = `FRB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
