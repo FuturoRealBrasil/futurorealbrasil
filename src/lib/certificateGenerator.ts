@@ -308,7 +308,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  await drawOrnamentalBorder(doc, W, H, cornerDataUrl);
+  drawOrnamentalBorder(doc, W, H);
 
   // Title
   doc.setFontSize(28);
