@@ -399,7 +399,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   });
 
   // ---- MISSIONS ----
-  const missionsStartY = 145;
+  const missionsStartY = 132;
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
