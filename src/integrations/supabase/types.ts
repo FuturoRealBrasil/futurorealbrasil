@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          completion_date: string
+          created_at: string
+          id: string
+          missions_completed: string[]
+          modules_completed: string[]
+          study_hours_total: number
+          user_cpf: string
+          user_id: string
+          user_name: string
+          verification_code: string
+        }
+        Insert: {
+          completion_date?: string
+          created_at?: string
+          id?: string
+          missions_completed?: string[]
+          modules_completed?: string[]
+          study_hours_total?: number
+          user_cpf: string
+          user_id: string
+          user_name: string
+          verification_code: string
+        }
+        Update: {
+          completion_date?: string
+          created_at?: string
+          id?: string
+          missions_completed?: string[]
+          modules_completed?: string[]
+          study_hours_total?: number
+          user_cpf?: string
+          user_id?: string
+          user_name?: string
+          verification_code?: string
+        }
+        Relationships: []
+      }
       monthly_savings: {
         Row: {
           ano: number
@@ -83,6 +122,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          cpf: string | null
           created_at: string
           display_name: string | null
           id: string
@@ -92,6 +132,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          cpf?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
@@ -101,6 +142,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          cpf?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
