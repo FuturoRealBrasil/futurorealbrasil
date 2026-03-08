@@ -46,11 +46,16 @@ const HamburgerMenu = () => {
     ? profile.display_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "?";
 
+  const isHome = location.pathname === "/";
+  const iconColor = isHome
+    ? "text-white hover:text-white/80 hover:bg-white/10"
+    : "text-[hsl(0,0%,0%)] hover:text-[hsl(0,0%,20%)] hover:bg-black/10";
+
   return (
     <div className="relative z-50">
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 rounded-lg text-[hsl(0,0%,0%)] hover:text-[hsl(0,0%,20%)] hover:bg-black/10 transition-colors"
+        className={`p-2 rounded-lg transition-colors ${iconColor}`}
         aria-label="Menu"
       >
         {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
