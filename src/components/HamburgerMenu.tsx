@@ -42,7 +42,7 @@ const HamburgerMenu = () => {
       {open && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-12 w-56 bg-card border rounded-xl shadow-xl z-50 overflow-hidden animate-fade-up">
+          <div className={`absolute right-0 top-12 w-56 border rounded-xl shadow-xl z-50 overflow-hidden animate-fade-up ${user ? "bg-[hsl(0,0%,5%)] border-white/10" : "bg-card"}`}>
             {menuItems.map((item) => {
               const active = location.pathname === item.path;
               return (
@@ -51,8 +51,8 @@ const HamburgerMenu = () => {
                   onClick={() => handleNav(item.path)}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-colors ${
                     active
-                      ? "bg-primary/10 text-primary"
-                      : "text-foreground hover:bg-muted"
+                      ? user ? "bg-white/10 text-brand-gold" : "bg-primary/10 text-primary"
+                      : user ? "text-white/80 hover:bg-white/5" : "text-foreground hover:bg-muted"
                   }`}
                 >
                   <item.icon className="w-5 h-5" />
