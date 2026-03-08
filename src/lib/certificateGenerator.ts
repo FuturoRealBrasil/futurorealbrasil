@@ -30,16 +30,16 @@ function formatStudyTime(totalSeconds: number): string {
   return `${mins}min`;
 }
 
-// Colors
-const DARK_GREEN = [0, 80, 50];
-const GREEN = [0, 100, 60];
-const GOLD = [180, 140, 40];
-const DARK_GOLD = [140, 110, 30];
-const CREAM_BG = [255, 248, 230];
-const FRAME_DARK = [60, 40, 20];
-const FRAME_GOLD = [180, 150, 60];
-const TEXT_DARK = [50, 40, 30];
-const TEXT_GRAY = [100, 90, 80];
+// Colors (tuples for TS spread)
+const DARK_GREEN: [number, number, number] = [0, 80, 50];
+const GREEN: [number, number, number] = [0, 100, 60];
+const GOLD: [number, number, number] = [180, 140, 40];
+const DARK_GOLD: [number, number, number] = [140, 110, 30];
+const CREAM_BG: [number, number, number] = [255, 248, 230];
+const FRAME_DARK: [number, number, number] = [60, 40, 20];
+const FRAME_GOLD: [number, number, number] = [180, 150, 60];
+const TEXT_DARK: [number, number, number] = [50, 40, 30];
+const TEXT_GRAY: [number, number, number] = [100, 90, 80];
 
 function drawOrnateFrame(doc: jsPDF, W: number, H: number) {
   // Outer dark frame

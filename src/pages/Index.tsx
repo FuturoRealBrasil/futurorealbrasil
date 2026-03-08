@@ -11,6 +11,8 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import WaitListForm from "@/components/WaitListForm";
 import logo from "@/assets/logo-transparent.png";
 import familiesImg from "@/assets/families-celebrating.jpg";
+import certFrenteImg from "@/assets/certificado-frente.png";
+import certVersoImg from "@/assets/certificado-verso.png";
 
 // Base date: March 5, 2026
 const BASE_DATE = new Date(2026, 2, 5);
