@@ -182,8 +182,6 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawStripes(doc, W, 0, 1);
-  drawStripes(doc, W, H - 5.5, -1);
   drawBorder(doc, W, H);
 
   // Logo — large
