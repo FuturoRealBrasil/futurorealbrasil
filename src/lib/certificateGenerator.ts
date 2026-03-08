@@ -188,62 +188,62 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.addImage(logoDataUrl, "PNG", W / 2 - 20, 10, 40, 40);
 
   // Title
-  doc.setFontSize(28);
+  doc.setFontSize(32);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
   doc.text("CERTIFICADO DE CONCLUSAO", W / 2, 60, { align: "center" });
 
   // Subtitle
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "normal");
+  tc(doc, C.muted);
+  doc.text("Curso Livre de Educacao Financeira Familiar", W / 2, 69, { align: "center" });
+
+  drawDivider(doc, W / 2, 74, 75);
+
+  // "Certificamos que"
+  doc.setFontSize(15);
+  doc.setFont("helvetica", "normal");
+  tc(doc, C.cream);
+  doc.text("Certificamos que", W / 2, 83, { align: "center" });
+
+  // Student name — large
+  doc.setFontSize(30);
+  doc.setFont("helvetica", "bolditalic");
+  tc(doc, C.white);
+  doc.text(safe(data.userName.toUpperCase()), W / 2, 96, { align: "center" });
+
+  drawDivider(doc, W / 2, 100, 80);
+
+  // CPF
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text("Curso Livre de Educacao Financeira Familiar", W / 2, 68, { align: "center" });
-
-  drawDivider(doc, W / 2, 73, 75);
-
-  // "Certificamos que"
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  tc(doc, C.cream);
-  doc.text("Certificamos que", W / 2, 82, { align: "center" });
-
-  // Student name — large
-  doc.setFontSize(26);
-  doc.setFont("helvetica", "bolditalic");
-  tc(doc, C.white);
-  doc.text(safe(data.userName.toUpperCase()), W / 2, 94, { align: "center" });
-
-  drawDivider(doc, W / 2, 98, 80);
-
-  // CPF
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  tc(doc, C.muted);
-  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 105, { align: "center" });
+  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 107, { align: "center" });
 
   // Body text
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
   tc(doc, C.cream);
   const body = safe(
     `concluiu com exito o Curso Livre de Educacao Financeira Familiar oferecido pelo ${COMPANY} (CNPJ: ${CNPJ}), com carga horaria total de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicacao aos estudos.`
   );
   const bLines = doc.splitTextToSize(body, 220);
-  doc.text(bLines, W / 2, 114, { align: "center" });
+  doc.text(bLines, W / 2, 116, { align: "center" });
 
   // Curso livre notice
-  doc.setFontSize(7.5);
+  doc.setFontSize(9);
   tc(doc, C.muted);
   doc.text(
     safe("Este certificado refere-se a um Curso Livre conforme Lei n. 9.394/96, Art. 42."),
-    W / 2, 134, { align: "center" }
+    W / 2, 136, { align: "center" }
   );
 
   // Date
-  doc.setFontSize(9);
+  doc.setFontSize(11);
   tc(doc, C.cream);
-  doc.text(`Data de Conclusao: ${data.completionDate}`, W / 2, 142, { align: "center" });
+  doc.text(`Data de Conclusao: ${data.completionDate}`, W / 2, 144, { align: "center" });
 
   drawDivider(doc, W / 2, 148, 65);
 
