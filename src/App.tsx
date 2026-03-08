@@ -40,6 +40,7 @@ const AppRoutes = () => (
     <Route path="/educacao" element={<ProtectedRoute><Educacao /></ProtectedRoute>} />
     <Route path="/emergencia" element={<ProtectedRoute><Emergencia /></ProtectedRoute>} />
     <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+    <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
     <Route path="/assinatura-confirmada" element={<ProtectedRoute><AssinaturaConfirmada /></ProtectedRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/como-funciona" element={<ComoFunciona />} />

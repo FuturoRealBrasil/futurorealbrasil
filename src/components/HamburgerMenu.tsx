@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { BarChart3, Target, BookOpen, Zap, CreditCard, LogOut, Menu, X, Home } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { BarChart3, Target, BookOpen, Zap, CreditCard, LogOut, Menu, X, Home, UserCircle } from "lucide-react";
 
 const menuItems = [
   { path: "/", icon: Home, label: "Início" },
@@ -17,6 +19,17 @@ const HamburgerMenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user } = useAuth();
+  const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!user) { setProfile(null); return; }
+    supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => setProfile(data));
+  }, [user]);
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -28,6 +41,10 @@ const HamburgerMenu = () => {
     setOpen(false);
     navigate("/");
   };
+
+  const initials = profile?.display_name
+    ? profile.display_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "?";
 
   return (
     <div className="relative z-50">
@@ -43,6 +60,26 @@ const HamburgerMenu = () => {
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setOpen(false)} />
           <div className={`absolute right-0 top-12 w-56 border rounded-xl shadow-xl z-50 overflow-hidden animate-fade-up ${user ? "bg-[hsl(0,0%,5%)] border-white/10" : "bg-card"}`}>
+            
+            {/* User profile header */}
+            {user && profile && (
+              <button
+                onClick={() => handleNav("/perfil")}
+                className="w-full flex items-center gap-3 px-4 py-3 border-b border-white/10 hover:bg-white/5 transition-colors"
+              >
+                <Avatar className="w-9 h-9 border-2 border-brand-green">
+                  <AvatarImage src={profile.avatar_url || undefined} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{profile.display_name || "Meu Perfil"}</p>
+                  <p className="text-[10px] text-white/50">Ver perfil</p>
+                </div>
+              </button>
+            )}
+
             {menuItems.map((item) => {
               const active = location.pathname === item.path;
               return (
@@ -63,7 +100,7 @@ const HamburgerMenu = () => {
             {user && (
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-destructive hover:bg-destructive/10 border-t transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/10 border-t border-white/10 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 Sair
