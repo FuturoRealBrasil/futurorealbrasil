@@ -103,7 +103,7 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       {/* Hero Section */}
       <div className="relative overflow-hidden text-primary-foreground">
-        <img src={familiesImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={familiesImg} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" fetchPriority="high" decoding="async" />
         <div className="absolute inset-0 bg-[hsl(213,40%,12%)]/80" />
 
         <div className="absolute top-4 right-4 z-20">
