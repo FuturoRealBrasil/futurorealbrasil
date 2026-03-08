@@ -807,7 +807,7 @@ const Educacao = () => {
                       className={`w-full text-left rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all ${completed && !canGetCertificate ? "bg-safe/5 border-safe/20" : "bg-card"}`}
                     >
                       <div className="flex items-center gap-3 p-4">
-                        <span className="text-2xl">{completed ? "✅" : article.emoji}</span>
+                        <span className="text-2xl">{completed && !canGetCertificate ? "✅" : article.emoji}</span>
                         <div className="flex-1 min-w-0">
                           <span className={`text-sm font-bold block ${completed ? "text-safe" : "text-foreground"}`}>{article.title}</span>
                           <span className="text-xs text-muted-foreground">{article.pages.length} telas • {completed ? "Concluído" : "Toque para ler"}</span>
