@@ -182,8 +182,6 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawStripes(doc, W, 0, 1);
-  drawStripes(doc, W, H - 5.5, -1);
   drawBorder(doc, W, H);
 
   // Logo — large
@@ -297,26 +295,24 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawStripes(doc, W, 0, 1);
-  drawStripes(doc, W, H - 5.5, -1);
   drawBorder(doc, W, H);
 
   // Logo — medium
   doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 9, 28, 28);
 
   // Title
-  doc.setFontSize(18);
+  doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
   doc.text("CONTEUDO PROGRAMATICO", W / 2, 44, { align: "center" });
 
   // Student info
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 50, { align: "center" });
+  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 51, { align: "center" });
 
-  drawDivider(doc, W / 2, 54, 105);
+  drawDivider(doc, W / 2, 55, 105);
 
   // ---- MODULES 2x2 ----
   const modLabels: Record<string, string> = {
@@ -383,72 +379,72 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   keys.forEach((key, idx) => {
     const col = idx % 2 === 0 ? lCol : rCol;
-    const startY = idx < 2 ? 59 : 118;
+    const startY = idx < 2 ? 60 : 122;
 
     // Module title
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     tc(doc, C.brandGreen);
     doc.text(modLabels[key], col, startY);
 
     // Underline
     dc(doc, C.brandGreen);
-    doc.setLineWidth(0.25);
-    doc.line(col, startY + 1.5, col + 55, startY + 1.5);
+    doc.setLineWidth(0.3);
+    doc.line(col, startY + 1.5, col + 60, startY + 1.5);
 
     // Topics
-    doc.setFontSize(6);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     tc(doc, C.cream);
     (modTopics[key] || []).forEach((topic, i) => {
-      doc.text(`-  ${topic}`, col + 1, startY + 6 + i * 5);
+      doc.text(`-  ${topic}`, col + 1, startY + 6 + i * 5.5);
     });
   });
 
   // ---- MISSIONS ----
-  doc.setFontSize(12);
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("MISSOES CONCLUIDAS", W / 2, 172, { align: "center" });
+  doc.text("MISSOES CONCLUIDAS", W / 2, 180, { align: "center" });
 
-  drawDivider(doc, W / 2, 175, 55);
+  drawDivider(doc, W / 2, 183, 55);
 
   const missions = data.missionsCompleted.map(m => safe(m));
   const perCol = Math.ceil(missions.length / 3);
   const mCols = [25, W / 3 + 10, (2 * W) / 3 - 5];
 
-  doc.setFontSize(5.5);
+  doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
   tc(doc, C.cream);
   missions.forEach((m, i) => {
     const ci = Math.floor(i / perCol);
     const row = i % perCol;
-    doc.text(`-  ${m}`, mCols[Math.min(ci, 2)], 179 + row * 3.5);
+    doc.text(`-  ${m}`, mCols[Math.min(ci, 2)], 188 + row * 4);
   });
 
   // ---- SOCIAL & FOOTER ----
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("Siga-nos:", W / 2, H - 22, { align: "center" });
+  doc.text("Siga-nos:", W / 2, H - 20, { align: "center" });
 
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   tc(doc, C.white);
-  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 17, { align: "center" });
+  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 15, { align: "center" });
 
-  doc.setFontSize(5);
+  doc.setFontSize(6);
   tc(doc, C.muted);
   doc.text(
     "Este certificado refere-se a um Curso Livre, conforme Lei n. 9.394/96, Art. 42. Nao substitui cursos tecnicos, de graduacao ou pos-graduacao.",
-    W / 2, H - 10, { align: "center" }
+    W / 2, H - 9, { align: "center" }
   );
 
-  doc.setFontSize(5);
+  doc.setFontSize(6);
   tc(doc, C.muted);
   doc.text(
     `Codigo de Verificacao: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
-    W / 2, H - 7, { align: "center" }
+    W / 2, H - 5, { align: "center" }
   );
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
