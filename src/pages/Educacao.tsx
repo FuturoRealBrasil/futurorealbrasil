@@ -804,7 +804,7 @@ const Educacao = () => {
                     <button
                       key={article.index}
                       onClick={() => handleOpenArticle(article.index)}
-                      className={`w-full text-left rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all ${completed ? "bg-safe/5 border-safe/20" : "bg-card"}`}
+                      className={`w-full text-left rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all ${completed && !canGetCertificate ? "bg-safe/5 border-safe/20" : "bg-card"}`}
                     >
                       <div className="flex items-center gap-3 p-4">
                         <span className="text-2xl">{completed ? "✅" : article.emoji}</span>
