@@ -404,6 +404,7 @@ const Educacao = () => {
   const [showModuleComplete, setShowModuleComplete] = useState<string | null>(null);
   const [studyDuration, setStudyDuration] = useState<number | null>(null);
   const [showCertDialog, setShowCertDialog] = useState(false);
+  const [certName, setCertName] = useState("");
   const [certCpf, setCertCpf] = useState("");
   const [certLoading, setCertLoading] = useState(false);
   const [existingCert, setExistingCert] = useState<string | null>(null);
@@ -458,16 +459,18 @@ const Educacao = () => {
   }
 
   async function handleGenerateCertificate() {
-    if (!user || !certCpf.trim()) return;
+    if (!user || !certCpf.trim() || !certName.trim()) return;
     setCertLoading(true);
 
     const verificationCode = `FRB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const completionDate = new Date();
     const studySeconds = getTotalStudySeconds();
 
-    // Get user display name
-    const { data: profile } = await supabase.from("profiles").select("display_name").eq("user_id", user.id).single();
-    const userName = profile?.display_name || user.email || "Aluno";
+    // Use the name provided by the user in the dialog
+    const userName = certName.trim() || user.email || "Aluno";
+
+    // Save name to profile
+    await supabase.from("profiles").update({ display_name: userName }).eq("user_id", user.id);
 
     // Save CPF to profile
     await supabase.from("profiles").update({ cpf: certCpf.trim() }).eq("user_id", user.id);
@@ -830,17 +833,30 @@ const Educacao = () => {
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold">Gerar Certificado</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">Informe seu CPF para constar no certificado:</p>
-          <Input
-            placeholder="000.000.000-00"
-            value={certCpf}
-            onChange={(e) => setCertCpf(e.target.value)}
-            maxLength={14}
-          />
+          <p className="text-sm text-muted-foreground">Informe seus dados para constar no certificado:</p>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">Nome Completo</label>
+              <Input
+                placeholder="Seu nome completo"
+                value={certName}
+                onChange={(e) => setCertName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">CPF</label>
+              <Input
+                placeholder="000.000.000-00"
+                value={certCpf}
+                onChange={(e) => setCertCpf(e.target.value)}
+                maxLength={14}
+              />
+            </div>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowCertDialog(false)} className="flex-1">Cancelar</Button>
-            <Button onClick={handleGenerateCertificate} disabled={certLoading || !certCpf.trim()} className="flex-1">
-              {certLoading ? "Gerando..." : "Gerar PDF"}
+            <Button onClick={handleGenerateCertificate} disabled={certLoading || !certCpf.trim() || !certName.trim()} className="flex-1">
+              {certLoading ? "Gerando..." : "Gerar Certificado"}
             </Button>
           </div>
         </DialogContent>
