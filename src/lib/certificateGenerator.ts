@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import logoImg from "@/assets/logo-transparent.png";
-import cornerImg from "@/assets/cert-corner.png";
+
 
 
 interface CertificateData {
@@ -76,7 +76,7 @@ function fc(doc: jsPDF, c: [number, number, number]) {
 
 // ---- Ornamental decorative helpers ----
 
-async function drawOrnamentalBorder(doc: jsPDF, W: number, H: number, cornerDataUrl: string) {
+function drawOrnamentalBorder(doc: jsPDF, W: number, H: number) {
   // Outer gold border
   dc(doc, C.brandGold);
   doc.setLineWidth(2.0);
@@ -90,47 +90,12 @@ async function drawOrnamentalBorder(doc: jsPDF, W: number, H: number, cornerData
   doc.setLineWidth(0.3);
   doc.rect(12, 12, W - 24, H - 24);
 
-  // Corner ornament images
-  const cs = 28;
-
-  // Top-left (original)
-  doc.addImage(cornerDataUrl, "PNG", 4, 4, cs, cs);
-
-  // Top-right (flip horizontal)
-  const flippedH = await flipImage(cornerDataUrl, true, false);
-  doc.addImage(flippedH, "PNG", W - 4 - cs, 4, cs, cs);
-
-  // Bottom-left (flip vertical)
-  const flippedV = await flipImage(cornerDataUrl, false, true);
-  doc.addImage(flippedV, "PNG", 4, H - 4 - cs, cs, cs);
-
-  // Bottom-right (flip both)
-  const flippedHV = await flipImage(cornerDataUrl, true, true);
-  doc.addImage(flippedHV, "PNG", W - 4 - cs, H - 4 - cs, cs, cs);
-
   // Edge center ornaments
   fc(doc, C.brandGold);
   drawEdgeOrnament(doc, W / 2, 6, 0);
   drawEdgeOrnament(doc, W / 2, H - 6, Math.PI);
   drawEdgeOrnament(doc, 6, H / 2, Math.PI / 2);
   drawEdgeOrnament(doc, W - 6, H / 2, -Math.PI / 2);
-}
-
-async function flipImage(dataUrl: string, flipH: boolean, flipV: boolean): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d")!;
-      ctx.translate(flipH ? img.width : 0, flipV ? img.height : 0);
-      ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.src = dataUrl;
-  });
 }
 
 function drawEdgeOrnament(doc: jsPDF, x: number, y: number, _angle: number) {
@@ -218,17 +183,16 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   const H = 210;
   const verifyUrl = `${PUBLISHED_URL}/verificar-certificado?code=${data.verificationCode}`;
 
-  const [logoDataUrl, qrDataUrl, cornerDataUrl] = await Promise.all([
+  const [logoDataUrl, qrDataUrl] = await Promise.all([
     loadImg(logoImg),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
-    loadImg(cornerImg),
   ]);
 
   // ==================== FRONT PAGE ====================
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  await drawOrnamentalBorder(doc, W, H, cornerDataUrl);
+  drawOrnamentalBorder(doc, W, H);
 
   // Logo
   doc.addImage(logoDataUrl, "PNG", W / 2 - 22, 14, 44, 44);
@@ -345,7 +309,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  await drawOrnamentalBorder(doc, W, H, cornerDataUrl);
+  drawOrnamentalBorder(doc, W, H);
 
   // Title
   doc.setFontSize(28);
