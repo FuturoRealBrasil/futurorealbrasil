@@ -362,8 +362,40 @@ const articles: Article[] = [
 
 const levels = ["iniciante", "organizado", "investidor", "independente"] as const;
 
+// All mission IDs from Missoes page
+const allMissionIds = [
+  "anotar-gastos", "guardar-valor", "listar-dividas", "cortar-gasto", "meta-semana",
+  "comparar-precos", "cozinhar-casa", "reserva-50", "renegociar-divida", "planejar-compras", "sem-delivery",
+  "abrir-corretora", "primeiro-investimento", "tesouro-direto", "reserva-3meses", "diversificar",
+  "reserva-6meses", "renda-extra", "planejamento-anual", "ensinar-alguem", "zero-dividas",
+];
+
+const allMissionLabels: Record<string, string> = {
+  "anotar-gastos": "Anote todos os gastos de hoje",
+  "guardar-valor": "Guarde qualquer valor",
+  "listar-dividas": "Liste todas as suas dívidas",
+  "cortar-gasto": "Corte um gasto desnecessário",
+  "meta-semana": "Defina uma meta para a semana",
+  "comparar-precos": "Compare preços antes de comprar",
+  "cozinhar-casa": "Cozinhe todas as refeições hoje",
+  "reserva-50": "Guarde R$ 50 este mês",
+  "renegociar-divida": "Renegocie uma dívida",
+  "planejar-compras": "Planeje suas compras da semana",
+  "sem-delivery": "Fique 7 dias sem pedir delivery",
+  "abrir-corretora": "Abra conta em uma corretora",
+  "primeiro-investimento": "Faça seu primeiro investimento",
+  "tesouro-direto": "Pesquise sobre Tesouro Direto",
+  "reserva-3meses": "Monte reserva de 3 meses",
+  "diversificar": "Diversifique seus investimentos",
+  "reserva-6meses": "Monte reserva de 6 meses",
+  "renda-extra": "Crie uma fonte de renda extra",
+  "planejamento-anual": "Faça um planejamento anual",
+  "ensinar-alguem": "Ensine alguém sobre finanças",
+  "zero-dividas": "Quite todas as dívidas",
+};
+
 const Educacao = () => {
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth();
   const { data: financialData, saveData } = useFinancialData();
   const navigate = useNavigate();
   const [openArticle, setOpenArticle] = useState<number | null>(null);
@@ -371,6 +403,10 @@ const Educacao = () => {
   const [studyStartTime, setStudyStartTime] = useState<number | null>(null);
   const [showModuleComplete, setShowModuleComplete] = useState<string | null>(null);
   const [studyDuration, setStudyDuration] = useState<number | null>(null);
+  const [showCertDialog, setShowCertDialog] = useState(false);
+  const [certCpf, setCertCpf] = useState("");
+  const [certLoading, setCertLoading] = useState(false);
+  const [existingCert, setExistingCert] = useState<string | null>(null);
 
   const completedTopics = financialData.completedMissions.filter(m => m.startsWith("edu_"));
 
