@@ -19,6 +19,7 @@ import Privacidade from "./pages/Privacidade";
 import ResetPassword from "./pages/ResetPassword";
 import ComoFunciona from "./pages/ComoFunciona";
 import VerificarCertificado from "./pages/VerificarCertificado";
+import Perfil from "./pages/Perfil";
 
 const queryClient = new QueryClient();
 
