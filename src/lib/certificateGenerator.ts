@@ -18,9 +18,12 @@ const CNPJ = "55.276.743/0001-80";
 
 const C = {
   bgDark: [10, 13, 22] as [number, number, number],
+  bgDark2: [18, 22, 35] as [number, number, number],
   brandBlue: [45, 110, 195] as [number, number, number],
   brandGreen: [46, 160, 105] as [number, number, number],
   brandGold: [235, 175, 35] as [number, number, number],
+  goldDark: [180, 130, 20] as [number, number, number],
+  goldLight: [255, 210, 80] as [number, number, number],
   white: [255, 255, 255] as [number, number, number],
   cream: [220, 225, 235] as [number, number, number],
   muted: [130, 145, 170] as [number, number, number],
@@ -69,99 +72,156 @@ function fc(doc: jsPDF, c: [number, number, number]) {
   doc.setFillColor(c[0], c[1], c[2]);
 }
 
-// ---- Decorative helpers ----
+// ---- Ornamental decorative helpers ----
 
-function drawStripes(doc: jsPDF, W: number, y: number, dir: 1 | -1) {
-  const colors = [C.brandGreen, C.brandGold, C.brandBlue];
-  const heights = [2.5, 1.2, 1.8];
-  let offset = 0;
-  const order = dir === 1 ? colors : [...colors].reverse();
-  const hOrder = dir === 1 ? heights : [...heights].reverse();
-  for (let i = 0; i < 3; i++) {
-    fc(doc, order[i]);
-    doc.rect(0, y + offset, W, hOrder[i], "F");
-    offset += hOrder[i];
-  }
-}
-
-function drawBorder(doc: jsPDF, W: number, H: number) {
+function drawOrnamentalBorder(doc: jsPDF, W: number, H: number) {
+  // Outer gold border
   dc(doc, C.brandGold);
-  doc.setLineWidth(1.4);
-  doc.rect(7, 7, W - 14, H - 14);
-  doc.setLineWidth(0.4);
-  doc.rect(11, 11, W - 22, H - 22);
+  doc.setLineWidth(2.0);
+  doc.rect(6, 6, W - 12, H - 12);
 
-  // Corner L-brackets with dots
-  const len = 20;
-  doc.setLineWidth(0.9);
-  [
-    [7, 7, 1, 1], [W - 7, 7, -1, 1],
-    [7, H - 7, 1, -1], [W - 7, H - 7, -1, -1],
-  ].forEach(([x, y, dx, dy]) => {
-    doc.line(x, y, x + dx * len, y);
-    doc.line(x, y, x, y + dy * len);
+  // Inner thin border
+  doc.setLineWidth(0.5);
+  doc.rect(10, 10, W - 20, H - 20);
+
+  // Second inner border
+  doc.setLineWidth(0.3);
+  doc.rect(12, 12, W - 24, H - 24);
+
+  // Ornamental corners - elaborate flourishes
+  const cornerSize = 30;
+  doc.setLineWidth(0.8);
+
+  // Draw ornate corner elements at each corner
+  const corners = [
+    { x: 6, y: 6, dx: 1, dy: 1 },
+    { x: W - 6, y: 6, dx: -1, dy: 1 },
+    { x: 6, y: H - 6, dx: 1, dy: -1 },
+    { x: W - 6, y: H - 6, dx: -1, dy: -1 },
+  ];
+
+  corners.forEach(({ x, y, dx, dy }) => {
+    dc(doc, C.brandGold);
+    // Main L-shape
+    doc.setLineWidth(1.2);
+    doc.line(x, y, x + dx * cornerSize, y);
+    doc.line(x, y, x, y + dy * cornerSize);
+
+    // Inner decorative lines
+    doc.setLineWidth(0.4);
+    doc.line(x + dx * 4, y + dy * 4, x + dx * (cornerSize - 5), y + dy * 4);
+    doc.line(x + dx * 4, y + dy * 4, x + dx * 4, y + dy * (cornerSize - 5));
+
+    // Corner diamond
     fc(doc, C.brandGold);
-    doc.circle(x + dx * 3.5, y + dy * 3.5, 1, "F");
+    const cx = x + dx * 3;
+    const cy = y + dy * 3;
+    doc.triangle(cx, cy - 2, cx + 2, cy, cx, cy + 2, "F");
+    doc.triangle(cx, cy - 2, cx - 2, cy, cx, cy + 2, "F");
+
+    // Dots along the L
+    for (let i = 1; i <= 3; i++) {
+      doc.circle(x + dx * (8 + i * 5), y + dy * 2, 0.6, "F");
+      doc.circle(x + dx * 2, y + dy * (8 + i * 5), 0.6, "F");
+    }
+
+    // Curl elements
+    doc.setLineWidth(0.5);
+    const curlX = x + dx * cornerSize;
+    const curlY = y + dy * 2;
+    doc.circle(curlX, curlY, 1.5, "S");
+
+    const curlX2 = x + dx * 2;
+    const curlY2 = y + dy * cornerSize;
+    doc.circle(curlX2, curlY2, 1.5, "S");
   });
 
-  // Edge center dots
+  // Edge center ornaments
   fc(doc, C.brandGold);
-  doc.circle(W / 2, 7, 1.2, "F");
-  doc.circle(W / 2, H - 7, 1.2, "F");
-  doc.circle(7, H / 2, 1.2, "F");
-  doc.circle(W - 7, H / 2, 1.2, "F");
+  // Top center
+  drawEdgeOrnament(doc, W / 2, 6, 0);
+  // Bottom center
+  drawEdgeOrnament(doc, W / 2, H - 6, Math.PI);
+  // Left center
+  drawEdgeOrnament(doc, 6, H / 2, Math.PI / 2);
+  // Right center
+  drawEdgeOrnament(doc, W - 6, H / 2, -Math.PI / 2);
+}
+
+function drawEdgeOrnament(doc: jsPDF, x: number, y: number, _angle: number) {
+  fc(doc, C.brandGold);
+  // Diamond shape
+  const s = 2.5;
+  doc.triangle(x, y - s, x + s, y, x, y + s, "F");
+  doc.triangle(x, y - s, x - s, y, x, y + s, "F");
+  // Small flanking dots
+  dc(doc, C.brandGold);
+  doc.circle(x - 5, y, 0.8, "F");
+  doc.circle(x + 5, y, 0.8, "F");
 }
 
 function drawDivider(doc: jsPDF, cx: number, y: number, hw: number) {
   dc(doc, C.brandGold);
   doc.setLineWidth(0.3);
-  doc.line(cx - hw, y, cx - 3, y);
-  doc.line(cx + 3, y, cx + hw, y);
+  doc.line(cx - hw, y, cx - 4, y);
+  doc.line(cx + 4, y, cx + hw, y);
+  // Center diamond
   fc(doc, C.brandGold);
-  const s = 1.5;
+  const s = 1.8;
   doc.triangle(cx, y - s, cx + s, y, cx, y + s, "F");
   doc.triangle(cx, y - s, cx - s, y, cx, y + s, "F");
+  // Small dots
+  doc.circle(cx - hw + 2, y, 0.5, "F");
+  doc.circle(cx + hw - 2, y, 0.5, "F");
 }
 
 function drawSeal(doc: jsPDF, x: number, y: number, r: number) {
+  // Outer serrated ring
   dc(doc, C.brandGold);
-  // Serrated teeth
-  for (let i = 0; i < 28; i++) {
-    const a = (i / 28) * Math.PI * 2;
-    doc.setLineWidth(0.35);
+  for (let i = 0; i < 36; i++) {
+    const a = (i / 36) * Math.PI * 2;
+    doc.setLineWidth(0.4);
     doc.line(
       x + Math.cos(a) * (r - 1), y + Math.sin(a) * (r - 1),
-      x + Math.cos(a) * (r + 1.2), y + Math.sin(a) * (r + 1.2)
+      x + Math.cos(a) * (r + 2), y + Math.sin(a) * (r + 2)
     );
   }
-  doc.setLineWidth(0.7);
-  doc.circle(x, y, r, "S");
-  doc.setLineWidth(0.3);
-  doc.circle(x, y, r - 2.5, "S");
 
+  // Outer circle
+  doc.setLineWidth(1.0);
+  dc(doc, C.brandGold);
+  doc.circle(x, y, r, "S");
+
+  // Inner rings
+  doc.setLineWidth(0.5);
+  doc.circle(x, y, r - 2, "S");
+
+  // Filled inner circle
   fc(doc, C.bgDark);
   doc.circle(x, y, r - 3.5, "F");
   dc(doc, C.brandGold);
+  doc.setLineWidth(0.4);
   doc.circle(x, y, r - 3.5, "S");
+  doc.circle(x, y, r - 5, "S");
 
+  // Text inside seal
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.setFontSize(5.5);
+  doc.setFontSize(7);
   doc.text("CURSO", x, y - 3, { align: "center" });
-  doc.text("LIVRE", x, y + 1.5, { align: "center" });
-  doc.setFontSize(3.5);
-  doc.text("CERTIFICADO", x, y + 5, { align: "center" });
+  doc.text("LIVRE", x, y + 2, { align: "center" });
+  doc.setFontSize(4.5);
+  doc.text("CERTIFICADO", x, y + 6, { align: "center" });
 }
 
 function drawBgPattern(doc: jsPDF, W: number, H: number) {
-  doc.setDrawColor(22, 27, 42);
-  doc.setLineWidth(0.08);
+  doc.setDrawColor(18, 22, 38);
+  doc.setLineWidth(0.06);
   for (let i = -H; i < W + H; i += 14) {
     doc.line(i, 0, i + H, H);
   }
 }
 
-// Strip any non-latin1 characters (emojis, etc.) that jsPDF can't render
 function safe(text: string): string {
   // eslint-disable-next-line no-control-regex
   return text.replace(/[^\x00-\xFF]/g, "").trim();
@@ -182,81 +242,88 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawBorder(doc, W, H);
+  drawOrnamentalBorder(doc, W, H);
 
-  // Logo — large
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 20, 10, 40, 40);
+  // Logo
+  doc.addImage(logoDataUrl, "PNG", W / 2 - 22, 14, 44, 44);
+
+  // Seal - positioned to the right of logo
+  drawSeal(doc, W / 2 + 50, 36, 18);
 
   // Title
-  doc.setFontSize(32);
+  doc.setFontSize(34);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("CERTIFICADO DE CONCLUSAO", W / 2, 60, { align: "center" });
+  doc.text("CERTIFICADO DE CONCLUSAO", W / 2, 68, { align: "center" });
 
   // Subtitle
+  doc.setFontSize(15);
+  doc.setFont("helvetica", "italic");
+  tc(doc, C.cream);
+  doc.text("Curso Livre de Educacao Financeira Familiar", W / 2, 76, { align: "center" });
+
+  drawDivider(doc, W / 2, 81, 85);
+
+  // "Certificamos que"
   doc.setFontSize(14);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text("Curso Livre de Educacao Financeira Familiar", W / 2, 69, { align: "center" });
+  doc.text("Certificamos que", W / 2, 89, { align: "center" });
 
-  drawDivider(doc, W / 2, 74, 75);
-
-  // "Certificamos que"
-  doc.setFontSize(15);
-  doc.setFont("helvetica", "normal");
-  tc(doc, C.cream);
-  doc.text("Certificamos que", W / 2, 83, { align: "center" });
-
-  // Student name — large
-  doc.setFontSize(30);
+  // Student name
+  doc.setFontSize(28);
   doc.setFont("helvetica", "bolditalic");
   tc(doc, C.white);
-  doc.text(safe(data.userName.toUpperCase()), W / 2, 96, { align: "center" });
+  doc.text(safe(data.userName.toUpperCase()), W / 2, 101, { align: "center" });
 
-  drawDivider(doc, W / 2, 100, 80);
+  // Underline below name
+  dc(doc, C.brandGold);
+  doc.setLineWidth(0.4);
+  const nameWidth = doc.getTextWidth(safe(data.userName.toUpperCase()));
+  doc.line(W / 2 - nameWidth / 2, 103, W / 2 + nameWidth / 2, 103);
 
   // CPF
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 107, { align: "center" });
+  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 110, { align: "center" });
 
   // Body text
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   tc(doc, C.cream);
   const body = safe(
     `concluiu com exito o Curso Livre de Educacao Financeira Familiar oferecido pelo ${COMPANY} (CNPJ: ${CNPJ}), com carga horaria total de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicacao aos estudos.`
   );
-  const bLines = doc.splitTextToSize(body, 220);
-  doc.text(bLines, W / 2, 116, { align: "center" });
+  const bLines = doc.splitTextToSize(body, 210);
+  doc.text(bLines, W / 2, 118, { align: "center" });
 
   // Curso livre notice
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   tc(doc, C.muted);
   doc.text(
     safe("Este certificado refere-se a um Curso Livre conforme Lei n. 9.394/96, Art. 42."),
-    W / 2, 136, { align: "center" }
+    W / 2, 134, { align: "center" }
   );
 
   // Date
   doc.setFontSize(11);
   tc(doc, C.cream);
-  doc.text(`Data de Conclusao: ${data.completionDate}`, W / 2, 144, { align: "center" });
+  doc.text(`Data de Conclusao: ${data.completionDate}`, W / 2, 141, { align: "center" });
 
-  drawDivider(doc, W / 2, 148, 65);
+  drawDivider(doc, W / 2, 146, 70);
 
   // Signatures
-  const sigY = 170;
+  const sigY = 168;
   // Left — student
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   tc(doc, C.white);
   doc.text(safe(data.userName), 80, sigY - 5, { align: "center" });
   dc(doc, C.brandGold);
-  doc.setLineWidth(0.3);
-  doc.line(50, sigY, 110, sigY);
+  doc.setLineWidth(0.4);
+  doc.line(45, sigY, 115, sigY);
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
@@ -268,55 +335,55 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   tc(doc, C.white);
   doc.text(COMPANY, W - 80, sigY - 5, { align: "center" });
   dc(doc, C.brandGold);
-  doc.line(W - 110, sigY, W - 50, sigY);
+  doc.line(W - 115, sigY, W - 45, sigY);
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
   doc.text("Coordenacao", W - 80, sigY + 5, { align: "center" });
 
-  // Seal — centered
-  drawSeal(doc, W / 2, sigY - 2, 15);
+  // Center seal between signatures
+  drawSeal(doc, W / 2, sigY - 3, 16);
 
-  // QR Code
+  // QR Code bottom right
   if (qrDataUrl) {
-    doc.addImage(qrDataUrl, "PNG", W - 44, H - 42, 24, 24);
+    doc.addImage(qrDataUrl, "PNG", W - 42, H - 40, 24, 24);
     doc.setFontSize(5.5);
     tc(doc, C.muted);
-    doc.text("Validar Certificado", W - 32, H - 16, { align: "center" });
+    doc.text("Validar Certificado", W - 30, H - 14, { align: "center" });
   }
 
-  // Verification code
+  // Verification code bottom left
   doc.setFontSize(6);
   tc(doc, C.muted);
-  doc.text(`Codigo: ${data.verificationCode}`, 38, H - 18, { align: "center" });
+  doc.text(`Codigo: ${data.verificationCode}`, 38, H - 16, { align: "center" });
 
   // ==================== BACK PAGE ====================
   doc.addPage("a4", "landscape");
   fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
-  drawBorder(doc, W, H);
+  drawOrnamentalBorder(doc, W, H);
 
   // Title
-  doc.setFontSize(26);
+  doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("CONTEUDO PROGRAMATICO", W / 2, 22, { align: "center" });
+  doc.text("CONTEUDO PROGRAMATICO", W / 2, 24, { align: "center" });
 
   // Student info
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
-  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 30, { align: "center" });
+  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 32, { align: "center" });
 
-  drawDivider(doc, W / 2, 34, 105);
+  drawDivider(doc, W / 2, 36, 110);
 
-  // ---- MODULES 2x2 ----
+  // ---- MODULES 2x2 grid with boxes ----
   const modLabels: Record<string, string> = {
-    iniciante: "MODULO INICIANTE",
-    organizado: "MODULO ORGANIZADO",
-    investidor: "MODULO INVESTIDOR",
-    independente: "MODULO INDEPENDENTE",
+    iniciante: "Fundamentos Financeiros",
+    organizado: "Planejamento e Orcamento",
+    investidor: "Investimentos Basicos",
+    independente: "Protecao Financeira",
   };
 
   const modTopics: Record<string, string[]> = {
@@ -370,72 +437,102 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
     ],
   };
 
-  const lCol = 20;
-  const rCol = W / 2 + 8;
   const keys = Object.keys(modLabels);
+  const colWidth = 63;
+  const colGap = 5;
+  const totalGridW = colWidth * 4 + colGap * 3;
+  const gridStartX = (W - totalGridW) / 2;
+  const gridStartY = 40;
 
   keys.forEach((key, idx) => {
-    const col = idx % 2 === 0 ? lCol : rCol;
-    const startY = idx < 2 ? 39 : 86;
+    const colX = gridStartX + idx * (colWidth + colGap);
 
-    // Module title
-    doc.setFontSize(11);
+    // Module header box with green background
+    fc(doc, C.brandGreen);
+    doc.roundedRect(colX, gridStartY, colWidth, 8, 1, 1, "F");
+    doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    tc(doc, C.brandGreen);
-    doc.text(modLabels[key], col, startY);
+    tc(doc, C.white);
+    doc.text(modLabels[key], colX + colWidth / 2, gridStartY + 5.5, { align: "center" });
 
-    // Underline
-    dc(doc, C.brandGreen);
+    // Content box
+    dc(doc, C.brandGold);
     doc.setLineWidth(0.3);
-    doc.line(col, startY + 1.5, col + 65, startY + 1.5);
+    doc.roundedRect(colX, gridStartY + 8, colWidth, 48, 1, 1, "S");
 
     // Topics
-    doc.setFontSize(8.5);
+    doc.setFontSize(6.5);
     doc.setFont("helvetica", "normal");
     tc(doc, C.cream);
     (modTopics[key] || []).forEach((topic, i) => {
-      doc.text(`-  ${topic}`, col + 1, startY + 6 + i * 3.8);
+      const num = `${i + 1}.`;
+      doc.setFont("helvetica", "bold");
+      tc(doc, C.brandGold);
+      doc.text(num, colX + 2, gridStartY + 13 + i * 4.5);
+      doc.setFont("helvetica", "normal");
+      tc(doc, C.cream);
+      const truncated = topic.length > 30 ? topic.substring(0, 28) + "..." : topic;
+      doc.text(truncated, colX + 7, gridStartY + 13 + i * 4.5);
     });
   });
 
   // ---- MISSIONS ----
-  const missionsStartY = 132;
-  doc.setFontSize(14);
+  const missionsStartY = 102;
+  doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
   doc.text("MISSOES CONCLUIDAS", W / 2, missionsStartY, { align: "center" });
 
-  drawDivider(doc, W / 2, missionsStartY + 3, 55);
+  drawDivider(doc, W / 2, missionsStartY + 4, 60);
 
   const missions = data.missionsCompleted.map(m => safe(m));
-  const perCol = Math.ceil(missions.length / 3);
-  const mCols = [25, W / 3 + 10, (2 * W) / 3 - 5];
+  const missionCols = 4;
+  const perCol = Math.ceil(missions.length / missionCols);
+  const mColWidth = 60;
+  const mTotalW = mColWidth * missionCols + 8 * (missionCols - 1);
+  const mStartX = (W - mTotalW) / 2;
 
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   tc(doc, C.cream);
   missions.forEach((m, i) => {
     const ci = Math.floor(i / perCol);
     const row = i % perCol;
-    doc.text(`-  ${m}`, mCols[Math.min(ci, 2)], missionsStartY + 8 + row * 3.8);
+    const x = mStartX + ci * (mColWidth + 8);
+    // Bullet
+    fc(doc, C.brandGreen);
+    doc.circle(x + 1, missionsStartY + 9 + row * 4.2 - 0.5, 0.7, "F");
+    // Text
+    tc(doc, C.cream);
+    const truncated = m.length > 30 ? m.substring(0, 28) + "..." : m;
+    doc.text(truncated, x + 4, missionsStartY + 9 + row * 4.2);
   });
 
-  // ---- SOCIAL & FOOTER ----
-  doc.setFontSize(10);
+  // ---- FOOTER ----
+  // QR code bottom right
+  if (qrDataUrl) {
+    doc.addImage(qrDataUrl, "PNG", W - 42, H - 40, 24, 24);
+    doc.setFontSize(5.5);
+    tc(doc, C.muted);
+    doc.text("Validar Certificado", W - 30, H - 14, { align: "center" });
+  }
+
+  // Social media
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("Siga-nos:", W / 2, H - 26, { align: "center" });
+  doc.text("Siga-nos:", W / 2, H - 28, { align: "center" });
 
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   tc(doc, C.white);
-  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 21, { align: "center" });
+  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 23, { align: "center" });
 
   doc.setFontSize(7);
   tc(doc, C.muted);
   doc.text(
     "Este certificado refere-se a um Curso Livre, conforme Lei n. 9.394/96, Art. 42. Nao substitui cursos tecnicos, de graduacao ou pos-graduacao.",
-    W / 2, H - 16, { align: "center" }
+    W / 2, H - 17, { align: "center" }
   );
 
   doc.setFontSize(7);
