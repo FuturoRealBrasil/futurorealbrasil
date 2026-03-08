@@ -376,7 +376,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   keys.forEach((key, idx) => {
     const col = idx % 2 === 0 ? lCol : rCol;
-    const startY = idx < 2 ? 55 : 100;
+    const startY = idx < 2 ? 39 : 86;
 
     // Module title
     doc.setFontSize(11);
