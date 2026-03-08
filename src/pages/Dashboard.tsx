@@ -8,6 +8,7 @@ import { TrendingUp, AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, P
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AppLayout from "@/components/AppLayout";
 import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
@@ -15,6 +16,42 @@ import { toast } from "sonner";
 import { generateTransactionsPDF } from "@/lib/pdfGenerator";
 import logo from "@/assets/logo-transparent.png";
 import HamburgerMenu from "@/components/HamburgerMenu";
+
+// Digital clock component
+function DigitalClock() {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  const monthYear = now.toLocaleString("pt-BR", { month: "long", year: "numeric" });
+
+  return (
+    <div className="text-right">
+      <p className="text-lg md:text-xl font-mono font-bold text-primary-foreground tracking-wider">
+        {hours}:{minutes}<span className="text-primary-foreground/50">:{seconds}</span>
+      </p>
+      <p className="text-[10px] md:text-xs text-primary-foreground/60 capitalize">{monthYear}</p>
+    </div>
+  );
+}
+
+// Health score emoji
+function ScoreEmoji({ score }: { score: number }) {
+  let emoji: string;
+  if (score >= 80) emoji = "😄";
+  else if (score >= 60) emoji = "🙂";
+  else if (score >= 50) emoji = "😐";
+  else if (score >= 30) emoji = "😟";
+  else if (score >= 15) emoji = "😢";
+  else emoji = "😰";
+  return <span className="text-3xl md:text-4xl">{emoji}</span>;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -28,18 +65,13 @@ const Dashboard = () => {
   const { saving: monthlySaving, addSaving, addReserve, removeSaving, removeReserve } = useMonthlySavings(selectedMonth, selectedYear);
   const { transactions, load: loadTransactions, logTransaction } = useSavingsTransactions(selectedMonth, selectedYear);
 
-  const [showSavingInput, setShowSavingInput] = useState(false);
+  // Dialog states
+  const [savingDialog, setSavingDialog] = useState<"add" | "remove" | null>(null);
   const [savingValue, setSavingValue] = useState("");
   const [savingDesc, setSavingDesc] = useState("");
-  const [showReserveInput, setShowReserveInput] = useState(false);
+  const [reserveDialog, setReserveDialog] = useState<"add" | "remove" | null>(null);
   const [reserveValue, setReserveValue] = useState("");
   const [reserveDesc, setReserveDesc] = useState("");
-  const [showRemoveSaving, setShowRemoveSaving] = useState(false);
-  const [removeSavingValue, setRemoveSavingValue] = useState("");
-  const [removeSavingDesc, setRemoveSavingDesc] = useState("");
-  const [showRemoveReserve, setShowRemoveReserve] = useState(false);
-  const [removeReserveValue, setRemoveReserveValue] = useState("");
-  const [removeReserveDesc, setRemoveReserveDesc] = useState("");
   const [showUpdateRenda, setShowUpdateRenda] = useState(false);
   const [newRenda, setNewRenda] = useState("");
   const [showUpdateGastos, setShowUpdateGastos] = useState(false);
@@ -68,42 +100,36 @@ const Dashboard = () => {
     else setSelectedMonth(selectedMonth + 1);
   }
 
-  async function handleAddSaving() {
+  async function handleSavingConfirm() {
     const v = parseFloat(savingValue.replace(",", "."));
     if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
-    await addSaving(v);
-    await logTransaction("guardado_add", v, savingDesc || "Valor guardado", selectedMonth, selectedYear);
-    setSavingValue(""); setSavingDesc(""); setShowSavingInput(false);
-    toast.success("Valor guardado!");
+    if (savingDialog === "add") {
+      await addSaving(v);
+      await logTransaction("guardado_add", v, savingDesc || "Valor guardado", selectedMonth, selectedYear);
+      toast.success("Valor guardado!");
+    } else {
+      await removeSaving(v);
+      await logTransaction("guardado_remove", v, savingDesc || "Valor retirado", selectedMonth, selectedYear);
+      toast.success("Valor retirado!");
+    }
+    setSavingValue(""); setSavingDesc(""); setSavingDialog(null);
   }
 
-  async function handleAddReserve() {
+  async function handleReserveConfirm() {
     const v = parseFloat(reserveValue.replace(",", "."));
     if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
-    await addReserve(v);
-    await saveData({ temReserva: true, valorReserva: data.valorReserva + v });
-    await logTransaction("reserva_add", v, reserveDesc || "Reserva adicionada", selectedMonth, selectedYear);
-    setReserveValue(""); setReserveDesc(""); setShowReserveInput(false);
-    toast.success("Reserva atualizada!");
-  }
-
-  async function handleRemoveSaving() {
-    const v = parseFloat(removeSavingValue.replace(",", "."));
-    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
-    await removeSaving(v);
-    await logTransaction("guardado_remove", v, removeSavingDesc || "Valor retirado", selectedMonth, selectedYear);
-    setRemoveSavingValue(""); setRemoveSavingDesc(""); setShowRemoveSaving(false);
-    toast.success("Valor retirado!");
-  }
-
-  async function handleRemoveReserve() {
-    const v = parseFloat(removeReserveValue.replace(",", "."));
-    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
-    await removeReserve(v);
-    await saveData({ valorReserva: Math.max(0, data.valorReserva - v) });
-    await logTransaction("reserva_remove", v, removeReserveDesc || "Reserva retirada", selectedMonth, selectedYear);
-    setRemoveReserveValue(""); setRemoveReserveDesc(""); setShowRemoveReserve(false);
-    toast.success("Reserva reduzida!");
+    if (reserveDialog === "add") {
+      await addReserve(v);
+      await saveData({ temReserva: true, valorReserva: data.valorReserva + v });
+      await logTransaction("reserva_add", v, reserveDesc || "Reserva adicionada", selectedMonth, selectedYear);
+      toast.success("Reserva atualizada!");
+    } else {
+      await removeReserve(v);
+      await saveData({ valorReserva: Math.max(0, data.valorReserva - v) });
+      await logTransaction("reserva_remove", v, reserveDesc || "Reserva retirada", selectedMonth, selectedYear);
+      toast.success("Reserva reduzida!");
+    }
+    setReserveValue(""); setReserveDesc(""); setReserveDialog(null);
   }
 
   async function handleDownloadPDF() {
@@ -128,7 +154,6 @@ const Dashboard = () => {
     toast.success("Gastos atualizados!");
   }
 
-  // Savings projection based on reserve additions
   const reserveMonthly = monthlySaving?.valor_reserva || 0;
   const savingsMonthly = monthlySaving?.valor_guardado || 0;
   const totalMonthlyContribution = reserveMonthly + savingsMonthly;
@@ -170,7 +195,10 @@ const Dashboard = () => {
                 <p className="text-xs md:text-sm text-primary-foreground/60 truncate">Gestão Financeira</p>
               </div>
             </div>
-            <HamburgerMenu />
+            <div className="flex items-center gap-3">
+              <DigitalClock />
+              <HamburgerMenu />
+            </div>
           </div>
         </div>
 
@@ -192,7 +220,10 @@ const Dashboard = () => {
           {/* Score */}
           <div className="bg-card rounded-2xl p-6 border shadow-sm mb-6 md:mb-0 text-center animate-fade-up">
             <p className="text-sm font-semibold text-muted-foreground mb-2">Saúde Financeira</p>
-            <p className={`text-5xl md:text-6xl font-black ${scoreColor}`}>{score}</p>
+            <div className="flex items-center justify-center gap-3">
+              <ScoreEmoji score={score} />
+              <p className={`text-5xl md:text-6xl font-black ${scoreColor}`}>{score}</p>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">de 100 pontos</p>
             <Progress value={score} className="mt-4 h-3 rounded-full" />
             <div className={`h-3 rounded-full ${scoreBg} -mt-3`} style={{ width: `${score}%` }} />
@@ -274,34 +305,14 @@ const Dashboard = () => {
 
         {/* Update Renda / Gastos buttons */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          {showUpdateRenda ? (
-            <div className="bg-card rounded-xl p-3 border shadow-sm space-y-2">
-              <Input placeholder="Nova renda" value={newRenda} onChange={(e) => setNewRenda(e.target.value)} inputMode="decimal" className="h-9 text-sm" />
-              <div className="flex gap-1">
-                <Button size="sm" onClick={handleUpdateRenda} className="flex-1 h-8 text-xs">Salvar</Button>
-                <Button size="sm" variant="outline" onClick={() => setShowUpdateRenda(false)} className="h-8 text-xs">X</Button>
-              </div>
-            </div>
-          ) : (
-            <button onClick={() => { setShowUpdateRenda(true); setNewRenda(String(data.renda)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
-              <RefreshCw className="w-4 h-4 text-brand-green" />
-              <span className="text-xs font-semibold text-foreground">Atualizar Renda</span>
-            </button>
-          )}
-          {showUpdateGastos ? (
-            <div className="bg-card rounded-xl p-3 border shadow-sm space-y-2">
-              <Input placeholder="Novos gastos" value={newGastos} onChange={(e) => setNewGastos(e.target.value)} inputMode="decimal" className="h-9 text-sm" />
-              <div className="flex gap-1">
-                <Button size="sm" onClick={handleUpdateGastos} className="flex-1 h-8 text-xs">Salvar</Button>
-                <Button size="sm" variant="outline" onClick={() => setShowUpdateGastos(false)} className="h-8 text-xs">X</Button>
-              </div>
-            </div>
-          ) : (
-            <button onClick={() => { setShowUpdateGastos(true); setNewGastos(String(data.gastos)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
-              <RefreshCw className="w-4 h-4 text-warning" />
-              <span className="text-xs font-semibold text-foreground">Atualizar Gastos</span>
-            </button>
-          )}
+          <button onClick={() => { setShowUpdateRenda(true); setNewRenda(String(data.renda)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
+            <RefreshCw className="w-4 h-4 text-brand-green" />
+            <span className="text-xs font-semibold text-foreground">Atualizar Renda</span>
+          </button>
+          <button onClick={() => { setShowUpdateGastos(true); setNewGastos(String(data.gastos)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
+            <RefreshCw className="w-4 h-4 text-warning" />
+            <span className="text-xs font-semibold text-foreground">Atualizar Gastos</span>
+          </button>
         </div>
 
         {/* Monthly Savings / Reserve */}
@@ -314,34 +325,14 @@ const Dashboard = () => {
             <p className="text-lg font-bold text-brand-green">
               R$ {(monthlySaving?.valor_guardado || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            {showSavingInput ? (
-              <div className="mt-2 space-y-2">
-                <Input placeholder="Valor (R$)" value={savingValue} onChange={(e) => setSavingValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
-                <Input placeholder="Descrição (opcional)" value={savingDesc} onChange={(e) => setSavingDesc(e.target.value)} className="h-8 text-sm" />
-                <div className="flex gap-1">
-                  <Button size="sm" onClick={handleAddSaving} className="flex-1 h-7 text-xs">Guardar</Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowSavingInput(false)} className="h-7 text-xs">X</Button>
-                </div>
-              </div>
-            ) : showRemoveSaving ? (
-              <div className="mt-2 space-y-2">
-                <Input placeholder="Valor (R$)" value={removeSavingValue} onChange={(e) => setRemoveSavingValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
-                <Input placeholder="Motivo da retirada" value={removeSavingDesc} onChange={(e) => setRemoveSavingDesc(e.target.value)} className="h-8 text-sm" />
-                <div className="flex gap-1">
-                  <Button size="sm" variant="destructive" onClick={handleRemoveSaving} className="flex-1 h-7 text-xs">Retirar</Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowRemoveSaving(false)} className="h-7 text-xs">X</Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => setShowSavingInput(true)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
-                  <DollarSign className="w-3 h-3" /> Adicionar
-                </button>
-                <button onClick={() => setShowRemoveSaving(true)} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
-                  <Minus className="w-3 h-3" /> Retirar
-                </button>
-              </div>
-            )}
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => { setSavingDialog("add"); setSavingValue(""); setSavingDesc(""); }} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                <DollarSign className="w-3 h-3" /> Adicionar
+              </button>
+              <button onClick={() => { setSavingDialog("remove"); setSavingValue(""); setSavingDesc(""); }} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
+                <Minus className="w-3 h-3" /> Retirar
+              </button>
+            </div>
           </div>
 
           <div className="bg-card rounded-xl p-4 border shadow-sm">
@@ -352,34 +343,14 @@ const Dashboard = () => {
             <p className="text-lg font-bold text-brand-gold">
               R$ {(monthlySaving?.valor_reserva || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            {showReserveInput ? (
-              <div className="mt-2 space-y-2">
-                <Input placeholder="Valor (R$)" value={reserveValue} onChange={(e) => setReserveValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
-                <Input placeholder="Descrição (opcional)" value={reserveDesc} onChange={(e) => setReserveDesc(e.target.value)} className="h-8 text-sm" />
-                <div className="flex gap-1">
-                  <Button size="sm" onClick={handleAddReserve} className="flex-1 h-7 text-xs">Adicionar</Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowReserveInput(false)} className="h-7 text-xs">X</Button>
-                </div>
-              </div>
-            ) : showRemoveReserve ? (
-              <div className="mt-2 space-y-2">
-                <Input placeholder="Valor (R$)" value={removeReserveValue} onChange={(e) => setRemoveReserveValue(e.target.value)} inputMode="decimal" className="h-8 text-sm" />
-                <Input placeholder="Motivo da retirada" value={removeReserveDesc} onChange={(e) => setRemoveReserveDesc(e.target.value)} className="h-8 text-sm" />
-                <div className="flex gap-1">
-                  <Button size="sm" variant="destructive" onClick={handleRemoveReserve} className="flex-1 h-7 text-xs">Retirar</Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowRemoveReserve(false)} className="h-7 text-xs">X</Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => setShowReserveInput(true)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
-                  <DollarSign className="w-3 h-3" /> Adicionar
-                </button>
-                <button onClick={() => setShowRemoveReserve(true)} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
-                  <Minus className="w-3 h-3" /> Retirar
-                </button>
-              </div>
-            )}
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => { setReserveDialog("add"); setReserveValue(""); setReserveDesc(""); }} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                <DollarSign className="w-3 h-3" /> Adicionar
+              </button>
+              <button onClick={() => { setReserveDialog("remove"); setReserveValue(""); setReserveDesc(""); }} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
+                <Minus className="w-3 h-3" /> Retirar
+              </button>
+            </div>
           </div>
         </div>
 
@@ -389,7 +360,7 @@ const Dashboard = () => {
           <span className="text-xs font-semibold text-foreground">Baixar Relatório PDF de {monthName}</span>
         </button>
 
-        {/* Weekly Expenses & Caixinhas - side by side on desktop */}
+        {/* Weekly Expenses & Caixinhas */}
         <div className="md:grid md:grid-cols-2 md:gap-6">
           <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
           <div className="mt-6 md:mt-0">
@@ -412,6 +383,110 @@ const Dashboard = () => {
         )}
       </div>
       </div>
+
+      {/* Saving Dialog */}
+      <Dialog open={savingDialog !== null} onOpenChange={() => setSavingDialog(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold">Movimentar Guardado</DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setSavingDialog("add")}
+              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${savingDialog === "add" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              Adicionar
+            </button>
+            <button
+              onClick={() => setSavingDialog("remove")}
+              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${savingDialog === "remove" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              Retirar
+            </button>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground">Valor</label>
+              <Input placeholder="R$ 0,00" value={savingValue} onChange={(e) => setSavingValue(e.target.value)} inputMode="decimal" className="mt-1" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setSavingDialog(null)} className="flex-1">Cancelar</Button>
+              <Button onClick={handleSavingConfirm} className="flex-1">Confirmar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reserve Dialog */}
+      <Dialog open={reserveDialog !== null} onOpenChange={() => setReserveDialog(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold">Movimentar Reserva</DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setReserveDialog("add")}
+              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${reserveDialog === "add" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              Adicionar
+            </button>
+            <button
+              onClick={() => setReserveDialog("remove")}
+              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${reserveDialog === "remove" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              Retirar
+            </button>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground">Valor</label>
+              <Input placeholder="R$ 0,00" value={reserveValue} onChange={(e) => setReserveValue(e.target.value)} inputMode="decimal" className="mt-1" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setReserveDialog(null)} className="flex-1">Cancelar</Button>
+              <Button onClick={handleReserveConfirm} className="flex-1">Confirmar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Renda Dialog */}
+      <Dialog open={showUpdateRenda} onOpenChange={setShowUpdateRenda}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold">Atualizar Renda</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground">Nova renda mensal</label>
+              <Input placeholder="R$ 0,00" value={newRenda} onChange={(e) => setNewRenda(e.target.value)} inputMode="decimal" className="mt-1" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowUpdateRenda(false)} className="flex-1">Cancelar</Button>
+              <Button onClick={handleUpdateRenda} className="flex-1">Confirmar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Gastos Dialog */}
+      <Dialog open={showUpdateGastos} onOpenChange={setShowUpdateGastos}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold">Atualizar Gastos</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground">Novos gastos fixos</label>
+              <Input placeholder="R$ 0,00" value={newGastos} onChange={(e) => setNewGastos(e.target.value)} inputMode="decimal" className="mt-1" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowUpdateGastos(false)} className="flex-1">Cancelar</Button>
+              <Button onClick={handleUpdateGastos} className="flex-1">Confirmar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
