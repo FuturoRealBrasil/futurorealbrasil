@@ -39,6 +39,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2">
               <Link to="/termos" className="text-xs font-semibold text-brand-gold hover:underline">Termos de Uso</Link>
               <Link to="/privacidade" className="text-xs font-semibold text-brand-gold hover:underline">Política de Privacidade</Link>
+              <Link to="/verificar-certificado" className="text-xs font-semibold text-brand-gold hover:underline">Verificar Certificado</Link>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-1.5">
