@@ -712,9 +712,11 @@ const Educacao = () => {
         <div className="bg-card rounded-2xl p-4 border shadow-sm mb-6 animate-fade-up">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-bold text-foreground">Progresso Geral</span>
-            <span className="text-xs text-muted-foreground">{completedCount}/{totalTopics} tópicos</span>
+            <span className="text-xs text-muted-foreground">
+              {canGetCertificate ? `${totalTopics}/${totalTopics} tópicos` : `${completedCount}/${totalTopics} tópicos`}
+            </span>
           </div>
-          <Progress value={overallProgress} className="h-3 mb-3" />
+          <Progress value={canGetCertificate ? 0 : overallProgress} className="h-3 mb-3" />
 
           {/* Level progress steps */}
           <div className="flex items-center gap-1 mt-3">
@@ -722,17 +724,19 @@ const Educacao = () => {
               const completed = isModuleCompleted(level);
               const progress = getLevelProgress(level);
               const labels = ["🌱", "📋", "📈", "🏆"];
+              const resetStyle = canGetCertificate;
               return (
                 <div key={level} className="flex-1 flex flex-col items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm mb-1 border-2 transition-all ${
+                    resetStyle ? "bg-muted border-muted-foreground/20 text-muted-foreground" :
                     completed ? "bg-safe border-safe text-white" : progress > 0 ? "bg-primary/10 border-primary text-primary" : "bg-muted border-muted-foreground/20 text-muted-foreground"
                   }`}>
-                    {completed ? "✓" : labels[i]}
+                    {!resetStyle && completed ? "✓" : labels[i]}
                   </div>
-                  <span className={`text-[10px] font-medium text-center leading-tight ${completed ? "text-safe" : "text-muted-foreground"}`}>
+                  <span className={`text-[10px] font-medium text-center leading-tight ${!resetStyle && completed ? "text-safe" : "text-muted-foreground"}`}>
                     {level.charAt(0).toUpperCase() + level.slice(1)}
                   </span>
-                  {progress > 0 && !completed && (
+                  {!resetStyle && progress > 0 && !completed && (
                     <span className="text-[9px] text-primary font-bold">{Math.round(progress)}%</span>
                   )}
                 </div>
