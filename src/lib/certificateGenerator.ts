@@ -222,81 +222,80 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.addPage("a4", "landscape");
   doc.addImage(backDataUrl, "PNG", 0, 0, W, H);
 
-  // Overlay QR Code on back page
+  // Replace the template's existing QR code with our dynamic one (same position, no white box)
   if (qrDataUrl) {
-    doc.setFillColor(255, 255, 255);
-    doc.rect(W - 70, 55, 42, 42, "F");
     doc.addImage(qrDataUrl, "PNG", W - 68, 57, 38, 38);
   }
 
-  // Verification URL under QR
+  // Verification URL under the QR code area
   doc.setFontSize(5.5);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 80, 40);
   doc.text(`${PUBLISHED_URL}/verificar-certificado`, W - 49, 100, { align: "center" });
 
-  // --- Course content overlay on back page ---
-  // Clear the generic text areas and write actual course modules
-  const contentStartY = 55;
-  const leftCol = 30;
-  const rightCol = 155;
-  const colWidth = 110;
+  // --- Course content: overlay modules list in the left content area ---
+  // Position within the template's "Conteúdo do Curso" section area
+  // The template has 4 sections (Conteúdo, Benefícios, Continuação, Conecte-se)
+  // We'll add the actual course topics inside the "Conteúdo do Curso" section
 
-  // Draw a semi-transparent overlay for the content area
-  // Use the parchment background color
-  doc.setFillColor(222, 213, 185);
-  doc.rect(18, contentStartY - 5, 195, 120, "F");
+  // Clear the generic description text under "Conteúdo do Curso" and replace with actual modules
+  const parchment = { r: 215, g: 205, b: 175 };
+  
+  // Clear area for course content (below the section headers, left side)
+  doc.setFillColor(parchment.r, parchment.g, parchment.b);
+  doc.rect(28, 62, 185, 108, "F");
 
-  // Draw border for content area
+  // Draw border
   doc.setDrawColor(139, 119, 42);
-  doc.setLineWidth(0.5);
-  doc.rect(18, contentStartY - 5, 195, 120, "S");
+  doc.setLineWidth(0.4);
+  doc.rect(28, 62, 185, 108, "S");
 
   // Title
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 80, 40);
-  doc.text("Conteudo Programatico do Curso", W / 2 - 35, contentStartY + 2, { align: "center" });
+  doc.text("Conteudo Programatico do Curso", 120, 69, { align: "center" });
 
   doc.setDrawColor(139, 119, 42);
   doc.setLineWidth(0.3);
-  doc.line(40, contentStartY + 5, W - 85, contentStartY + 5);
+  doc.line(45, 71, 195, 71);
 
-  let y = contentStartY + 12;
   const modules = Object.entries(COURSE_MODULES);
+  const leftCol = 33;
+  const rightCol = 122;
+  const colWidth = 85;
 
-  // Layout: 2 modules per row, 2 rows
+  // Row 1: Modules 1 & 2, Row 2: Modules 3 & 4
   for (let row = 0; row < 2; row++) {
     for (let col = 0; col < 2; col++) {
       const idx = row * 2 + col;
       if (idx >= modules.length) break;
       const [moduleName, topics] = modules[idx];
       const x = col === 0 ? leftCol : rightCol;
-      const currentY = y + row * 55;
+      const baseY = 78 + row * 50;
 
       // Module title
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 80, 40);
-      doc.text(moduleName, x, currentY);
+      doc.text(moduleName, x, baseY);
 
-      // Module underline
+      // Underline
       doc.setDrawColor(180, 160, 80);
-      doc.setLineWidth(0.2);
-      doc.line(x, currentY + 1, x + colWidth, currentY + 1);
+      doc.setLineWidth(0.15);
+      doc.line(x, baseY + 1, x + colWidth, baseY + 1);
 
       // Topics
-      doc.setFontSize(6.5);
+      doc.setFontSize(5.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(50, 40, 30);
       for (let t = 0; t < topics.length; t++) {
-        const topicY = currentY + 5 + t * 4.5;
-        doc.text(`• ${topics[t]}`, x + 2, topicY);
+        doc.text(`• ${topics[t]}`, x + 1, baseY + 5 + t * 4.2);
       }
     }
   }
 
-  // Verification code at bottom of back page
+  // Verification code at bottom
   doc.setFontSize(6);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 90, 75);
