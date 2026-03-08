@@ -438,6 +438,92 @@ const Educacao = () => {
   // Current active level index (first non-completed level)
   const currentLevelIndex = levels.findIndex(l => !isModuleCompleted(l));
   const allModulesCompleted = levels.every(l => isModuleCompleted(l));
+  const allMissionsCompleted = allMissionIds.every(id => financialData.completedMissions.includes(id));
+  const canGetCertificate = allModulesCompleted && allMissionsCompleted;
+
+  // Check for existing certificate
+  useEffect(() => {
+    if (user && canGetCertificate) {
+      supabase.from("certificates").select("verification_code").eq("user_id", user.id).limit(1).then(({ data }) => {
+        if (data && data.length > 0) setExistingCert(data[0].verification_code);
+      });
+    }
+  }, [user, canGetCertificate]);
+
+  // Calculate total study time (rough estimate: count completed edu topics * average read time or use stored data)
+  function getTotalStudySeconds(): number {
+    // Estimate ~3 minutes per topic completed (3 pages each)
+    const eduCompleted = financialData.completedMissions.filter(m => m.startsWith("edu_")).length;
+    return eduCompleted * 180; // 3 min per topic as base estimate
+  }
+
+  async function handleGenerateCertificate() {
+    if (!user || !certCpf.trim()) return;
+    setCertLoading(true);
+
+    const verificationCode = `FRB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const completionDate = new Date();
+    const studySeconds = getTotalStudySeconds();
+
+    // Get user display name
+    const { data: profile } = await supabase.from("profiles").select("display_name").eq("user_id", user.id).single();
+    const userName = profile?.display_name || user.email || "Aluno";
+
+    // Save CPF to profile
+    await supabase.from("profiles").update({ cpf: certCpf.trim() }).eq("user_id", user.id);
+
+    // Get completed missions names
+    const completedMissionNames = allMissionIds
+      .filter(id => financialData.completedMissions.includes(id))
+      .map(id => allMissionLabels[id] || id);
+
+    // Save certificate to DB
+    await supabase.from("certificates").insert({
+      user_id: user.id,
+      user_name: userName,
+      user_cpf: certCpf.trim(),
+      verification_code: verificationCode,
+      completion_date: completionDate.toISOString(),
+      study_hours_total: studySeconds,
+      modules_completed: [...levels],
+      missions_completed: completedMissionNames,
+    });
+
+    // Generate PDF
+    await generateCertificatePDF({
+      userName,
+      userCpf: certCpf.trim(),
+      completionDate: completionDate.toLocaleDateString("pt-BR"),
+      verificationCode,
+      studyHoursTotal: studySeconds,
+      modulesCompleted: [...levels],
+      missionsCompleted: completedMissionNames,
+    }, window.location.origin);
+
+    setExistingCert(verificationCode);
+    setCertLoading(false);
+    setShowCertDialog(false);
+    confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+  }
+
+  async function handleRedownloadCertificate() {
+    if (!existingCert || !user) return;
+    setCertLoading(true);
+
+    const { data: cert } = await supabase.from("certificates").select("*").eq("verification_code", existingCert).single();
+    if (cert) {
+      await generateCertificatePDF({
+        userName: cert.user_name,
+        userCpf: cert.user_cpf,
+        completionDate: new Date(cert.completion_date).toLocaleDateString("pt-BR"),
+        verificationCode: cert.verification_code,
+        studyHoursTotal: Number(cert.study_hours_total),
+        modulesCompleted: cert.modules_completed as string[],
+        missionsCompleted: cert.missions_completed as string[],
+      }, window.location.origin);
+    }
+    setCertLoading(false);
+  }
 
   async function markTopicComplete(articleId: string) {
     const key = "edu_" + articleId;
