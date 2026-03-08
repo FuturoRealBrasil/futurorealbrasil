@@ -18,6 +18,7 @@ import Termos from "./pages/Termos";
 import Privacidade from "./pages/Privacidade";
 import ResetPassword from "./pages/ResetPassword";
 import ComoFunciona from "./pages/ComoFunciona";
+import VerificarCertificado from "./pages/VerificarCertificado";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const AppRoutes = () => (
     <Route path="/como-funciona" element={<ComoFunciona />} />
     <Route path="/termos" element={<Termos />} />
     <Route path="/privacidade" element={<Privacidade />} />
+    <Route path="/verificar-certificado" element={<VerificarCertificado />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Lock, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Clock } from "lucide-react";
+import { BookOpen, Lock, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Clock, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useFinancialData } from "@/hooks/useFinancialData";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AppLayout from "@/components/AppLayout";
 import confetti from "canvas-confetti";
+import { generateCertificatePDF } from "@/lib/certificateGenerator";
 
 const levelInfo = {
   iniciante: { label: "🌱 Iniciante", color: "bg-brand-blue/10 text-brand-blue border-brand-blue/20", completedColor: "bg-safe/10 text-safe border-safe/20", desc: "Conceitos básicos para quem está começando a organizar as finanças." },
@@ -358,8 +362,40 @@ const articles: Article[] = [
 
 const levels = ["iniciante", "organizado", "investidor", "independente"] as const;
 
+// All mission IDs from Missoes page
+const allMissionIds = [
+  "anotar-gastos", "guardar-valor", "listar-dividas", "cortar-gasto", "meta-semana",
+  "comparar-precos", "cozinhar-casa", "reserva-50", "renegociar-divida", "planejar-compras", "sem-delivery",
+  "abrir-corretora", "primeiro-investimento", "tesouro-direto", "reserva-3meses", "diversificar",
+  "reserva-6meses", "renda-extra", "planejamento-anual", "ensinar-alguem", "zero-dividas",
+];
+
+const allMissionLabels: Record<string, string> = {
+  "anotar-gastos": "Anote todos os gastos de hoje",
+  "guardar-valor": "Guarde qualquer valor",
+  "listar-dividas": "Liste todas as suas dívidas",
+  "cortar-gasto": "Corte um gasto desnecessário",
+  "meta-semana": "Defina uma meta para a semana",
+  "comparar-precos": "Compare preços antes de comprar",
+  "cozinhar-casa": "Cozinhe todas as refeições hoje",
+  "reserva-50": "Guarde R$ 50 este mês",
+  "renegociar-divida": "Renegocie uma dívida",
+  "planejar-compras": "Planeje suas compras da semana",
+  "sem-delivery": "Fique 7 dias sem pedir delivery",
+  "abrir-corretora": "Abra conta em uma corretora",
+  "primeiro-investimento": "Faça seu primeiro investimento",
+  "tesouro-direto": "Pesquise sobre Tesouro Direto",
+  "reserva-3meses": "Monte reserva de 3 meses",
+  "diversificar": "Diversifique seus investimentos",
+  "reserva-6meses": "Monte reserva de 6 meses",
+  "renda-extra": "Crie uma fonte de renda extra",
+  "planejamento-anual": "Faça um planejamento anual",
+  "ensinar-alguem": "Ensine alguém sobre finanças",
+  "zero-dividas": "Quite todas as dívidas",
+};
+
 const Educacao = () => {
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth();
   const { data: financialData, saveData } = useFinancialData();
   const navigate = useNavigate();
   const [openArticle, setOpenArticle] = useState<number | null>(null);
@@ -367,6 +403,10 @@ const Educacao = () => {
   const [studyStartTime, setStudyStartTime] = useState<number | null>(null);
   const [showModuleComplete, setShowModuleComplete] = useState<string | null>(null);
   const [studyDuration, setStudyDuration] = useState<number | null>(null);
+  const [showCertDialog, setShowCertDialog] = useState(false);
+  const [certCpf, setCertCpf] = useState("");
+  const [certLoading, setCertLoading] = useState(false);
+  const [existingCert, setExistingCert] = useState<string | null>(null);
 
   const completedTopics = financialData.completedMissions.filter(m => m.startsWith("edu_"));
 
@@ -398,6 +438,92 @@ const Educacao = () => {
   // Current active level index (first non-completed level)
   const currentLevelIndex = levels.findIndex(l => !isModuleCompleted(l));
   const allModulesCompleted = levels.every(l => isModuleCompleted(l));
+  const allMissionsCompleted = allMissionIds.every(id => financialData.completedMissions.includes(id));
+  const canGetCertificate = allModulesCompleted && allMissionsCompleted;
+
+  // Check for existing certificate
+  useEffect(() => {
+    if (user && canGetCertificate) {
+      supabase.from("certificates").select("verification_code").eq("user_id", user.id).limit(1).then(({ data }) => {
+        if (data && data.length > 0) setExistingCert(data[0].verification_code);
+      });
+    }
+  }, [user, canGetCertificate]);
+
+  // Calculate total study time (rough estimate: count completed edu topics * average read time or use stored data)
+  function getTotalStudySeconds(): number {
+    // Estimate ~3 minutes per topic completed (3 pages each)
+    const eduCompleted = financialData.completedMissions.filter(m => m.startsWith("edu_")).length;
+    return eduCompleted * 180; // 3 min per topic as base estimate
+  }
+
+  async function handleGenerateCertificate() {
+    if (!user || !certCpf.trim()) return;
+    setCertLoading(true);
+
+    const verificationCode = `FRB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const completionDate = new Date();
+    const studySeconds = getTotalStudySeconds();
+
+    // Get user display name
+    const { data: profile } = await supabase.from("profiles").select("display_name").eq("user_id", user.id).single();
+    const userName = profile?.display_name || user.email || "Aluno";
+
+    // Save CPF to profile
+    await supabase.from("profiles").update({ cpf: certCpf.trim() }).eq("user_id", user.id);
+
+    // Get completed missions names
+    const completedMissionNames = allMissionIds
+      .filter(id => financialData.completedMissions.includes(id))
+      .map(id => allMissionLabels[id] || id);
+
+    // Save certificate to DB
+    await supabase.from("certificates").insert({
+      user_id: user.id,
+      user_name: userName,
+      user_cpf: certCpf.trim(),
+      verification_code: verificationCode,
+      completion_date: completionDate.toISOString(),
+      study_hours_total: studySeconds,
+      modules_completed: [...levels],
+      missions_completed: completedMissionNames,
+    });
+
+    // Generate PDF
+    await generateCertificatePDF({
+      userName,
+      userCpf: certCpf.trim(),
+      completionDate: completionDate.toLocaleDateString("pt-BR"),
+      verificationCode,
+      studyHoursTotal: studySeconds,
+      modulesCompleted: [...levels],
+      missionsCompleted: completedMissionNames,
+    }, window.location.origin);
+
+    setExistingCert(verificationCode);
+    setCertLoading(false);
+    setShowCertDialog(false);
+    confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+  }
+
+  async function handleRedownloadCertificate() {
+    if (!existingCert || !user) return;
+    setCertLoading(true);
+
+    const { data: cert } = await supabase.from("certificates").select("*").eq("verification_code", existingCert).single();
+    if (cert) {
+      await generateCertificatePDF({
+        userName: cert.user_name,
+        userCpf: cert.user_cpf,
+        completionDate: new Date(cert.completion_date).toLocaleDateString("pt-BR"),
+        verificationCode: cert.verification_code,
+        studyHoursTotal: Number(cert.study_hours_total),
+        modulesCompleted: cert.modules_completed as string[],
+        missionsCompleted: cert.missions_completed as string[],
+      }, window.location.origin);
+    }
+    setCertLoading(false);
+  }
 
   async function markTopicComplete(articleId: string) {
     const key = "edu_" + articleId;
@@ -620,6 +746,34 @@ const Educacao = () => {
           </div>
         )}
 
+        {/* Certificate Section */}
+        {canGetCertificate && (
+          <div className="bg-gradient-to-br from-brand-gold/10 to-brand-green/10 border border-brand-gold/30 rounded-2xl p-5 mb-6 text-center animate-fade-up">
+            <Award className="w-10 h-10 text-brand-gold mx-auto mb-2" />
+            <p className="text-lg font-extrabold text-foreground mb-1">🎓 Certificado Disponível!</p>
+            <p className="text-sm text-muted-foreground mb-4">Você concluiu todos os módulos de Educação Financeira e todas as Missões. Parabéns!</p>
+            {existingCert ? (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Código: <span className="font-mono font-bold text-foreground">{existingCert}</span></p>
+                <Button onClick={handleRedownloadCertificate} disabled={certLoading} className="w-full">
+                  {certLoading ? "Gerando..." : "📄 Baixar Certificado Novamente"}
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => setShowCertDialog(true)} className="w-full bg-brand-gold text-white hover:bg-brand-gold/90">
+                📄 Gerar Meu Certificado
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!canGetCertificate && allModulesCompleted && !allMissionsCompleted && (
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 mb-6 text-center animate-fade-up">
+            <p className="text-sm font-bold text-warning">📋 Complete todas as Missões para liberar seu certificado</p>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate("/missoes")}>Ir para Missões</Button>
+          </div>
+        )}
+
         {levels.map((level) => {
           const lvl = levelInfo[level];
           const levelArticles = articles.map((a, i) => ({ ...a, index: i })).filter(a => a.level === level);
@@ -669,6 +823,28 @@ const Educacao = () => {
           );
         })}
       </div>
+
+      {/* CPF Dialog for Certificate */}
+      <Dialog open={showCertDialog} onOpenChange={setShowCertDialog}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold">Gerar Certificado</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Informe seu CPF para constar no certificado:</p>
+          <Input
+            placeholder="000.000.000-00"
+            value={certCpf}
+            onChange={(e) => setCertCpf(e.target.value)}
+            maxLength={14}
+          />
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowCertDialog(false)} className="flex-1">Cancelar</Button>
+            <Button onClick={handleGenerateCertificate} disabled={certLoading || !certCpf.trim()} className="flex-1">
+              {certLoading ? "Gerando..." : "Gerar PDF"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
