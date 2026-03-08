@@ -30,7 +30,7 @@ function formatStudyTime(totalSeconds: number): string {
   return `${mins}min`;
 }
 
-// Colors (tuples for TS spread)
+// Colors
 const DARK_GREEN: [number, number, number] = [0, 80, 50];
 const GREEN: [number, number, number] = [0, 100, 60];
 const GOLD: [number, number, number] = [180, 140, 40];
@@ -62,110 +62,163 @@ function drawOrnateFrame(doc: jsPDF, W: number, H: number) {
   doc.setFillColor(...CREAM_BG);
   doc.rect(12, 12, W - 24, H - 24, "F");
 
-  // Green decorative banner bar at top
-  doc.setFillColor(...DARK_GREEN);
-  doc.rect(12, 12, W - 24, 3, "F");
-
-  // Gold accent lines
+  // Gold accent line rectangle
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.5);
-  doc.rect(15, 15, W - 30, H - 30);
+  doc.rect(16, 16, W - 32, H - 32);
+
+  // Corner ornaments - fleur-de-lis style decorations
+  drawCornerOrnament(doc, 16, 16, 1, 1);         // top-left
+  drawCornerOrnament(doc, W - 16, 16, -1, 1);    // top-right
+  drawCornerOrnament(doc, 16, H - 16, 1, -1);    // bottom-left
+  drawCornerOrnament(doc, W - 16, H - 16, -1, -1); // bottom-right
+}
+
+function drawCornerOrnament(doc: jsPDF, cx: number, cy: number, dx: number, dy: number) {
+  doc.setFillColor(...DARK_GREEN);
+  doc.setDrawColor(...DARK_GREEN);
+  doc.setLineWidth(1.2);
+
+  // Main diagonal flourish
+  doc.line(cx, cy, cx + dx * 18, cy + dy * 18);
+  doc.line(cx, cy, cx + dx * 18, cy);
+  doc.line(cx, cy, cx, cy + dy * 18);
+
+  // Decorative curves
+  doc.setLineWidth(0.8);
+  doc.line(cx + dx * 3, cy, cx + dx * 12, cy + dy * 3);
+  doc.line(cx, cy + dy * 3, cx + dx * 3, cy + dy * 12);
+
+  // Small diamond
+  const dmx = cx + dx * 6;
+  const dmy = cy + dy * 6;
+  doc.setFillColor(...GOLD);
+  doc.circle(dmx, dmy, 1.5, "F");
 }
 
 function drawGreenBanner(doc: jsPDF, W: number, y: number, h: number) {
-  // Dark green banner
   doc.setFillColor(0, 70, 40);
-  doc.roundedRect(W / 2 - 80, y, 160, h, 2, 2, "F");
+  doc.roundedRect(W / 2 - 85, y, 170, h, 3, 3, "F");
 
   // Gold trim lines
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.5);
-  doc.line(W / 2 - 78, y + 1, W / 2 + 78, y + 1);
-  doc.line(W / 2 - 78, y + h - 1, W / 2 + 78, y + h - 1);
+  doc.line(W / 2 - 83, y + 1.5, W / 2 + 83, y + 1.5);
+  doc.line(W / 2 - 83, y + h - 1.5, W / 2 + 83, y + h - 1.5);
 }
 
-function drawMedallion(doc: jsPDF, x: number, y: number) {
-  // Outer gold circle
-  doc.setFillColor(...GOLD);
-  doc.circle(x, y, 12, "F");
-  doc.setFillColor(...DARK_GREEN);
-  doc.circle(x, y, 9, "F");
-  doc.setFillColor(220, 200, 80);
-  doc.circle(x, y, 7, "F");
-  doc.setFillColor(...GREEN);
-  doc.circle(x, y, 5.5, "F");
+function drawGoldSeal(doc: jsPDF, x: number, y: number) {
+  // Draw a clean gold seal with rays
+  const outerR = 14;
+  const innerR = 10;
+  const coreR = 8;
+  const centerR = 6;
 
-  // Laurel leaves (simplified arcs)
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(0.8);
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 6) * i - Math.PI / 2;
-    const lx = x + Math.cos(angle + Math.PI) * 13;
-    const ly = y + Math.sin(angle + Math.PI) * 13;
-    doc.line(x - 12, y + 2 + i * 1.5, lx, ly);
+  // Outer serrated edge (star points)
+  doc.setFillColor(200, 170, 50);
+  const points = 24;
+  for (let i = 0; i < points; i++) {
+    const angle = (Math.PI * 2 * i) / points;
+    const nextAngle = (Math.PI * 2 * (i + 1)) / points;
+    const midAngle = (angle + nextAngle) / 2;
+
+    const x1 = x + Math.cos(angle) * outerR;
+    const y1 = y + Math.sin(angle) * outerR;
+    const x2 = x + Math.cos(midAngle) * (outerR - 3);
+    const y2 = y + Math.sin(midAngle) * (outerR - 3);
+
+    doc.triangle(x, y, x1, y1, x2, y2, "F");
   }
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 6) * i - Math.PI / 2;
-    const lx = x + Math.cos(angle) * 13;
-    const ly = y + Math.sin(angle) * 13;
-    doc.line(x + 12, y + 2 + i * 1.5, lx, ly);
+
+  // Inner gold circle
+  doc.setFillColor(220, 190, 60);
+  doc.circle(x, y, innerR, "F");
+
+  // Dark ring
+  doc.setFillColor(160, 130, 40);
+  doc.circle(x, y, coreR + 0.5, "F");
+
+  // Gold center
+  doc.setFillColor(240, 210, 80);
+  doc.circle(x, y, coreR, "F");
+
+  // Inner decorative ring
+  doc.setDrawColor(180, 140, 40);
+  doc.setLineWidth(0.4);
+  doc.circle(x, y, centerR, "S");
+
+  // Star in center
+  doc.setFillColor(160, 120, 30);
+  const starPoints = 5;
+  for (let i = 0; i < starPoints; i++) {
+    const angle = (Math.PI * 2 * i) / starPoints - Math.PI / 2;
+    const nextAngle = (Math.PI * 2 * ((i + 0.5)) ) / starPoints - Math.PI / 2;
+    const sx = x + Math.cos(angle) * 4;
+    const sy = y + Math.sin(angle) * 4;
+    const mx = x + Math.cos(nextAngle) * 1.8;
+    const my = y + Math.sin(nextAngle) * 1.8;
+    doc.triangle(x, y, sx, sy, mx, my, "F");
   }
 }
 
-export async function generateCertificatePDF(data: CertificateData, siteUrl: string) {
+function getPublishedUrl(): string {
+  return "https://futurorealbrasil.lovable.app";
+}
+
+export async function generateCertificatePDF(data: CertificateData, _siteUrl: string) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const W = 297;
   const H = 210;
 
+  // Use published URL for QR code so it always opens the real site
+  const publishedUrl = getPublishedUrl();
+  const verifyUrl = `${publishedUrl}/verificar-certificado?code=${data.verificationCode}`;
+
   // ===== FRONT PAGE =====
   drawOrnateFrame(doc, W, H);
 
-  // Title - "Certificado de Conclusao"
-  doc.setFontSize(36);
-  doc.setFont("helvetica", "bolditalic");
-  doc.setTextColor(...DARK_GOLD);
-  doc.text("Certificado de Conclusao", W / 2, 38, { align: "center" });
+  // Green banner at top with company name
+  drawGreenBanner(doc, W, 25, 16);
 
-  // Green banner with course name
-  drawGreenBanner(doc, W, 46, 22);
-
-  doc.setFontSize(16);
+  doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255);
-  doc.text("Educacao Financeira", W / 2, 55, { align: "center" });
+  doc.text("FUTURO REAL BRASIL", W / 2, 35, { align: "center" });
 
+  // Title - "CERTIFICADO"
+  doc.setFontSize(34);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...DARK_GOLD);
+  doc.text("CERTIFICADO", W / 2, 56, { align: "center" });
+
+  // Gold decorative line
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.8);
+  doc.line(W / 2 - 70, 60, W / 2 + 70, 60);
+
+  // "Certificamos que"
   doc.setFontSize(13);
-  doc.setFont("helvetica", "bolditalic");
-  doc.setTextColor(220, 200, 80);
-  doc.text("Futuro Real Brasil", W / 2, 63, { align: "center" });
-
-  // Subtitle
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "italic");
-  doc.setTextColor(...GOLD);
-  doc.text("Planeje, Invista, Conquiste a Liberdade Financeira!", W / 2, 74, { align: "center" });
-
-  // Decorative gold line
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(0.5);
-  doc.line(W / 2 - 60, 78, W / 2 + 60, 78);
-
-  // Student name
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bolditalic");
+  doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT_DARK);
-  doc.text(data.userName, W / 2, 90, { align: "center" });
+  doc.text("Certificamos que", W / 2, 72, { align: "center" });
 
-  // Line under name
+  // Student name - ABOVE the line, large and bold
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...DARK_GREEN);
+  const nameText = data.userName.toUpperCase();
+  doc.text(nameText, W / 2, 86, { align: "center" });
+
+  // Line BELOW the name
   doc.setDrawColor(...GOLD);
-  doc.setLineWidth(0.3);
-  doc.line(W / 2 - 55, 93, W / 2 + 55, 93);
+  doc.setLineWidth(0.4);
+  doc.line(W / 2 - 70, 89, W / 2 + 70, 89);
 
-  // CPF
-  doc.setFontSize(9);
+  // CPF - visible size
+  doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT_GRAY);
-  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 99, { align: "center" });
+  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 96, { align: "center" });
 
   // Body text
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
@@ -174,99 +227,108 @@ export async function generateCertificatePDF(data: CertificateData, siteUrl: str
   doc.setTextColor(...TEXT_DARK);
 
   const bodyLines = [
-    `Certificamos que o(a) aluno(a) acima concluiu com exito o curso de Educacao Financeira`,
-    `oferecido pelo ${COMPANY}, com a carga horaria de ${studyTimeStr} de estudo,`,
+    `concluiu com sucesso o curso de`,
+    ``,
+    `Gestao Financeira Familiar`,
+    ``,
+    `oferecido pelo ${COMPANY}, com carga horaria de ${studyTimeStr},`,
     `em reconhecimento ao seu empenho e dedicacao aos estudos.`,
   ];
-  let y = 110;
+
+  let y = 105;
   for (const line of bodyLines) {
-    doc.text(line, W / 2, y, { align: "center" });
+    if (line === "Gestao Financeira Familiar") {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...DARK_GREEN);
+      doc.text(line, W / 2, y, { align: "center" });
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...TEXT_DARK);
+    } else if (line !== "") {
+      doc.text(line, W / 2, y, { align: "center" });
+    }
     y += 6;
   }
 
   // Date
   doc.setFontSize(10);
   doc.setTextColor(...TEXT_GRAY);
-  doc.text(`Data de conclusao: ${data.completionDate}`, W / 2, y + 4, { align: "center" });
+  doc.text(`Data de conclusao: ${data.completionDate}`, W / 2, y + 2, { align: "center" });
 
-  // Verification code
-  doc.setFontSize(8);
-  doc.setTextColor(120, 110, 100);
-  doc.text(`Codigo de verificacao: ${data.verificationCode}`, W / 2, y + 10, { align: "center" });
+  // ---- Signatures section ----
+  const sigLineY = H - 45;
 
-  // Medallion at bottom left
-  drawMedallion(doc, 45, H - 42);
+  // Left signature - Aluno name ABOVE line
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...DARK_GREEN);
+  doc.text(data.userName, W / 2 - 50, sigLineY - 3, { align: "center" });
 
-  // Signatures
-  const sigY = H - 48;
-
-  // Left signature - Aluno
   doc.setDrawColor(...DARK_GREEN);
   doc.setLineWidth(0.4);
-  doc.line(W / 2 - 65, sigY + 10, W / 2 - 5, sigY + 10);
+  doc.line(W / 2 - 80, sigLineY, W / 2 - 20, sigLineY);
+
   doc.setFontSize(9);
   doc.setFont("helvetica", "italic");
   doc.setTextColor(...TEXT_GRAY);
-  doc.text("Aluno(a)", W / 2 - 35, sigY + 15, { align: "center" });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...DARK_GREEN);
-  doc.text(data.userName, W / 2 - 35, sigY + 20, { align: "center" });
+  doc.text("Aluno(a)", W / 2 - 50, sigLineY + 5, { align: "center" });
 
-  // Right signature - Direcao
-  doc.line(W / 2 + 5, sigY + 10, W / 2 + 65, sigY + 10);
+  // Right signature - Direcao name ABOVE line
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...DARK_GREEN);
+  doc.text(COMPANY, W / 2 + 50, sigLineY - 3, { align: "center" });
+
+  doc.line(W / 2 + 20, sigLineY, W / 2 + 80, sigLineY);
+
   doc.setFont("helvetica", "italic");
   doc.setTextColor(...TEXT_GRAY);
   doc.setFontSize(9);
-  doc.text("Direcao", W / 2 + 35, sigY + 15, { align: "center" });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...DARK_GREEN);
-  doc.text(COMPANY, W / 2 + 35, sigY + 20, { align: "center" });
+  doc.text("Direcao", W / 2 + 50, sigLineY + 5, { align: "center" });
 
-  // Company info at bottom center
+  // Gold Seal between signatures
+  drawGoldSeal(doc, W / 2, sigLineY + 2);
+
+  // Company info at bottom
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...DARK_GREEN);
-  doc.text(COMPANY, W / 2, H - 22, { align: "center" });
+  doc.text(`${COMPANY} - CNPJ: ${CNPJ}`, W / 2, H - 22, { align: "center" });
+
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT_GRAY);
-  doc.text(`CNPJ: ${CNPJ}`, W / 2, H - 18, { align: "center" });
+  doc.text("Gestao Financeira Familiar", W / 2, H - 18, { align: "center" });
 
-  // QR Code on front (bottom right)
-  const verifyUrl = `${siteUrl}/verificar-certificado?code=${data.verificationCode}`;
-  try {
-    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 200, margin: 1 });
-    doc.addImage(qrDataUrl, "PNG", W - 50, H - 55, 30, 30);
-    doc.setFontSize(6);
-    doc.setTextColor(120, 110, 100);
-    doc.text("Escaneie para verificar", W - 35, H - 22, { align: "center" });
-  } catch (e) {
-    console.error("QR generation failed", e);
-  }
+  // Verification code
+  doc.setFontSize(7);
+  doc.setTextColor(120, 110, 100);
+  doc.text(`Codigo de verificacao: ${data.verificationCode}`, W / 2, H - 14, { align: "center" });
 
   // ===== BACK PAGE (VERSO) =====
   doc.addPage("a4", "landscape");
   drawOrnateFrame(doc, W, H);
 
-  // Header
-  doc.setFontSize(28);
-  doc.setFont("helvetica", "bolditalic");
-  doc.setTextColor(...DARK_GOLD);
-  doc.text("Conteudo Programatico", W / 2, 32, { align: "center" });
+  // Header banner
+  drawGreenBanner(doc, W, 22, 14);
+
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(255, 255, 255);
+  doc.text("CONTEUDO PROGRAMATICO", W / 2, 31, { align: "center" });
 
   // Gold line
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.5);
-  doc.line(W / 2 - 55, 36, W / 2 + 55, 36);
+  doc.line(W / 2 - 60, 39, W / 2 + 60, 39);
 
   // Module labels
   const moduleLabels: Record<string, string> = {
-    iniciante: "Modulo 1 - Iniciante",
-    organizado: "Modulo 2 - Organizado",
-    investidor: "Modulo 3 - Investidor",
-    independente: "Modulo 4 - Independente",
+    iniciante: "Iniciante",
+    organizado: "Organizado",
+    investidor: "Investidor",
+    independente: "Independente",
   };
 
   // All education topics by module
@@ -321,9 +383,9 @@ export async function generateCertificatePDF(data: CertificateData, siteUrl: str
     ],
   };
 
-  // Draw modules in 2x2 grid
-  const colPositions = [22, W / 2 + 5];
-  const rowPositions = [42, 110];
+  // Draw modules in 2x2 grid with LARGER font
+  const colPositions = [24, W / 2 + 8];
+  const rowPositions = [46, 115];
   const levels = ["iniciante", "organizado", "investidor", "independente"];
 
   levels.forEach((level, idx) => {
@@ -332,63 +394,67 @@ export async function generateCertificatePDF(data: CertificateData, siteUrl: str
     const x = colPositions[col];
     let cy = rowPositions[row];
 
-    doc.setFontSize(10);
+    // Module title
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...DARK_GREEN);
     doc.text(moduleLabels[level], x, cy);
-    cy += 5;
+    cy += 6;
 
     const topics = eduTopics[level] || [];
-    doc.setFontSize(7);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...TEXT_DARK);
     for (const topic of topics) {
-      doc.text(`• ${topic}`, x + 2, cy);
-      cy += 4;
+      doc.text(`• ${topic}`, x + 3, cy);
+      cy += 5;
     }
   });
 
   // Missions section
-  let mY = 155;
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...DARK_GREEN);
-  doc.text("Missoes Concluidas", 22, mY);
-  mY += 5;
+  doc.text("Missoes Concluidas", W / 2, 172, { align: "center" });
 
+  // Gold line under missions title
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.line(W / 2 - 40, 174, W / 2 + 40, 174);
+
+  let mY = 178;
   const missionsPerCol = Math.ceil(data.missionsCompleted.length / 3);
-  doc.setFontSize(7);
+  doc.setFontSize(7.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...TEXT_DARK);
 
   data.missionsCompleted.forEach((mission, i) => {
     const col = Math.floor(i / missionsPerCol);
     const row = i % missionsPerCol;
-    const mx = 24 + col * 90;
+    const mx = 24 + col * 88;
     const my = mY + row * 4;
-    if (my < H - 25) {
-      doc.text(`• ${mission.substring(0, 45)}`, mx, my);
+    if (my < H - 28) {
+      doc.text(`• ${mission.substring(0, 50)}`, mx, my);
     }
   });
 
-  // QR Code on back
+  // QR Code on back - bottom right
   try {
-    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 200, margin: 1 });
-    doc.addImage(qrDataUrl, "PNG", W - 50, H - 50, 28, 28);
+    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 300, margin: 1 });
+    doc.addImage(qrDataUrl, "PNG", W - 48, H - 46, 26, 26);
   } catch (e) {
     console.error("QR generation failed", e);
   }
 
+  // Footer text - properly spaced to avoid overlap
   doc.setFontSize(6);
   doc.setTextColor(120, 110, 100);
-  doc.text("Escaneie para verificar", W - 36, H - 20, { align: "center" });
-  doc.text(`Codigo: ${data.verificationCode}`, W - 36, H - 17, { align: "center" });
+  doc.text(`Verificacao: ${data.verificationCode}`, W - 35, H - 18, { align: "center" });
 
-  // Footer
   doc.setFontSize(7);
   doc.setTextColor(...TEXT_GRAY);
-  doc.text(`${COMPANY} - CNPJ: ${CNPJ} - Gestao Financeira Familiar`, W / 2, H - 15, { align: "center" });
-  doc.text(verifyUrl, W / 2, H - 11, { align: "center" });
+  doc.text(`${COMPANY} - CNPJ: ${CNPJ}`, W / 2 - 15, H - 20, { align: "center" });
+  doc.text("Gestao Financeira Familiar", W / 2 - 15, H - 16, { align: "center" });
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
 }
