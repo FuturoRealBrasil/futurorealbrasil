@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -17,6 +17,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { signIn, signUp, user } = useAuth();
@@ -70,10 +71,20 @@ const Auth = () => {
         setSubmitting(false);
         return;
       }
+      if (!whatsapp) {
+        toast.error("Informe seu número de celular");
+        setSubmitting(false);
+        return;
+      }
       const { error } = await signUp(email, password, displayName || email);
       if (error) {
         toast.error(error.message);
       } else {
+        // Save whatsapp to profile after signup
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.from("profiles").update({ whatsapp } as any).eq("user_id", newUser.id);
+        }
         toast.success("Conta criada! Verifique seu email para confirmar.");
       }
     }
@@ -134,6 +145,13 @@ const Auth = () => {
               <div>
                 <Label className="text-sm font-semibold text-primary-foreground/90">Nome</Label>
                 <Input type="text" placeholder="Seu nome" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-12 rounded-xl bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/40 mt-1" />
+              </div>
+            )}
+
+            {!isLogin && (
+              <div>
+                <Label className="text-sm font-semibold text-primary-foreground/90">Celular / WhatsApp</Label>
+                <Input type="tel" placeholder="(11) 99999-9999" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="h-12 rounded-xl bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/40 mt-1" inputMode="tel" required />
               </div>
             )}
 
