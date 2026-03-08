@@ -75,7 +75,7 @@ function fc(doc: jsPDF, c: [number, number, number]) {
 
 // ---- Ornamental decorative helpers ----
 
-function drawOrnamentalBorder(doc: jsPDF, W: number, H: number) {
+async function drawOrnamentalBorder(doc: jsPDF, W: number, H: number, cornerDataUrl: string) {
   // Outer gold border
   dc(doc, C.brandGold);
   doc.setLineWidth(2.0);
@@ -89,64 +89,47 @@ function drawOrnamentalBorder(doc: jsPDF, W: number, H: number) {
   doc.setLineWidth(0.3);
   doc.rect(12, 12, W - 24, H - 24);
 
-  // Ornamental corners - elaborate flourishes
-  const cornerSize = 30;
-  doc.setLineWidth(0.8);
+  // Corner ornament images (the uploaded ornate flourish)
+  const cs = 35; // corner size in mm
 
-  // Draw ornate corner elements at each corner
-  const corners = [
-    { x: 6, y: 6, dx: 1, dy: 1 },
-    { x: W - 6, y: 6, dx: -1, dy: 1 },
-    { x: 6, y: H - 6, dx: 1, dy: -1 },
-    { x: W - 6, y: H - 6, dx: -1, dy: -1 },
-  ];
+  // Top-left (original orientation)
+  doc.addImage(cornerDataUrl, "PNG", 4, 4, cs, cs);
 
-  corners.forEach(({ x, y, dx, dy }) => {
-    dc(doc, C.brandGold);
-    // Main L-shape
-    doc.setLineWidth(1.2);
-    doc.line(x, y, x + dx * cornerSize, y);
-    doc.line(x, y, x, y + dy * cornerSize);
+  // Top-right (flipped horizontally) — use a canvas to flip
+  const flippedH = await flipImage(cornerDataUrl, true, false);
+  doc.addImage(flippedH, "PNG", W - 4 - cs, 4, cs, cs);
 
-    // Inner decorative lines
-    doc.setLineWidth(0.4);
-    doc.line(x + dx * 4, y + dy * 4, x + dx * (cornerSize - 5), y + dy * 4);
-    doc.line(x + dx * 4, y + dy * 4, x + dx * 4, y + dy * (cornerSize - 5));
+  // Bottom-left (flipped vertically)
+  const flippedV = await flipImage(cornerDataUrl, false, true);
+  doc.addImage(flippedV, "PNG", 4, H - 4 - cs, cs, cs);
 
-    // Corner diamond
-    fc(doc, C.brandGold);
-    const cx = x + dx * 3;
-    const cy = y + dy * 3;
-    doc.triangle(cx, cy - 2, cx + 2, cy, cx, cy + 2, "F");
-    doc.triangle(cx, cy - 2, cx - 2, cy, cx, cy + 2, "F");
-
-    // Dots along the L
-    for (let i = 1; i <= 3; i++) {
-      doc.circle(x + dx * (8 + i * 5), y + dy * 2, 0.6, "F");
-      doc.circle(x + dx * 2, y + dy * (8 + i * 5), 0.6, "F");
-    }
-
-    // Curl elements
-    doc.setLineWidth(0.5);
-    const curlX = x + dx * cornerSize;
-    const curlY = y + dy * 2;
-    doc.circle(curlX, curlY, 1.5, "S");
-
-    const curlX2 = x + dx * 2;
-    const curlY2 = y + dy * cornerSize;
-    doc.circle(curlX2, curlY2, 1.5, "S");
-  });
+  // Bottom-right (flipped both)
+  const flippedHV = await flipImage(cornerDataUrl, true, true);
+  doc.addImage(flippedHV, "PNG", W - 4 - cs, H - 4 - cs, cs, cs);
 
   // Edge center ornaments
   fc(doc, C.brandGold);
-  // Top center
   drawEdgeOrnament(doc, W / 2, 6, 0);
-  // Bottom center
   drawEdgeOrnament(doc, W / 2, H - 6, Math.PI);
-  // Left center
   drawEdgeOrnament(doc, 6, H / 2, Math.PI / 2);
-  // Right center
   drawEdgeOrnament(doc, W - 6, H / 2, -Math.PI / 2);
+}
+
+async function flipImage(dataUrl: string, flipH: boolean, flipV: boolean): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.translate(flipH ? img.width : 0, flipV ? img.height : 0);
+      ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.src = dataUrl;
+  });
 }
 
 function drawEdgeOrnament(doc: jsPDF, x: number, y: number, _angle: number) {
