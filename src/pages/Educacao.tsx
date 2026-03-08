@@ -823,6 +823,28 @@ const Educacao = () => {
           );
         })}
       </div>
+
+      {/* CPF Dialog for Certificate */}
+      <Dialog open={showCertDialog} onOpenChange={setShowCertDialog}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold">Gerar Certificado</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Informe seu CPF para constar no certificado:</p>
+          <Input
+            placeholder="000.000.000-00"
+            value={certCpf}
+            onChange={(e) => setCertCpf(e.target.value)}
+            maxLength={14}
+          />
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowCertDialog(false)} className="flex-1">Cancelar</Button>
+            <Button onClick={handleGenerateCertificate} disabled={certLoading || !certCpf.trim()} className="flex-1">
+              {certLoading ? "Gerando..." : "Gerar PDF"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
