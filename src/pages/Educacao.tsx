@@ -833,17 +833,30 @@ const Educacao = () => {
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold">Gerar Certificado</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">Informe seu CPF para constar no certificado:</p>
-          <Input
-            placeholder="000.000.000-00"
-            value={certCpf}
-            onChange={(e) => setCertCpf(e.target.value)}
-            maxLength={14}
-          />
+          <p className="text-sm text-muted-foreground">Informe seus dados para constar no certificado:</p>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">Nome Completo</label>
+              <Input
+                placeholder="Seu nome completo"
+                value={certName}
+                onChange={(e) => setCertName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">CPF</label>
+              <Input
+                placeholder="000.000.000-00"
+                value={certCpf}
+                onChange={(e) => setCertCpf(e.target.value)}
+                maxLength={14}
+              />
+            </div>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowCertDialog(false)} className="flex-1">Cancelar</Button>
-            <Button onClick={handleGenerateCertificate} disabled={certLoading || !certCpf.trim()} className="flex-1">
-              {certLoading ? "Gerando..." : "Gerar PDF"}
+            <Button onClick={handleGenerateCertificate} disabled={certLoading || !certCpf.trim() || !certName.trim()} className="flex-1">
+              {certLoading ? "Gerando..." : "Gerar Certificado"}
             </Button>
           </div>
         </DialogContent>
