@@ -16,493 +16,439 @@ const COMPANY = "Futuro Real Brasil";
 const PUBLISHED_URL = "https://futurorealbrasil.lovable.app";
 const CNPJ = "55.276.743/0001-80";
 
-const COLORS = {
-  bgDark: [12, 15, 24] as [number, number, number],
-  bgPanel: [18, 22, 34] as [number, number, number],
+const C = {
+  bgDark: [10, 13, 22] as [number, number, number],
   brandBlue: [45, 110, 195] as [number, number, number],
   brandGreen: [46, 160, 105] as [number, number, number],
   brandGold: [235, 175, 35] as [number, number, number],
-  goldLight: [255, 215, 100] as [number, number, number],
   white: [255, 255, 255] as [number, number, number],
-  lightGray: [195, 205, 215] as [number, number, number],
-  mutedText: [120, 135, 160] as [number, number, number],
+  cream: [220, 225, 235] as [number, number, number],
+  muted: [130, 145, 170] as [number, number, number],
 };
 
 function formatCPF(cpf: string): string {
-  const digits = cpf.replace(/\D/g, "");
-  if (digits.length === 11)
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-  return cpf;
+  const d = cpf.replace(/\D/g, "");
+  return d.length === 11
+    ? `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`
+    : cpf;
 }
 
-function formatStudyTime(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const mins = Math.floor((totalSeconds % 3600) / 60);
-  if (hours > 0 && mins > 0) return `${hours}h ${mins}min`;
-  if (hours > 0) return `${hours}h`;
-  if (mins > 0) return `${mins}min`;
+function formatStudyTime(s: number): string {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0 && m > 0) return `${h}h ${m}min`;
+  if (h > 0) return `${h}h`;
+  if (m > 0) return `${m}min`;
   return "1h";
 }
 
-async function loadImageAsDataUrl(src: string): Promise<string> {
+async function loadImg(src: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d")!;
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const ctx = c.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
+      resolve(c.toDataURL("image/png"));
     };
     img.onerror = reject;
     img.src = src;
   });
 }
 
-function sc(doc: jsPDF, c: [number, number, number]) {
+function tc(doc: jsPDF, c: [number, number, number]) {
   doc.setTextColor(c[0], c[1], c[2]);
 }
+function dc(doc: jsPDF, c: [number, number, number]) {
+  doc.setDrawColor(c[0], c[1], c[2]);
+}
+function fc(doc: jsPDF, c: [number, number, number]) {
+  doc.setFillColor(c[0], c[1], c[2]);
+}
 
-// Elegant double border with ornamental corners
-function drawElegantBorder(doc: jsPDF, W: number, H: number) {
-  const [r, g, b] = COLORS.brandGold;
-  doc.setDrawColor(r, g, b);
+// ---- Decorative helpers ----
 
-  // Outer frame
-  doc.setLineWidth(1.2);
-  doc.rect(6, 6, W - 12, H - 12);
+function drawStripes(doc: jsPDF, W: number, y: number, dir: 1 | -1) {
+  const colors = [C.brandGreen, C.brandGold, C.brandBlue];
+  const heights = [2.5, 1.2, 1.8];
+  let offset = 0;
+  const order = dir === 1 ? colors : [...colors].reverse();
+  const hOrder = dir === 1 ? heights : [...heights].reverse();
+  for (let i = 0; i < 3; i++) {
+    fc(doc, order[i]);
+    doc.rect(0, y + offset, W, hOrder[i], "F");
+    offset += hOrder[i];
+  }
+}
 
-  // Inner frame
+function drawBorder(doc: jsPDF, W: number, H: number) {
+  dc(doc, C.brandGold);
+  doc.setLineWidth(1.4);
+  doc.rect(7, 7, W - 14, H - 14);
   doc.setLineWidth(0.4);
-  doc.rect(10, 10, W - 20, H - 20);
+  doc.rect(11, 11, W - 22, H - 22);
 
-  // Ornamental corner brackets (L-shapes with dots)
-  const cLen = 18;
-  const offset = 6;
-  doc.setLineWidth(0.8);
-
-  const corners = [
-    { x: offset, y: offset, dx: 1, dy: 1 },
-    { x: W - offset, y: offset, dx: -1, dy: 1 },
-    { x: offset, y: H - offset, dx: 1, dy: -1 },
-    { x: W - offset, y: H - offset, dx: -1, dy: -1 },
-  ];
-
-  corners.forEach(({ x, y, dx, dy }) => {
-    doc.line(x, y, x + dx * cLen, y);
-    doc.line(x, y, x, y + dy * cLen);
-    // Small diamond at corner
-    const cx = x + dx * 3;
-    const cy = y + dy * 3;
-    doc.setFillColor(r, g, b);
-    doc.circle(cx, cy, 0.8, "F");
+  // Corner L-brackets with dots
+  const len = 20;
+  doc.setLineWidth(0.9);
+  [
+    [7, 7, 1, 1], [W - 7, 7, -1, 1],
+    [7, H - 7, 1, -1], [W - 7, H - 7, -1, -1],
+  ].forEach(([x, y, dx, dy]) => {
+    doc.line(x, y, x + dx * len, y);
+    doc.line(x, y, x, y + dy * len);
+    fc(doc, C.brandGold);
+    doc.circle(x + dx * 3.5, y + dy * 3.5, 1, "F");
   });
 
-  // Mid-edge diamonds
-  doc.setFillColor(r, g, b);
-  doc.circle(W / 2, 6, 1, "F");
-  doc.circle(W / 2, H - 6, 1, "F");
-  doc.circle(6, H / 2, 1, "F");
-  doc.circle(W - 6, H / 2, 1, "F");
+  // Edge center dots
+  fc(doc, C.brandGold);
+  doc.circle(W / 2, 7, 1.2, "F");
+  doc.circle(W / 2, H - 7, 1.2, "F");
+  doc.circle(7, H / 2, 1.2, "F");
+  doc.circle(W - 7, H / 2, 1.2, "F");
 }
 
-// Elegant horizontal divider with center diamond
-function drawDivider(doc: jsPDF, cx: number, y: number, halfW: number) {
-  const [r, g, b] = COLORS.brandGold;
-  doc.setDrawColor(r, g, b);
+function drawDivider(doc: jsPDF, cx: number, y: number, hw: number) {
+  dc(doc, C.brandGold);
   doc.setLineWidth(0.3);
-  doc.line(cx - halfW, y, cx - 3, y);
-  doc.line(cx + 3, y, cx + halfW, y);
-  // Center diamond
-  doc.setFillColor(r, g, b);
-  const d = 1.5;
-  doc.triangle(cx, y - d, cx + d, y, cx, y + d, "F");
-  doc.triangle(cx, y - d, cx - d, y, cx, y + d, "F");
+  doc.line(cx - hw, y, cx - 3, y);
+  doc.line(cx + 3, y, cx + hw, y);
+  fc(doc, C.brandGold);
+  const s = 1.5;
+  doc.triangle(cx, y - s, cx + s, y, cx, y + s, "F");
+  doc.triangle(cx, y - s, cx - s, y, cx, y + s, "F");
 }
 
-// Ornate seal with double ring and star burst effect
-function drawSeal(doc: jsPDF, x: number, y: number, radius: number) {
-  const [r, g, b] = COLORS.brandGold;
-  doc.setDrawColor(r, g, b);
-
-  // Outer serrated ring (simulated with small lines)
-  const teeth = 24;
-  for (let i = 0; i < teeth; i++) {
-    const angle = (i / teeth) * Math.PI * 2;
-    const innerR = radius - 1;
-    const outerR = radius + 1;
-    const x1 = x + Math.cos(angle) * innerR;
-    const y1 = y + Math.sin(angle) * innerR;
-    const x2 = x + Math.cos(angle) * outerR;
-    const y2 = y + Math.sin(angle) * outerR;
-    doc.setLineWidth(0.4);
-    doc.line(x1, y1, x2, y2);
+function drawSeal(doc: jsPDF, x: number, y: number, r: number) {
+  dc(doc, C.brandGold);
+  // Serrated teeth
+  for (let i = 0; i < 28; i++) {
+    const a = (i / 28) * Math.PI * 2;
+    doc.setLineWidth(0.35);
+    doc.line(
+      x + Math.cos(a) * (r - 1), y + Math.sin(a) * (r - 1),
+      x + Math.cos(a) * (r + 1.2), y + Math.sin(a) * (r + 1.2)
+    );
   }
-
-  // Outer circle
-  doc.setLineWidth(0.6);
-  doc.circle(x, y, radius, "S");
-  // Inner circle
+  doc.setLineWidth(0.7);
+  doc.circle(x, y, r, "S");
   doc.setLineWidth(0.3);
-  doc.circle(x, y, radius - 2, "S");
+  doc.circle(x, y, r - 2.5, "S");
 
-  // Dark fill center
-  doc.setFillColor(COLORS.bgDark[0], COLORS.bgDark[1], COLORS.bgDark[2]);
-  doc.circle(x, y, radius - 3, "F");
-  doc.setDrawColor(r, g, b);
-  doc.setLineWidth(0.3);
-  doc.circle(x, y, radius - 3, "S");
+  fc(doc, C.bgDark);
+  doc.circle(x, y, r - 3.5, "F");
+  dc(doc, C.brandGold);
+  doc.circle(x, y, r - 3.5, "S");
 
-  // Text
   doc.setFont("helvetica", "bold");
-  sc(doc, COLORS.brandGold);
-  doc.setFontSize(4.5);
-  doc.text("CURSO", x, y - 2.5, { align: "center" });
-  doc.text("LIVRE", x, y + 1, { align: "center" });
-  doc.setFontSize(3);
-  doc.text("CERTIFICADO", x, y + 4, { align: "center" });
+  tc(doc, C.brandGold);
+  doc.setFontSize(5.5);
+  doc.text("CURSO", x, y - 3, { align: "center" });
+  doc.text("LIVRE", x, y + 1.5, { align: "center" });
+  doc.setFontSize(3.5);
+  doc.text("CERTIFICADO", x, y + 5, { align: "center" });
 }
 
-function drawSignatureLine(doc: jsPDF, x: number, y: number, w: number, label: string, name: string) {
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  sc(doc, COLORS.white);
-  doc.text(name, x, y - 4, { align: "center" });
-
-  doc.setDrawColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.setLineWidth(0.3);
-  doc.line(x - w / 2, y, x + w / 2, y);
-
-  doc.setFontSize(6);
-  doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.mutedText);
-  doc.text(label, x, y + 5, { align: "center" });
-}
-
-// Subtle background pattern (diagonal thin lines)
 function drawBgPattern(doc: jsPDF, W: number, H: number) {
-  doc.setDrawColor(25, 30, 45);
-  doc.setLineWidth(0.1);
-  for (let i = -H; i < W + H; i += 12) {
+  doc.setDrawColor(22, 27, 42);
+  doc.setLineWidth(0.08);
+  for (let i = -H; i < W + H; i += 14) {
     doc.line(i, 0, i + H, H);
   }
+}
+
+// Strip any non-latin1 characters (emojis, etc.) that jsPDF can't render
+function safe(text: string): string {
+  // eslint-disable-next-line no-control-regex
+  return text.replace(/[^\x00-\xFF]/g, "").trim();
 }
 
 export async function generateCertificatePDF(data: CertificateData, _siteUrl: string) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const W = 297;
   const H = 210;
-
   const verifyUrl = `${PUBLISHED_URL}/verificar-certificado?code=${data.verificationCode}`;
 
   const [logoDataUrl, qrDataUrl] = await Promise.all([
-    loadImageAsDataUrl(logoImg),
+    loadImg(logoImg),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
   ]);
 
   // ==================== FRONT PAGE ====================
-  // Background
-  doc.setFillColor(COLORS.bgDark[0], COLORS.bgDark[1], COLORS.bgDark[2]);
+  fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
+  drawStripes(doc, W, 0, 1);
+  drawStripes(doc, W, H - 5.5, -1);
+  drawBorder(doc, W, H);
 
-  // Top accent stripe (Brazil colors)
-  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, 0, W, 2.5, "F");
-  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, 2.5, W, 1.2, "F");
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, 3.7, W, 1.8, "F");
-
-  // Bottom accent stripe
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, H - 5.5, W, 1.8, "F");
-  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, H - 3.7, W, 1.2, "F");
-  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, H - 2.5, W, 2.5, "F");
-
-  drawElegantBorder(doc, W, H);
-
-  // Logo
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 12, 28, 28);
+  // Logo — large
+  doc.addImage(logoDataUrl, "PNG", W / 2 - 20, 10, 40, 40);
 
   // Title
-  doc.setFontSize(24);
+  doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
-  sc(doc, COLORS.brandGold);
-  doc.text("CERTIFICADO DE CONCLUSÃO", W / 2, 52, { align: "center" });
+  tc(doc, C.brandGold);
+  doc.text("CERTIFICADO DE CONCLUSAO", W / 2, 60, { align: "center" });
 
   // Subtitle
-  doc.setFontSize(9);
+  doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.mutedText);
-  doc.text("Curso Livre de Educação Financeira Familiar", W / 2, 59, { align: "center" });
+  tc(doc, C.muted);
+  doc.text("Curso Livre de Educacao Financeira Familiar", W / 2, 68, { align: "center" });
 
-  drawDivider(doc, W / 2, 64, 70);
+  drawDivider(doc, W / 2, 73, 75);
 
   // "Certificamos que"
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.lightGray);
-  doc.text("Certificamos que", W / 2, 73, { align: "center" });
+  tc(doc, C.cream);
+  doc.text("Certificamos que", W / 2, 82, { align: "center" });
 
-  // Student name
-  doc.setFontSize(22);
+  // Student name — large
+  doc.setFontSize(26);
   doc.setFont("helvetica", "bolditalic");
-  sc(doc, COLORS.white);
-  doc.text(data.userName.toUpperCase(), W / 2, 84, { align: "center" });
+  tc(doc, C.white);
+  doc.text(safe(data.userName.toUpperCase()), W / 2, 94, { align: "center" });
 
-  // Underline below name
-  const nameWidth = doc.getTextWidth(data.userName.toUpperCase());
-  drawDivider(doc, W / 2, 87, Math.min(nameWidth / 2 + 10, 80));
+  drawDivider(doc, W / 2, 98, 80);
 
   // CPF
-  doc.setFontSize(7.5);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.mutedText);
-  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 93, { align: "center" });
+  tc(doc, C.muted);
+  doc.text(`CPF: ${formatCPF(data.userCpf)}`, W / 2, 105, { align: "center" });
 
   // Body text
   const studyTimeStr = formatStudyTime(data.studyHoursTotal);
-  doc.setFontSize(8.5);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.lightGray);
-  const bodyText = `concluiu com êxito o Curso Livre de Educação Financeira Familiar oferecido pelo ${COMPANY} (CNPJ: ${CNPJ}), com carga horária total de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicação aos estudos.`;
-  const bodyLines = doc.splitTextToSize(bodyText, 210);
-  doc.text(bodyLines, W / 2, 101, { align: "center" });
+  tc(doc, C.cream);
+  const body = safe(
+    `concluiu com exito o Curso Livre de Educacao Financeira Familiar oferecido pelo ${COMPANY} (CNPJ: ${CNPJ}), com carga horaria total de ${studyTimeStr}, em reconhecimento ao seu empenho e dedicacao aos estudos.`
+  );
+  const bLines = doc.splitTextToSize(body, 220);
+  doc.text(bLines, W / 2, 114, { align: "center" });
 
-  // Curso livre notice (smaller, separate)
-  doc.setFontSize(6.5);
-  sc(doc, COLORS.mutedText);
+  // Curso livre notice
+  doc.setFontSize(7.5);
+  tc(doc, C.muted);
   doc.text(
-    "Este certificado refere-se a um Curso Livre conforme Lei nº 9.394/96, Art. 42.",
-    W / 2,
-    118,
-    { align: "center" }
+    safe("Este certificado refere-se a um Curso Livre conforme Lei n. 9.394/96, Art. 42."),
+    W / 2, 134, { align: "center" }
   );
 
   // Date
-  doc.setFontSize(7.5);
-  sc(doc, COLORS.lightGray);
-  doc.text(`Data de Conclusão: ${data.completionDate}`, W / 2, 126, { align: "center" });
+  doc.setFontSize(9);
+  tc(doc, C.cream);
+  doc.text(`Data de Conclusao: ${data.completionDate}`, W / 2, 142, { align: "center" });
 
-  drawDivider(doc, W / 2, 132, 60);
+  drawDivider(doc, W / 2, 148, 65);
 
-  // Signatures — well spaced from seal
-  drawSignatureLine(doc, 80, 158, 55, "Nome do Aluno", data.userName);
-  drawSignatureLine(doc, W - 80, 158, 55, "Coordenação", COMPANY);
+  // Signatures
+  const sigY = 170;
+  // Left — student
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  tc(doc, C.white);
+  doc.text(safe(data.userName), 80, sigY - 5, { align: "center" });
+  dc(doc, C.brandGold);
+  doc.setLineWidth(0.3);
+  doc.line(50, sigY, 110, sigY);
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "normal");
+  tc(doc, C.muted);
+  doc.text("Nome do Aluno", 80, sigY + 5, { align: "center" });
 
-  // Seal — centered between signatures, vertically aligned
-  drawSeal(doc, W / 2, 155, 13);
+  // Right — company
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  tc(doc, C.white);
+  doc.text(COMPANY, W - 80, sigY - 5, { align: "center" });
+  dc(doc, C.brandGold);
+  doc.line(W - 110, sigY, W - 50, sigY);
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "normal");
+  tc(doc, C.muted);
+  doc.text("Coordenacao", W - 80, sigY + 5, { align: "center" });
 
-  // QR Code — bottom-right, inside border
+  // Seal — centered
+  drawSeal(doc, W / 2, sigY - 2, 15);
+
+  // QR Code
   if (qrDataUrl) {
-    doc.addImage(qrDataUrl, "PNG", W - 42, H - 38, 22, 22);
-    doc.setFontSize(4.5);
-    sc(doc, COLORS.mutedText);
-    doc.text("Validar Certificado", W - 31, H - 14.5, { align: "center" });
+    doc.addImage(qrDataUrl, "PNG", W - 44, H - 42, 24, 24);
+    doc.setFontSize(5.5);
+    tc(doc, C.muted);
+    doc.text("Validar Certificado", W - 32, H - 16, { align: "center" });
   }
 
-  // Verification code — bottom-left
-  doc.setFontSize(5.5);
-  sc(doc, COLORS.mutedText);
-  doc.text(`Código: ${data.verificationCode}`, 38, H - 16, { align: "center" });
+  // Verification code
+  doc.setFontSize(6);
+  tc(doc, C.muted);
+  doc.text(`Codigo: ${data.verificationCode}`, 38, H - 18, { align: "center" });
 
   // ==================== BACK PAGE ====================
   doc.addPage("a4", "landscape");
-
-  doc.setFillColor(COLORS.bgDark[0], COLORS.bgDark[1], COLORS.bgDark[2]);
+  fc(doc, C.bgDark);
   doc.rect(0, 0, W, H, "F");
   drawBgPattern(doc, W, H);
+  drawStripes(doc, W, 0, 1);
+  drawStripes(doc, W, H - 5.5, -1);
+  drawBorder(doc, W, H);
 
-  // Top/bottom stripes
-  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, 0, W, 2.5, "F");
-  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, 2.5, W, 1.2, "F");
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, 3.7, W, 1.8, "F");
-
-  doc.setFillColor(COLORS.brandBlue[0], COLORS.brandBlue[1], COLORS.brandBlue[2]);
-  doc.rect(0, H - 5.5, W, 1.8, "F");
-  doc.setFillColor(COLORS.brandGold[0], COLORS.brandGold[1], COLORS.brandGold[2]);
-  doc.rect(0, H - 3.7, W, 1.2, "F");
-  doc.setFillColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-  doc.rect(0, H - 2.5, W, 2.5, "F");
-
-  drawElegantBorder(doc, W, H);
-
-  // Logo
-  doc.addImage(logoDataUrl, "PNG", W / 2 - 10, 9, 20, 20);
+  // Logo — medium
+  doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 9, 28, 28);
 
   // Title
-  doc.setFontSize(14);
+  doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
-  sc(doc, COLORS.brandGold);
-  doc.text("CONTEÚDO PROGRAMÁTICO", W / 2, 36, { align: "center" });
+  tc(doc, C.brandGold);
+  doc.text("CONTEUDO PROGRAMATICO", W / 2, 44, { align: "center" });
 
   // Student info
-  doc.setFontSize(7);
+  doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.mutedText);
-  doc.text(`Aluno(a): ${data.userName}  |  Código: ${data.verificationCode}`, W / 2, 42, { align: "center" });
+  tc(doc, C.muted);
+  doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 50, { align: "center" });
 
-  drawDivider(doc, W / 2, 45, 100);
+  drawDivider(doc, W / 2, 54, 105);
 
-  // ---- MODULES (2x2 grid) ----
-  const moduleLabels: Record<string, string> = {
-    iniciante: "Módulo Iniciante",
-    organizado: "Módulo Organizado",
-    investidor: "Módulo Investidor",
-    independente: "Módulo Independente",
-  };
-  const moduleEmojis: Record<string, string> = {
-    iniciante: "🌱",
-    organizado: "📋",
-    investidor: "📈",
-    independente: "🏆",
+  // ---- MODULES 2x2 ----
+  const modLabels: Record<string, string> = {
+    iniciante: "MODULO INICIANTE",
+    organizado: "MODULO ORGANIZADO",
+    investidor: "MODULO INVESTIDOR",
+    independente: "MODULO INDEPENDENTE",
   };
 
-  const moduleTopics: Record<string, string[]> = {
+  const modTopics: Record<string, string[]> = {
     iniciante: [
-      "Por que o dinheiro acaba antes do mês",
-      "Como sobreviver com salário mínimo",
-      "Reserva de emergência na vida real",
-      "O que são juros e como te afetam",
-      "Como fazer um orçamento simples",
-      "Diferença entre querer e precisar",
+      "Por que o dinheiro acaba antes do mes",
+      "Como sobreviver com salario minimo",
+      "Reserva de emergencia na vida real",
+      "O que sao juros e como te afetam",
+      "Como fazer um orcamento simples",
+      "Diferenca entre querer e precisar",
       "Como evitar o cheque especial",
       "Metas financeiras: como definir",
-      "Conversar sobre dinheiro em família",
-      "Golpes financeiros: proteção",
+      "Conversar sobre dinheiro em familia",
+      "Golpes financeiros: protecao",
     ],
     organizado: [
-      "Dívida não é sentença de morte",
+      "Divida nao e sentenca de morte",
       "Compra por impulso: como parar",
-      "Pix parcelado e cartão: armadilhas",
-      "Método bola de neve para dívidas",
+      "Pix parcelado e cartao: armadilhas",
+      "Metodo bola de neve para dividas",
       "Como economizar no supermercado",
       "Contas fixas: como reduzir",
-      "Renda extra: ideias práticas",
+      "Renda extra: ideias praticas",
       "Direitos do consumidor endividado",
       "Apps financeiros gratuitos",
       "Planejamento mensal eficiente",
     ],
     investidor: [
-      "Poupança vs CDB vs Tesouro",
+      "Poupanca vs CDB vs Tesouro",
       "Como funciona a bolsa de valores",
       "Renda fixa para iniciantes",
       "Fundos de investimento",
       "Como avaliar riscos",
       "Imposto de renda: investimentos",
-      "Previdência privada: vale?",
-      "Diversificação de carteira",
+      "Previdencia privada: vale a pena?",
+      "Diversificacao de carteira",
       "Investir com pouco dinheiro",
       "Erros comuns ao investir",
     ],
     independente: [
-      "Independência financeira: conceito",
+      "Independencia financeira: conceito",
       "Renda passiva: como construir",
-      "Imóveis como investimento",
-      "Empreendedorismo e finanças",
+      "Imoveis como investimento",
+      "Empreendedorismo e financas",
       "Planejamento para aposentadoria",
-      "Herança e planejamento sucessório",
-      "Educação financeira para filhos",
-      "Proteção patrimonial: seguros",
+      "Heranca e planejamento sucessorio",
+      "Educacao financeira para filhos",
+      "Protecao patrimonial: seguros",
       "Filantropia e impacto social",
       "Seu plano de liberdade financeira",
     ],
   };
 
-  const leftCol = 20;
-  const rightCol = W / 2 + 8;
-  const moduleKeys = Object.keys(moduleLabels);
+  const lCol = 20;
+  const rCol = W / 2 + 8;
+  const keys = Object.keys(modLabels);
 
-  moduleKeys.forEach((key, idx) => {
-    const col = idx % 2 === 0 ? leftCol : rightCol;
-    const startY = idx < 2 ? 50 : 108;
+  keys.forEach((key, idx) => {
+    const col = idx % 2 === 0 ? lCol : rCol;
+    const startY = idx < 2 ? 59 : 118;
 
-    // Module title with colored underline
-    doc.setFontSize(7.5);
+    // Module title
+    doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    sc(doc, COLORS.brandGreen);
-    doc.text(`${moduleEmojis[key]}  ${moduleLabels[key]}`, col, startY);
+    tc(doc, C.brandGreen);
+    doc.text(modLabels[key], col, startY);
 
-    // Small underline
-    doc.setDrawColor(COLORS.brandGreen[0], COLORS.brandGreen[1], COLORS.brandGreen[2]);
-    doc.setLineWidth(0.2);
-    doc.line(col, startY + 1.5, col + 50, startY + 1.5);
+    // Underline
+    dc(doc, C.brandGreen);
+    doc.setLineWidth(0.25);
+    doc.line(col, startY + 1.5, col + 55, startY + 1.5);
 
     // Topics
-    doc.setFontSize(5.2);
+    doc.setFontSize(6);
     doc.setFont("helvetica", "normal");
-    sc(doc, COLORS.lightGray);
-    const topics = moduleTopics[key] || [];
-    topics.forEach((topic, i) => {
-      doc.text(`•  ${topic}`, col + 1, startY + 5.5 + i * 4.8);
+    tc(doc, C.cream);
+    (modTopics[key] || []).forEach((topic, i) => {
+      doc.text(`-  ${topic}`, col + 1, startY + 6 + i * 5);
     });
   });
 
   // ---- MISSIONS ----
-  doc.setFontSize(9);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  sc(doc, COLORS.brandGold);
-  doc.text("MISSÕES CONCLUÍDAS", W / 2, 162, { align: "center" });
+  tc(doc, C.brandGold);
+  doc.text("MISSOES CONCLUIDAS", W / 2, 172, { align: "center" });
 
-  drawDivider(doc, W / 2, 164.5, 50);
+  drawDivider(doc, W / 2, 175, 55);
 
-  // Missions in 3 columns to fit better
-  const missions = data.missionsCompleted;
-  const colCount = 3;
-  const perCol = Math.ceil(missions.length / colCount);
+  const missions = data.missionsCompleted.map(m => safe(m));
+  const perCol = Math.ceil(missions.length / 3);
   const mCols = [25, W / 3 + 10, (2 * W) / 3 - 5];
 
-  doc.setFontSize(4.8);
+  doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.lightGray);
-
-  missions.forEach((mission, i) => {
-    const colIdx = Math.floor(i / perCol);
+  tc(doc, C.cream);
+  missions.forEach((m, i) => {
+    const ci = Math.floor(i / perCol);
     const row = i % perCol;
-    const x = mCols[Math.min(colIdx, 2)];
-    doc.text(`✓  ${mission}`, x, 169 + row * 3.2);
+    doc.text(`-  ${m}`, mCols[Math.min(ci, 2)], 179 + row * 3.5);
   });
 
   // ---- SOCIAL & FOOTER ----
-  doc.setFontSize(6.5);
+  doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  sc(doc, COLORS.brandGold);
-  doc.text("Siga-nos:", W / 2, H - 20, { align: "center" });
+  tc(doc, C.brandGold);
+  doc.text("Siga-nos:", W / 2, H - 22, { align: "center" });
 
-  doc.setFontSize(6.5);
+  doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  sc(doc, COLORS.white);
+  tc(doc, C.white);
+  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 17, { align: "center" });
+
+  doc.setFontSize(5);
+  tc(doc, C.muted);
   doc.text(
-    "Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil",
-    W / 2,
-    H - 15.5,
-    { align: "center" }
+    "Este certificado refere-se a um Curso Livre, conforme Lei n. 9.394/96, Art. 42. Nao substitui cursos tecnicos, de graduacao ou pos-graduacao.",
+    W / 2, H - 10, { align: "center" }
   );
 
-  doc.setFontSize(4.5);
-  sc(doc, COLORS.mutedText);
+  doc.setFontSize(5);
+  tc(doc, C.muted);
   doc.text(
-    "Este certificado refere-se a um Curso Livre, conforme Lei nº 9.394/96, Art. 42. Não substitui cursos técnicos, de graduação ou pós-graduação.",
-    W / 2,
-    H - 10,
-    { align: "center" }
-  );
-
-  doc.setFontSize(4.5);
-  sc(doc, COLORS.mutedText);
-  doc.text(
-    `Código: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
-    W / 2,
-    H - 7,
-    { align: "center" }
+    `Codigo de Verificacao: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
+    W / 2, H - 7, { align: "center" }
   );
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
