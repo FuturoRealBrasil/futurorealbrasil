@@ -745,11 +745,17 @@ const Educacao = () => {
           </div>
         </div>
 
-        {/* All modules completed message */}
-        {allModulesCompleted && (
+        {/* Review encouragement message */}
+        {canGetCertificate && (
+          <div className="bg-gradient-to-r from-brand-blue/10 to-brand-green/10 border border-brand-blue/30 rounded-xl p-4 mb-6 text-center animate-fade-up">
+            <p className="text-lg font-extrabold text-foreground">📚 Parabéns, você concluiu tudo!</p>
+            <p className="text-sm text-muted-foreground mt-1">Revisar os conteúdos é a melhor forma de fixar o conhecimento. Releia os tópicos quantas vezes quiser para fortalecer sua educação financeira!</p>
+          </div>
+        )}
+        {allModulesCompleted && !canGetCertificate && (
           <div className="bg-safe/10 border border-safe/20 rounded-xl p-4 mb-6 text-center animate-fade-up">
             <p className="text-lg font-extrabold text-safe">🏆 Todos os módulos concluídos!</p>
-            <p className="text-sm text-safe/80">Você pode revisar qualquer módulo quando quiser.</p>
+            <p className="text-sm text-safe/80">Complete as missões para liberar seu certificado.</p>
           </div>
         )}
 
