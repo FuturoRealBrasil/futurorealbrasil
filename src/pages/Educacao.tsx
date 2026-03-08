@@ -466,9 +466,11 @@ const Educacao = () => {
     const completionDate = new Date();
     const studySeconds = getTotalStudySeconds();
 
-    // Get user display name
-    const { data: profile } = await supabase.from("profiles").select("display_name").eq("user_id", user.id).single();
-    const userName = profile?.display_name || user.email || "Aluno";
+    // Use the name provided by the user in the dialog
+    const userName = certName.trim() || user.email || "Aluno";
+
+    // Save name to profile
+    await supabase.from("profiles").update({ display_name: userName }).eq("user_id", user.id);
 
     // Save CPF to profile
     await supabase.from("profiles").update({ cpf: certCpf.trim() }).eq("user_id", user.id);
