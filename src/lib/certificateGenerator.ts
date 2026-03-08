@@ -427,25 +427,25 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("Siga-nos:", W / 2, H - 16, { align: "center" });
+  doc.text("Siga-nos:", W / 2, H - 28, { align: "center" });
 
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   tc(doc, C.white);
-  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 12, { align: "center" });
+  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 23, { align: "center" });
 
   doc.setFontSize(5);
   tc(doc, C.muted);
   doc.text(
     "Este certificado refere-se a um Curso Livre, conforme Lei n. 9.394/96, Art. 42. Nao substitui cursos tecnicos, de graduacao ou pos-graduacao.",
-    W / 2, H - 8, { align: "center" }
+    W / 2, H - 18, { align: "center" }
   );
 
   doc.setFontSize(5);
   tc(doc, C.muted);
   doc.text(
     `Codigo de Verificacao: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
-    W / 2, H - 5, { align: "center" }
+    W / 2, H - 14, { align: "center" }
   );
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
