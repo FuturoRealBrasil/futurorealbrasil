@@ -46,6 +46,13 @@ const FRONT_CLEAR_REGIONS = [
   [0.55, 0.72, 0.2, 0.045],
 ];
 
+// Regions to clear on the back template for course content overlay
+// Clears the 4 text sections (Conteúdo, Benefícios, Continuação, Conecte-se) body text
+const BACK_CLEAR_REGIONS = [
+  // Main content area - all 4 sections text (below headers, above footer)
+  [0.08, 0.28, 0.58, 0.62],
+];
+
 // Load image, clear specified regions by sampling surrounding pixels, return data URL
 async function loadAndCleanImage(src: string, clearRegions: number[][] = []): Promise<string> {
   return new Promise((resolve, reject) => {
