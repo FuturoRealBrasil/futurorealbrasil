@@ -379,10 +379,10 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   keys.forEach((key, idx) => {
     const col = idx % 2 === 0 ? lCol : rCol;
-    const startY = idx < 2 ? 59 : 105;
+    const startY = idx < 2 ? 59 : 100;
 
     // Module title
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     tc(doc, C.brandGreen);
     doc.text(modLabels[key], col, startY);
@@ -393,17 +393,17 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
     doc.line(col, startY + 1.5, col + 65, startY + 1.5);
 
     // Topics
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     tc(doc, C.cream);
     (modTopics[key] || []).forEach((topic, i) => {
-      doc.text(`-  ${topic}`, col + 1, startY + 5.5 + i * 4);
+      doc.text(`-  ${topic}`, col + 1, startY + 5 + i * 3.5);
     });
   });
 
   // ---- MISSIONS ----
-  const missionsStartY = 150;
-  doc.setFontSize(13);
+  const missionsStartY = 140;
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
   doc.text("MISSOES CONCLUIDAS", W / 2, missionsStartY, { align: "center" });
@@ -427,25 +427,25 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
-  doc.text("Siga-nos:", W / 2, H - 28, { align: "center" });
+  doc.text("Siga-nos:", W / 2, H - 26, { align: "center" });
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   tc(doc, C.white);
-  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 23, { align: "center" });
+  doc.text("Instagram: @futurorealbrasil   |   YouTube: Futuro Real Brasil", W / 2, H - 21, { align: "center" });
 
-  doc.setFontSize(7);
+  doc.setFontSize(6);
   tc(doc, C.muted);
   doc.text(
     "Este certificado refere-se a um Curso Livre, conforme Lei n. 9.394/96, Art. 42. Nao substitui cursos tecnicos, de graduacao ou pos-graduacao.",
-    W / 2, H - 18, { align: "center" }
+    W / 2, H - 16, { align: "center" }
   );
 
-  doc.setFontSize(7);
+  doc.setFontSize(6);
   tc(doc, C.muted);
   doc.text(
     `Codigo de Verificacao: ${data.verificationCode}  |  Verifique em: ${PUBLISHED_URL}/verificar-certificado`,
-    W / 2, H - 14, { align: "center" }
+    W / 2, H - 13, { align: "center" }
   );
 
   doc.save(`certificado-${data.verificationCode}.pdf`);
