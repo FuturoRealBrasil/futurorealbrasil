@@ -513,11 +513,19 @@ const Educacao = () => {
     if (!existingCert || !user) return;
     setCertLoading(true);
 
-    const { data: cert } = await supabase.from("certificates").select("*").eq("verification_code", existingCert).single();
+    const [{ data: cert }, { data: profile }] = await Promise.all([
+      supabase.from("certificates").select("*").eq("verification_code", existingCert).single(),
+      supabase.from("profiles").select("display_name, cpf").eq("user_id", user.id).single(),
+    ]);
+
     if (cert) {
+      // Use current profile name/cpf if available, fallback to certificate data
+      const currentName = profile?.display_name || cert.user_name;
+      const currentCpf = profile?.cpf || cert.user_cpf;
+
       await generateCertificatePDF({
-        userName: cert.user_name,
-        userCpf: cert.user_cpf,
+        userName: currentName,
+        userCpf: currentCpf,
         completionDate: new Date(cert.completion_date).toLocaleDateString("pt-BR"),
         verificationCode: cert.verification_code,
         studyHoursTotal: Number(cert.study_hours_total),
