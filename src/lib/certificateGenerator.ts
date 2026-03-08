@@ -301,13 +301,13 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.addImage(logoDataUrl, "PNG", W / 2 - 14, 9, 28, 28);
 
   // Title
-  doc.setFontSize(20);
+  doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
   tc(doc, C.brandGold);
   doc.text("CONTEUDO PROGRAMATICO", W / 2, 44, { align: "center" });
 
   // Student info
-  doc.setFontSize(9);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   tc(doc, C.muted);
   doc.text(safe(`Aluno(a): ${data.userName}  |  Codigo: ${data.verificationCode}`), W / 2, 51, { align: "center" });
