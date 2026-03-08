@@ -94,7 +94,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
 
   // Load front with cleared regions, back as-is (new template), and QR code
   const [frontDataUrl, backDataUrl, qrDataUrl] = await Promise.all([
-    loadAndCleanImage(certFrenteImg, FRONT_CLEAR_REGIONS),
+    loadImageAsDataUrl(certFrenteImg),
     loadImageAsDataUrl(certVersoImg),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
   ]);
