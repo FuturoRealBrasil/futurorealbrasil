@@ -71,10 +71,20 @@ const Auth = () => {
         setSubmitting(false);
         return;
       }
+      if (!whatsapp) {
+        toast.error("Informe seu número de celular");
+        setSubmitting(false);
+        return;
+      }
       const { error } = await signUp(email, password, displayName || email);
       if (error) {
         toast.error(error.message);
       } else {
+        // Save whatsapp to profile after signup
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.from("profiles").update({ whatsapp } as any).eq("user_id", newUser.id);
+        }
         toast.success("Conta criada! Verifique seu email para confirmar.");
       }
     }
