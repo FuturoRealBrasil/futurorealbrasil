@@ -788,7 +788,7 @@ const Educacao = () => {
             <div key={level} className="mb-6">
               <div className={`rounded-xl p-3 mb-3 border ${moduleCompleted && !canGetCertificate ? lvl.completedColor : lvl.color}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold">{moduleCompleted ? "✅ " : ""}{lvl.label}</span>
+                  <span className="text-sm font-bold">{moduleCompleted && !canGetCertificate ? "✅ " : ""}{lvl.label}</span>
                   <span className="text-xs font-medium">{completedInModule}/{levelArticles.length}</span>
                 </div>
                 <p className="text-xs mt-1 opacity-80">{lvl.desc}</p>
