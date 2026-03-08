@@ -46,6 +46,13 @@ const FRONT_CLEAR_REGIONS = [
   [0.55, 0.72, 0.2, 0.045],
 ];
 
+// Regions to clear on the back template for course content overlay
+// Clears the 4 text sections (Conteúdo, Benefícios, Continuação, Conecte-se) body text
+const BACK_CLEAR_REGIONS = [
+  // Main content area - all 4 sections text (below headers, above footer)
+  [0.08, 0.28, 0.58, 0.62],
+];
+
 // Load image, clear specified regions by sampling surrounding pixels, return data URL
 async function loadAndCleanImage(src: string, clearRegions: number[][] = []): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -160,7 +167,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   // Load front image with cleared placeholder regions, back image as-is, and QR code
   const [frontDataUrl, backDataUrl, qrDataUrl] = await Promise.all([
     loadAndCleanImage(certFrenteImg, FRONT_CLEAR_REGIONS),
-    loadImageAsDataUrl(certVersoImg),
+    loadAndCleanImage(certVersoImg, BACK_CLEAR_REGIONS),
     QRCode.toDataURL(verifyUrl, { width: 400, margin: 1 }).catch(() => null),
   ]);
 
@@ -233,36 +240,20 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
   doc.setTextColor(0, 80, 40);
   doc.text(`${PUBLISHED_URL}/verificar-certificado`, W - 49, 100, { align: "center" });
 
-  // --- Course content: overlay modules list in the left content area ---
-  // Position within the template's "Conteúdo do Curso" section area
-  // The template has 4 sections (Conteúdo, Benefícios, Continuação, Conecte-se)
-  // We'll add the actual course topics inside the "Conteúdo do Curso" section
-
-  // Clear the generic description text under "Conteúdo do Curso" and replace with actual modules
-  const parchment = { r: 215, g: 205, b: 175 };
-  
-  // Clear area for course content (below the section headers, left side)
-  doc.setFillColor(parchment.r, parchment.g, parchment.b);
-  doc.rect(28, 62, 185, 108, "F");
-
-  // Draw border
-  doc.setDrawColor(139, 119, 42);
-  doc.setLineWidth(0.4);
-  doc.rect(28, 62, 185, 108, "S");
-
+  // --- Course content: positioned over the cleared template area ---
   // Title
-  doc.setFontSize(11);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 80, 40);
-  doc.text("Conteudo Programatico do Curso", 120, 69, { align: "center" });
+  doc.text("Conteudo Programatico do Curso", 120, 68, { align: "center" });
 
   doc.setDrawColor(139, 119, 42);
   doc.setLineWidth(0.3);
-  doc.line(45, 71, 195, 71);
+  doc.line(45, 70, 195, 70);
 
   const modules = Object.entries(COURSE_MODULES);
-  const leftCol = 33;
-  const rightCol = 122;
+  const leftCol = 30;
+  const rightCol = 120;
   const colWidth = 85;
 
   // Row 1: Modules 1 & 2, Row 2: Modules 3 & 4
@@ -272,7 +263,7 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
       if (idx >= modules.length) break;
       const [moduleName, topics] = modules[idx];
       const x = col === 0 ? leftCol : rightCol;
-      const baseY = 78 + row * 50;
+      const baseY = 78 + row * 52;
 
       // Module title
       doc.setFontSize(7.5);
@@ -286,11 +277,11 @@ export async function generateCertificatePDF(data: CertificateData, _siteUrl: st
       doc.line(x, baseY + 1, x + colWidth, baseY + 1);
 
       // Topics
-      doc.setFontSize(5.5);
+      doc.setFontSize(5.8);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(50, 40, 30);
       for (let t = 0; t < topics.length; t++) {
-        doc.text(`• ${topics[t]}`, x + 1, baseY + 5 + t * 4.2);
+        doc.text(`• ${topics[t]}`, x + 1, baseY + 5 + t * 4.5);
       }
     }
   }
