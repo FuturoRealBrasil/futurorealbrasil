@@ -3,11 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BarChart3, Target, BookOpen, Zap, CreditCard, LogOut, Menu, X, Home, UserCircle } from "lucide-react";
+import { BarChart3, Target, BookOpen, Zap, CreditCard, LogOut, Menu, X, Home, UserCircle, Shield } from "lucide-react";
 
 const menuItems = [
   { path: "/", icon: Home, label: "Início" },
   { path: "/dashboard", icon: BarChart3, label: "Futuro" },
+  { path: "/reserva", icon: Shield, label: "Reserva" },
   { path: "/missoes", icon: Target, label: "Missões" },
   { path: "/educacao", icon: BookOpen, label: "Aprender" },
   { path: "/emergencia", icon: Zap, label: "SOS" },

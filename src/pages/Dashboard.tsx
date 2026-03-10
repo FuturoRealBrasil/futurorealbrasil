@@ -4,11 +4,12 @@ import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
 import { useAuth } from "@/hooks/useAuth";
-import { TrendingUp, AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, PiggyBank, RefreshCw, DollarSign, Minus, FileDown } from "lucide-react";
+import { TrendingUp, AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, RefreshCw, DollarSign, Minus, FileDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppLayout from "@/components/AppLayout";
 import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
@@ -17,20 +18,36 @@ import { generateTransactionsPDF } from "@/lib/pdfGenerator";
 import logo from "@/assets/logo-transparent.png";
 import HamburgerMenu from "@/components/HamburgerMenu";
 
+// Investment types with annual yields
+const investmentTypes = [
+  { id: "cdb", label: "CDB (100% CDI)", annualRate: 0.105 },
+  { id: "cdb_120", label: "CDB (120% CDI)", annualRate: 0.126 },
+  { id: "tesouro_selic", label: "Tesouro Selic", annualRate: 0.105 },
+  { id: "lci", label: "LCI (90% CDI)", annualRate: 0.0945 },
+  { id: "lca", label: "LCA (90% CDI)", annualRate: 0.0945 },
+  { id: "tesouro_ipca", label: "Tesouro IPCA+ (6%+IPCA)", annualRate: 0.105 },
+];
+
+function compoundProjection(principal: number, monthlyAdd: number, annualRate: number, months: number): number {
+  const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
+  let total = principal;
+  for (let i = 0; i < months; i++) {
+    total = (total + monthlyAdd) * (1 + monthlyRate);
+  }
+  return total;
+}
+
 // Digital clock component
 function DigitalClock() {
   const [now, setNow] = useState(new Date());
-
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
-
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
   const seconds = String(now.getSeconds()).padStart(2, "0");
   const monthYear = now.toLocaleString("pt-BR", { month: "long", year: "numeric" });
-
   return (
     <div className="text-right">
       <p className="text-lg md:text-xl font-mono font-bold text-primary-foreground tracking-wider">
@@ -41,7 +58,6 @@ function DigitalClock() {
   );
 }
 
-// Health score emoji
 function ScoreEmoji({ score }: { score: number }) {
   let emoji: string;
   if (score >= 80) emoji = "😄";
@@ -61,17 +77,14 @@ const Dashboard = () => {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedInvestment, setSelectedInvestment] = useState("cdb");
 
-  const { saving: monthlySaving, addSaving, addReserve, removeSaving, removeReserve } = useMonthlySavings(selectedMonth, selectedYear);
+  const { saving: monthlySaving, addSaving, removeSaving } = useMonthlySavings(selectedMonth, selectedYear);
   const { transactions, load: loadTransactions, logTransaction } = useSavingsTransactions(selectedMonth, selectedYear);
 
-  // Dialog states
   const [savingDialog, setSavingDialog] = useState<"add" | "remove" | null>(null);
   const [savingValue, setSavingValue] = useState("");
   const [savingDesc, setSavingDesc] = useState("");
-  const [reserveDialog, setReserveDialog] = useState<"add" | "remove" | null>(null);
-  const [reserveValue, setReserveValue] = useState("");
-  const [reserveDesc, setReserveDesc] = useState("");
   const [showUpdateRenda, setShowUpdateRenda] = useState(false);
   const [newRenda, setNewRenda] = useState("");
   const [showUpdateGastos, setShowUpdateGastos] = useState(false);
@@ -105,31 +118,14 @@ const Dashboard = () => {
     if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
     if (savingDialog === "add") {
       await addSaving(v);
-      await logTransaction("guardado_add", v, savingDesc || "Valor guardado", selectedMonth, selectedYear);
-      toast.success("Valor guardado!");
+      await logTransaction("guardado_add", v, savingDesc || "Investimento adicionado", selectedMonth, selectedYear);
+      toast.success("Investimento adicionado!");
     } else {
       await removeSaving(v);
-      await logTransaction("guardado_remove", v, savingDesc || "Valor retirado", selectedMonth, selectedYear);
+      await logTransaction("guardado_remove", v, savingDesc || "Investimento retirado", selectedMonth, selectedYear);
       toast.success("Valor retirado!");
     }
     setSavingValue(""); setSavingDesc(""); setSavingDialog(null);
-  }
-
-  async function handleReserveConfirm() {
-    const v = parseFloat(reserveValue.replace(",", "."));
-    if (isNaN(v) || v <= 0) { toast.error("Valor inválido"); return; }
-    if (reserveDialog === "add") {
-      await addReserve(v);
-      await saveData({ temReserva: true, valorReserva: data.valorReserva + v });
-      await logTransaction("reserva_add", v, reserveDesc || "Reserva adicionada", selectedMonth, selectedYear);
-      toast.success("Reserva atualizada!");
-    } else {
-      await removeReserve(v);
-      await saveData({ valorReserva: Math.max(0, data.valorReserva - v) });
-      await logTransaction("reserva_remove", v, reserveDesc || "Reserva retirada", selectedMonth, selectedYear);
-      toast.success("Reserva reduzida!");
-    }
-    setReserveValue(""); setReserveDesc(""); setReserveDialog(null);
   }
 
   async function handleDownloadPDF() {
@@ -154,14 +150,16 @@ const Dashboard = () => {
     toast.success("Gastos atualizados!");
   }
 
-  const reserveMonthly = monthlySaving?.valor_reserva || 0;
-  const savingsMonthly = monthlySaving?.valor_guardado || 0;
-  const totalMonthlyContribution = reserveMonthly + savingsMonthly;
-  const projectionBase = totalMonthlyContribution > 0 ? totalMonthlyContribution : (saldo > 0 ? saldo : 0);
-  const projection6m = projectionBase * 6;
-  const projection1y = projectionBase * 12;
-  const projection5y = projectionBase * 60;
-  const projection10y = projectionBase * 120;
+  // Investment projections with compound interest
+  const investmentMonthly = monthlySaving?.valor_guardado || 0;
+  const currentInvestment = investmentMonthly; // current month's investment as base
+  const selectedRate = investmentTypes.find(t => t.id === selectedInvestment)?.annualRate || 0.105;
+
+  const projectionBase = investmentMonthly > 0 ? investmentMonthly : (saldo > 0 ? saldo : 0);
+  const projection6m = compoundProjection(0, projectionBase, selectedRate, 6);
+  const projection1y = compoundProjection(0, projectionBase, selectedRate, 12);
+  const projection5y = compoundProjection(0, projectionBase, selectedRate, 60);
+  const projection10y = compoundProjection(0, projectionBase, selectedRate, 120);
 
   const alerts: { text: string; type: "safe" | "warning" | "danger" }[] = [];
   if (saldo < 0) {
@@ -217,7 +215,6 @@ const Dashboard = () => {
 
         {/* Desktop: Score + Alerts side by side */}
         <div className="md:grid md:grid-cols-2 md:gap-6 mb-6">
-          {/* Score */}
           <div className="bg-card rounded-2xl p-6 border shadow-sm mb-6 md:mb-0 text-center animate-fade-up">
             <p className="text-sm font-semibold text-muted-foreground mb-2">Saúde Financeira</p>
             <div className="flex items-center justify-center gap-3">
@@ -229,7 +226,6 @@ const Dashboard = () => {
             <div className={`h-3 rounded-full ${scoreBg} -mt-3`} style={{ width: `${score}%` }} />
           </div>
 
-          {/* Alerts */}
           <div className="space-y-3 md:flex md:flex-col md:justify-center">
             {alerts.map((alert, i) => (
               <div key={i} className={`rounded-xl p-4 border flex items-start gap-3 animate-fade-up ${alert.type === "danger" ? "bg-danger/5 border-danger/20" : alert.type === "warning" ? "bg-warning/5 border-warning/20" : "bg-safe/5 border-safe/20"}`} style={{ animationDelay: `${(i + 1) * 0.1}s` }}>
@@ -240,34 +236,52 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Savings Projection */}
+        {/* Investment Projection */}
         <div className="bg-card rounded-2xl p-5 border shadow-sm mb-6 animate-fade-up">
           <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Economia
+            <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Investimento
           </h2>
+          
+          {/* Investment type selector */}
+          <div className="mb-4">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Em qual investimento aplicou?</label>
+            <Select value={selectedInvestment} onValueChange={setSelectedInvestment}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {investmentTypes.map(t => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.label} — {(t.annualRate * 100).toFixed(1)}% a.a.
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {projectionBase > 0 ? (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">
-                Se você guardar <span className="font-bold text-foreground">R$ {projectionBase.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span>:
+                Investindo <span className="font-bold text-foreground">R$ {projectionBase.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span> em <span className="font-bold text-foreground">{investmentTypes.find(t => t.id === selectedInvestment)?.label}</span>:
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
                   <p className="text-xs text-muted-foreground">Em 6 meses</p>
-                  <p className="text-sm font-bold text-safe">R$ {projection6m.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                  <p className="text-sm font-bold text-safe">R$ {projection6m.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                 {isPremium ? (
                   <>
                     <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
                       <p className="text-xs text-muted-foreground">Em 1 ano</p>
-                      <p className="text-sm font-bold text-safe">R$ {projection1y.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                      <p className="text-sm font-bold text-safe">R$ {projection1y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                     <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
                       <p className="text-xs text-muted-foreground">Em 5 anos</p>
-                      <p className="text-sm font-bold text-safe">R$ {projection5y.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                      <p className="text-sm font-bold text-safe">R$ {projection5y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                     <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
                       <p className="text-xs text-muted-foreground">Em 10 anos</p>
-                      <p className="text-sm font-bold text-primary">R$ {projection10y.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</p>
+                      <p className="text-sm font-bold text-primary">R$ {projection10y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                   </>
                 ) : (
@@ -279,7 +293,7 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Adicione valores à reserva ou guardado para ver projeções de economia.</p>
+            <p className="text-sm text-muted-foreground">Adicione valores ao investimento para ver projeções com juros compostos.</p>
           )}
         </div>
 
@@ -315,42 +329,22 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Monthly Savings / Reserve */}
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-3">
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <Wallet className="w-4 h-4 text-brand-green" />
-              <p className="text-xs text-muted-foreground font-medium">Guardado em {monthName}</p>
-            </div>
-            <p className="text-lg font-bold text-brand-green">
-              R$ {(monthlySaving?.valor_guardado || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </p>
-            <div className="flex gap-2 mt-2">
-              <button onClick={() => { setSavingDialog("add"); setSavingValue(""); setSavingDesc(""); }} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Adicionar
-              </button>
-              <button onClick={() => { setSavingDialog("remove"); setSavingValue(""); setSavingDesc(""); }} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
-                <Minus className="w-3 h-3" /> Retirar
-              </button>
-            </div>
+        {/* Monthly Investment (was "Guardado") */}
+        <div className="bg-card rounded-xl p-4 border shadow-sm mb-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Wallet className="w-4 h-4 text-brand-green" />
+            <p className="text-xs text-muted-foreground font-medium">Investimento de {monthName}</p>
           </div>
-
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <PiggyBank className="w-4 h-4 text-brand-gold" />
-              <p className="text-xs text-muted-foreground font-medium">Reserva em {monthName}</p>
-            </div>
-            <p className="text-lg font-bold text-brand-gold">
-              R$ {(monthlySaving?.valor_reserva || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </p>
-            <div className="flex gap-2 mt-2">
-              <button onClick={() => { setReserveDialog("add"); setReserveValue(""); setReserveDesc(""); }} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Adicionar
-              </button>
-              <button onClick={() => { setReserveDialog("remove"); setReserveValue(""); setReserveDesc(""); }} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
-                <Minus className="w-3 h-3" /> Retirar
-              </button>
-            </div>
+          <p className="text-lg font-bold text-brand-green">
+            R$ {(monthlySaving?.valor_guardado || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          </p>
+          <div className="flex gap-2 mt-2">
+            <button onClick={() => { setSavingDialog("add"); setSavingValue(""); setSavingDesc(""); }} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+              <DollarSign className="w-3 h-3" /> Adicionar
+            </button>
+            <button onClick={() => { setSavingDialog("remove"); setSavingValue(""); setSavingDesc(""); }} className="text-xs text-destructive font-medium hover:underline flex items-center gap-1">
+              <Minus className="w-3 h-3" /> Retirar
+            </button>
           </div>
         </div>
 
@@ -388,7 +382,7 @@ const Dashboard = () => {
       <Dialog open={savingDialog !== null} onOpenChange={() => setSavingDialog(null)}>
         <DialogContent className="max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold">Movimentar Guardado</DialogTitle>
+            <DialogTitle className="text-lg font-extrabold">Movimentar Investimento</DialogTitle>
           </DialogHeader>
           <div className="flex gap-2 mb-4">
             <button
@@ -412,39 +406,6 @@ const Dashboard = () => {
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setSavingDialog(null)} className="flex-1">Cancelar</Button>
               <Button onClick={handleSavingConfirm} className="flex-1">Confirmar</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Reserve Dialog */}
-      <Dialog open={reserveDialog !== null} onOpenChange={() => setReserveDialog(null)}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold">Movimentar Reserva</DialogTitle>
-          </DialogHeader>
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setReserveDialog("add")}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${reserveDialog === "add" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-            >
-              Adicionar
-            </button>
-            <button
-              onClick={() => setReserveDialog("remove")}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${reserveDialog === "remove" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-            >
-              Retirar
-            </button>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-foreground">Valor</label>
-              <Input placeholder="R$ 0,00" value={reserveValue} onChange={(e) => setReserveValue(e.target.value)} inputMode="decimal" className="mt-1" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setReserveDialog(null)} className="flex-1">Cancelar</Button>
-              <Button onClick={handleReserveConfirm} className="flex-1">Confirmar</Button>
             </div>
           </div>
         </DialogContent>
