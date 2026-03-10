@@ -20,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ComoFunciona from "./pages/ComoFunciona";
 import VerificarCertificado from "./pages/VerificarCertificado";
 import Perfil from "./pages/Perfil";
+import Reserva from "./pages/Reserva";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const AppRoutes = () => (
     <Route path="/emergencia" element={<ProtectedRoute><Emergencia /></ProtectedRoute>} />
     <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
     <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+    <Route path="/reserva" element={<ProtectedRoute><Reserva /></ProtectedRoute>} />
     <Route path="/assinatura-confirmada" element={<ProtectedRoute><AssinaturaConfirmada /></ProtectedRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/como-funciona" element={<ComoFunciona />} />
