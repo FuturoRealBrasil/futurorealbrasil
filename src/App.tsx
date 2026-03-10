@@ -20,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ComoFunciona from "./pages/ComoFunciona";
 import VerificarCertificado from "./pages/VerificarCertificado";
 import Perfil from "./pages/Perfil";
+import Reserva from "./pages/Reserva";
 
 const queryClient = new QueryClient();
 
