@@ -4,12 +4,13 @@ import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
 import { useAuth } from "@/hooks/useAuth";
-import { TrendingUp, AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, RefreshCw, DollarSign, Minus, FileDown } from "lucide-react";
+import { AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, RefreshCw, DollarSign, Minus, FileDown, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import InvestmentProjection from "@/components/InvestmentProjection";
 import AppLayout from "@/components/AppLayout";
 import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
@@ -18,24 +19,6 @@ import { generateTransactionsPDF } from "@/lib/pdfGenerator";
 import logo from "@/assets/logo-transparent.png";
 import HamburgerMenu from "@/components/HamburgerMenu";
 
-// Investment types with annual yields
-const investmentTypes = [
-  { id: "cdb", label: "CDB (100% CDI)", annualRate: 0.105 },
-  { id: "cdb_120", label: "CDB (120% CDI)", annualRate: 0.126 },
-  { id: "tesouro_selic", label: "Tesouro Selic", annualRate: 0.105 },
-  { id: "lci", label: "LCI (90% CDI)", annualRate: 0.0945 },
-  { id: "lca", label: "LCA (90% CDI)", annualRate: 0.0945 },
-  { id: "tesouro_ipca", label: "Tesouro IPCA+ (6%+IPCA)", annualRate: 0.105 },
-];
-
-function compoundProjection(principal: number, monthlyAdd: number, annualRate: number, months: number): number {
-  const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
-  let total = principal;
-  for (let i = 0; i < months; i++) {
-    total = (total + monthlyAdd) * (1 + monthlyRate);
-  }
-  return total;
-}
 
 // Digital clock component
 function DigitalClock() {
@@ -150,16 +133,7 @@ const Dashboard = () => {
     toast.success("Gastos atualizados!");
   }
 
-  // Investment projections with compound interest
   const investmentMonthly = monthlySaving?.valor_guardado || 0;
-  const currentInvestment = investmentMonthly; // current month's investment as base
-  const selectedRate = investmentTypes.find(t => t.id === selectedInvestment)?.annualRate || 0.105;
-
-  const projectionBase = investmentMonthly > 0 ? investmentMonthly : (saldo > 0 ? saldo : 0);
-  const projection6m = compoundProjection(0, projectionBase, selectedRate, 6);
-  const projection1y = compoundProjection(0, projectionBase, selectedRate, 12);
-  const projection5y = compoundProjection(0, projectionBase, selectedRate, 60);
-  const projection10y = compoundProjection(0, projectionBase, selectedRate, 120);
 
   const alerts: { text: string; type: "safe" | "warning" | "danger" }[] = [];
   if (saldo < 0) {
@@ -237,65 +211,13 @@ const Dashboard = () => {
         </div>
 
         {/* Investment Projection */}
-        <div className="bg-card rounded-2xl p-5 border shadow-sm mb-6 animate-fade-up">
-          <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Investimento
-          </h2>
-          
-          {/* Investment type selector */}
-          <div className="mb-4">
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Em qual investimento aplicou?</label>
-            <Select value={selectedInvestment} onValueChange={setSelectedInvestment}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {investmentTypes.map(t => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.label} — {(t.annualRate * 100).toFixed(1)}% a.a.
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {projectionBase > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                Investindo <span className="font-bold text-foreground">R$ {projectionBase.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span> em <span className="font-bold text-foreground">{investmentTypes.find(t => t.id === selectedInvestment)?.label}</span>:
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
-                  <p className="text-xs text-muted-foreground">Em 6 meses</p>
-                  <p className="text-sm font-bold text-safe">R$ {projection6m.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                </div>
-                {isPremium ? (
-                  <>
-                    <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
-                      <p className="text-xs text-muted-foreground">Em 1 ano</p>
-                      <p className="text-sm font-bold text-safe">R$ {projection1y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                    <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
-                      <p className="text-xs text-muted-foreground">Em 5 anos</p>
-                      <p className="text-sm font-bold text-safe">R$ {projection5y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                    <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                      <p className="text-xs text-muted-foreground">Em 10 anos</p>
-                      <p className="text-sm font-bold text-primary">R$ {projection10y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                  </>
-                ) : (
-                  <button onClick={() => navigate("/planos")} className="bg-primary/5 rounded-lg p-3 border border-primary/20 text-left hover:bg-primary/10 transition-colors">
-                    <p className="text-xs text-muted-foreground">1, 5 e 10 anos</p>
-                    <p className="text-xs font-bold text-primary">🔒 Premium</p>
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Adicione valores ao investimento para ver projeções com juros compostos.</p>
-          )}
-        </div>
+        <InvestmentProjection
+          investmentMonthly={investmentMonthly}
+          selectedInvestment={selectedInvestment}
+          setSelectedInvestment={setSelectedInvestment}
+          isPremium={isPremium}
+          navigate={navigate}
+        />
 
         {/* Summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 md:mt-6">

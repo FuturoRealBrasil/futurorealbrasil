@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Lock, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Clock, Award } from "lucide-react";
+import { BookOpen, Lock, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Clock, Award, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useFinancialData } from "@/hooks/useFinancialData";
@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import AppLayout from "@/components/AppLayout";
 import confetti from "canvas-confetti";
 import { generateCertificatePDF } from "@/lib/certificateGenerator";
+import { expandedContent } from "@/data/educationalContent";
+import { toast } from "sonner";
 
 const levelInfo = {
   iniciante: { label: "🌱 Iniciante", color: "bg-brand-blue/10 text-brand-blue border-brand-blue/20", completedColor: "bg-safe/10 text-safe border-safe/20", desc: "Conceitos básicos para quem está começando a organizar as finanças." },
@@ -519,21 +521,40 @@ const Educacao = () => {
     ]);
 
     if (cert) {
-      // Use current profile name/cpf if available, fallback to certificate data
       const currentName = profile?.display_name || cert.user_name;
       const currentCpf = profile?.cpf || cert.user_cpf;
+      const studySeconds = getTotalStudySeconds();
+
+      // Sync certificate data with current profile
+      await supabase.from("certificates").update({
+        user_name: currentName,
+        user_cpf: currentCpf,
+        study_hours_total: studySeconds,
+      }).eq("verification_code", existingCert);
 
       await generateCertificatePDF({
         userName: currentName,
         userCpf: currentCpf,
         completionDate: new Date(cert.completion_date).toLocaleDateString("pt-BR"),
         verificationCode: cert.verification_code,
-        studyHoursTotal: Number(cert.study_hours_total),
+        studyHoursTotal: studySeconds,
         modulesCompleted: cert.modules_completed as string[],
         missionsCompleted: cert.missions_completed as string[],
       }, window.location.origin);
     }
     setCertLoading(false);
+  }
+
+  async function handleResetStudies() {
+    if (!user) return;
+    const eduMissions = financialData.completedMissions.filter(m => m.startsWith("edu_"));
+    if (eduMissions.length === 0) { toast.info("Nenhum estudo para zerar."); return; }
+    const updated = financialData.completedMissions.filter(m => !m.startsWith("edu_"));
+    await saveData({ completedMissions: updated });
+    // Delete existing certificate so user can re-earn it
+    await supabase.from("certificates").delete().eq("user_id", user.id);
+    setExistingCert(null);
+    toast.success("Estudos zerados! Comece novamente do início.");
   }
 
   async function markTopicComplete(articleId: string) {
@@ -649,7 +670,17 @@ const Educacao = () => {
           <div className="bg-card rounded-2xl border shadow-sm p-5 animate-fade-up">
             <span className="text-xs font-bold text-primary mb-2 block">{pageLabels[currentPage] || page.title}</span>
             <h2 className="text-lg font-bold text-foreground mb-3">{page.title}</h2>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{page.content}</p>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+              {(() => {
+                const exp = expandedContent[article.id];
+                if (exp) {
+                  if (currentPage === 0) return exp.introduction;
+                  if (currentPage === 1) return exp.explanation;
+                  if (currentPage === 2) return exp.tips;
+                }
+                return page.content;
+              })()}
+            </p>
           </div>
 
           <div className="flex justify-between mt-4">
@@ -752,6 +783,22 @@ const Educacao = () => {
             })}
           </div>
         </div>
+
+        {/* Reset Studies Button */}
+        {completedCount > 0 && (
+          <div className="mb-4">
+            <Dialog>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full flex items-center gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={handleResetStudies}
+              >
+                <RotateCcw className="w-4 h-4" /> Zerar Estudos e Recomeçar
+              </Button>
+            </Dialog>
+          </div>
+        )}
 
         {/* Review encouragement message */}
         {canGetCertificate && (
