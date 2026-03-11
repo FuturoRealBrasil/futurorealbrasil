@@ -521,21 +521,40 @@ const Educacao = () => {
     ]);
 
     if (cert) {
-      // Use current profile name/cpf if available, fallback to certificate data
       const currentName = profile?.display_name || cert.user_name;
       const currentCpf = profile?.cpf || cert.user_cpf;
+      const studySeconds = getTotalStudySeconds();
+
+      // Sync certificate data with current profile
+      await supabase.from("certificates").update({
+        user_name: currentName,
+        user_cpf: currentCpf,
+        study_hours_total: studySeconds,
+      }).eq("verification_code", existingCert);
 
       await generateCertificatePDF({
         userName: currentName,
         userCpf: currentCpf,
         completionDate: new Date(cert.completion_date).toLocaleDateString("pt-BR"),
         verificationCode: cert.verification_code,
-        studyHoursTotal: Number(cert.study_hours_total),
+        studyHoursTotal: studySeconds,
         modulesCompleted: cert.modules_completed as string[],
         missionsCompleted: cert.missions_completed as string[],
       }, window.location.origin);
     }
     setCertLoading(false);
+  }
+
+  async function handleResetStudies() {
+    if (!user) return;
+    const eduMissions = financialData.completedMissions.filter(m => m.startsWith("edu_"));
+    if (eduMissions.length === 0) { toast.info("Nenhum estudo para zerar."); return; }
+    const updated = financialData.completedMissions.filter(m => !m.startsWith("edu_"));
+    await saveData({ completedMissions: updated });
+    // Delete existing certificate so user can re-earn it
+    await supabase.from("certificates").delete().eq("user_id", user.id);
+    setExistingCert(null);
+    toast.success("Estudos zerados! Comece novamente do início.");
   }
 
   async function markTopicComplete(articleId: string) {
