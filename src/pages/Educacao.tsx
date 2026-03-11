@@ -670,7 +670,17 @@ const Educacao = () => {
           <div className="bg-card rounded-2xl border shadow-sm p-5 animate-fade-up">
             <span className="text-xs font-bold text-primary mb-2 block">{pageLabels[currentPage] || page.title}</span>
             <h2 className="text-lg font-bold text-foreground mb-3">{page.title}</h2>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{page.content}</p>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+              {(() => {
+                const exp = expandedContent[article.id];
+                if (exp) {
+                  if (currentPage === 0) return exp.introduction;
+                  if (currentPage === 1) return exp.explanation;
+                  if (currentPage === 2) return exp.tips;
+                }
+                return page.content;
+              })()}
+            </p>
           </div>
 
           <div className="flex justify-between mt-4">
