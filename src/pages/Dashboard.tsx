@@ -237,65 +237,13 @@ const Dashboard = () => {
         </div>
 
         {/* Investment Projection */}
-        <div className="bg-card rounded-2xl p-5 border shadow-sm mb-6 animate-fade-up">
-          <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Investimento
-          </h2>
-          
-          {/* Investment type selector */}
-          <div className="mb-4">
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Em qual investimento aplicou?</label>
-            <Select value={selectedInvestment} onValueChange={setSelectedInvestment}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {investmentTypes.map(t => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.label} — {(t.annualRate * 100).toFixed(1)}% a.a.
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {projectionBase > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                Investindo <span className="font-bold text-foreground">R$ {projectionBase.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}/mês</span> em <span className="font-bold text-foreground">{investmentTypes.find(t => t.id === selectedInvestment)?.label}</span>:
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
-                  <p className="text-xs text-muted-foreground">Em 6 meses</p>
-                  <p className="text-sm font-bold text-safe">R$ {projection6m.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                </div>
-                {isPremium ? (
-                  <>
-                    <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
-                      <p className="text-xs text-muted-foreground">Em 1 ano</p>
-                      <p className="text-sm font-bold text-safe">R$ {projection1y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                    <div className="bg-safe/5 rounded-lg p-3 border border-safe/20">
-                      <p className="text-xs text-muted-foreground">Em 5 anos</p>
-                      <p className="text-sm font-bold text-safe">R$ {projection5y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                    <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
-                      <p className="text-xs text-muted-foreground">Em 10 anos</p>
-                      <p className="text-sm font-bold text-primary">R$ {projection10y.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                  </>
-                ) : (
-                  <button onClick={() => navigate("/planos")} className="bg-primary/5 rounded-lg p-3 border border-primary/20 text-left hover:bg-primary/10 transition-colors">
-                    <p className="text-xs text-muted-foreground">1, 5 e 10 anos</p>
-                    <p className="text-xs font-bold text-primary">🔒 Premium</p>
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Adicione valores ao investimento para ver projeções com juros compostos.</p>
-          )}
-        </div>
+        <InvestmentProjection
+          investmentMonthly={investmentMonthly}
+          selectedInvestment={selectedInvestment}
+          setSelectedInvestment={setSelectedInvestment}
+          isPremium={isPremium}
+          navigate={navigate}
+        />
 
         {/* Summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 md:mt-6">

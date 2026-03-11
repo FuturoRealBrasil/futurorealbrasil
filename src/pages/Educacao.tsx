@@ -784,6 +784,22 @@ const Educacao = () => {
           </div>
         </div>
 
+        {/* Reset Studies Button */}
+        {completedCount > 0 && (
+          <div className="mb-4">
+            <Dialog>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full flex items-center gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={handleResetStudies}
+              >
+                <RotateCcw className="w-4 h-4" /> Zerar Estudos e Recomeçar
+              </Button>
+            </Dialog>
+          </div>
+        )}
+
         {/* Review encouragement message */}
         {canGetCertificate && (
           <div className="bg-gradient-to-r from-brand-blue/10 to-brand-green/10 border border-brand-blue/30 rounded-xl p-4 mb-6 text-center animate-fade-up">
