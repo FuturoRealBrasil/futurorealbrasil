@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Lock, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Clock, Award } from "lucide-react";
+import { BookOpen, Lock, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Clock, Award, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useFinancialData } from "@/hooks/useFinancialData";
@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import AppLayout from "@/components/AppLayout";
 import confetti from "canvas-confetti";
 import { generateCertificatePDF } from "@/lib/certificateGenerator";
+import { expandedContent } from "@/data/educationalContent";
+import { toast } from "sonner";
 
 const levelInfo = {
   iniciante: { label: "🌱 Iniciante", color: "bg-brand-blue/10 text-brand-blue border-brand-blue/20", completedColor: "bg-safe/10 text-safe border-safe/20", desc: "Conceitos básicos para quem está começando a organizar as finanças." },
