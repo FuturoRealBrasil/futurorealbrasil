@@ -763,8 +763,6 @@ ESTRATÉGIAS CIENTIFICAMENTE COMPROVADAS:
 1️⃣9️⃣ Crie um "pote de desejos": coloque o valor que gastaria e veja crescer.
 2️⃣0️⃣ No final do mês, some o que economizou resistindo a impulsos.`
   },
-  // For remaining topics (org_3 through ind_10), use similar comprehensive format
-  // We'll include shorter but still substantial expanded content
   org_3: {
     introduction: `O cartão de crédito e o Pix parcelado são ferramentas úteis quando usados com consciência. Mas para milhões de brasileiros, eles se tornaram armadilhas que levam ao endividamento. O problema não é a ferramenta, mas como a usamos. O crédito cria uma ilusão perigosa: a sensação de que você pode comprar agora e se preocupar depois. Mas o "depois" sempre chega — e geralmente com juros. No Brasil, o cartão de crédito rotativo cobra juros de até 450% ao ano, tornando-o uma das formas mais caras de crédito do mundo.`,
     explanation: `O problema não é o cartão em si, mas a ilusão de que o parcelamento "cabe no orçamento". Quando você parcela uma compra, está comprometendo renda futura. Some todas as parcelas que já paga. Se ultrapassar 30% da renda, está em zona de perigo.\n\nO Pix parcelado é uma novidade que merece atenção: parece prático, mas as taxas podem ser tão altas quanto as do cartão. Sempre compare o CET antes de usar. A regra é simples: se não pode comprar à vista, reconsidere se realmente precisa.`,
