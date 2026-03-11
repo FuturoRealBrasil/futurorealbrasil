@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import InvestmentProjection from "@/components/InvestmentProjection";
 import AppLayout from "@/components/AppLayout";
 import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
