@@ -133,16 +133,7 @@ const Dashboard = () => {
     toast.success("Gastos atualizados!");
   }
 
-  // Investment projections with compound interest
   const investmentMonthly = monthlySaving?.valor_guardado || 0;
-  const currentInvestment = investmentMonthly; // current month's investment as base
-  const selectedRate = investmentTypes.find(t => t.id === selectedInvestment)?.annualRate || 0.105;
-
-  const projectionBase = investmentMonthly > 0 ? investmentMonthly : (saldo > 0 ? saldo : 0);
-  const projection6m = compoundProjection(0, projectionBase, selectedRate, 6);
-  const projection1y = compoundProjection(0, projectionBase, selectedRate, 12);
-  const projection5y = compoundProjection(0, projectionBase, selectedRate, 60);
-  const projection10y = compoundProjection(0, projectionBase, selectedRate, 120);
 
   const alerts: { text: string; type: "safe" | "warning" | "danger" }[] = [];
   if (saldo < 0) {
