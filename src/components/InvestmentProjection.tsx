@@ -1,15 +1,43 @@
-import { useState } from "react";
-import { TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TrendingUp, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
-const investmentTypes = [
-  { id: "cdb", label: "CDB (100% CDI)", annualRate: 0.105 },
-  { id: "cdb_120", label: "CDB (120% CDI)", annualRate: 0.126 },
-  { id: "tesouro_selic", label: "Tesouro Selic", annualRate: 0.105 },
-  { id: "lci", label: "LCI (90% CDI)", annualRate: 0.0945 },
-  { id: "lca", label: "LCA (90% CDI)", annualRate: 0.0945 },
-  { id: "tesouro_ipca", label: "Tesouro IPCA+ (6%+IPCA)", annualRate: 0.105 },
-];
+interface LiveRates {
+  selic: number;
+  cdi: number;
+  cdb_100: number;
+  cdb_120: number;
+  tesouro_selic: number;
+  lci_90: number;
+  lca_90: number;
+  tesouro_ipca: number;
+  updated_at: string;
+  fallback?: boolean;
+}
+
+const defaultRates: LiveRates = {
+  selic: 0.1075,
+  cdi: 0.1065,
+  cdb_100: 0.1065,
+  cdb_120: 0.1278,
+  tesouro_selic: 0.1075,
+  lci_90: 0.09585,
+  lca_90: 0.09585,
+  tesouro_ipca: 0.105,
+  updated_at: new Date().toISOString(),
+};
+
+function getInvestmentTypes(rates: LiveRates) {
+  return [
+    { id: "cdb", label: "CDB (100% CDI)", annualRate: rates.cdb_100 },
+    { id: "cdb_120", label: "CDB (120% CDI)", annualRate: rates.cdb_120 },
+    { id: "tesouro_selic", label: "Tesouro Selic", annualRate: rates.tesouro_selic },
+    { id: "lci", label: "LCI (90% CDI)", annualRate: rates.lci_90 },
+    { id: "lca", label: "LCA (90% CDI)", annualRate: rates.lca_90 },
+    { id: "tesouro_ipca", label: "Tesouro IPCA+ (6%+IPCA)", annualRate: rates.tesouro_ipca },
+  ];
+}
 
 const periods = [
   { label: "1 mês", months: 1 },
@@ -49,11 +77,33 @@ interface Props {
 }
 
 export default function InvestmentProjection({ investmentMonthly, selectedInvestment, setSelectedInvestment, isPremium, navigate }: Props) {
-  const [selectedPeriodIdx, setSelectedPeriodIdx] = useState(5); // default 6 months
-  const selectedRate = investmentTypes.find(t => t.id === selectedInvestment)?.annualRate || 0.105;
+  const [selectedPeriodIdx, setSelectedPeriodIdx] = useState(5);
+  const [rates, setRates] = useState<LiveRates>(defaultRates);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
+
+  useEffect(() => {
+    fetchRates();
+  }, []);
+
+  async function fetchRates() {
+    setRatesLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-investment-rates");
+      if (data && !error) {
+        setRates(data as LiveRates);
+        setLastUpdate(data.updated_at);
+      }
+    } catch {
+      // Keep default rates
+    }
+    setRatesLoading(false);
+  }
+
+  const investmentTypes = getInvestmentTypes(rates);
+  const selectedRate = investmentTypes.find(t => t.id === selectedInvestment)?.annualRate || rates.cdb_100;
   const period = periods[selectedPeriodIdx];
 
-  // Free users: only first 6 periods (1-6 months)
   const availablePeriods = isPremium ? periods : periods.slice(0, 6);
 
   const totalInvested = investmentMonthly * period.months;
@@ -62,9 +112,30 @@ export default function InvestmentProjection({ investmentMonthly, selectedInvest
 
   return (
     <div className="bg-card rounded-2xl p-5 border shadow-sm mb-6 animate-fade-up">
-      <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-        <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Investimento
-      </h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Investimento
+        </h2>
+        <button
+          onClick={fetchRates}
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          disabled={ratesLoading}
+        >
+          <RefreshCw className={`w-3 h-3 ${ratesLoading ? "animate-spin" : ""}`} />
+          Atualizar
+        </button>
+      </div>
+
+      {/* Live rate indicator */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className={`w-2 h-2 rounded-full ${ratesLoading ? "bg-warning animate-pulse" : "bg-safe"}`} />
+        <span className="text-[10px] text-muted-foreground">
+          {ratesLoading ? "Atualizando taxas..." : `Selic: ${(rates.selic * 100).toFixed(2)}% a.a. · CDI: ${(rates.cdi * 100).toFixed(2)}% a.a.`}
+          {lastUpdate && !ratesLoading && (
+            <span className="ml-1">· Atualizado: {new Date(lastUpdate).toLocaleDateString("pt-BR")}</span>
+          )}
+        </span>
+      </div>
 
       <div className="mb-4">
         <label className="text-xs font-medium text-muted-foreground mb-1 block">Em qual investimento aplicou?</label>
@@ -75,7 +146,7 @@ export default function InvestmentProjection({ investmentMonthly, selectedInvest
           <SelectContent>
             {investmentTypes.map(t => (
               <SelectItem key={t.id} value={t.id}>
-                {t.label} — {(t.annualRate * 100).toFixed(1)}% a.a.
+                {t.label} — {(t.annualRate * 100).toFixed(2)}% a.a.
               </SelectItem>
             ))}
           </SelectContent>
