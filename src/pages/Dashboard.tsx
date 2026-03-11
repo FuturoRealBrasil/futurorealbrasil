@@ -19,24 +19,6 @@ import { generateTransactionsPDF } from "@/lib/pdfGenerator";
 import logo from "@/assets/logo-transparent.png";
 import HamburgerMenu from "@/components/HamburgerMenu";
 
-// Investment types with annual yields
-const investmentTypes = [
-  { id: "cdb", label: "CDB (100% CDI)", annualRate: 0.105 },
-  { id: "cdb_120", label: "CDB (120% CDI)", annualRate: 0.126 },
-  { id: "tesouro_selic", label: "Tesouro Selic", annualRate: 0.105 },
-  { id: "lci", label: "LCI (90% CDI)", annualRate: 0.0945 },
-  { id: "lca", label: "LCA (90% CDI)", annualRate: 0.0945 },
-  { id: "tesouro_ipca", label: "Tesouro IPCA+ (6%+IPCA)", annualRate: 0.105 },
-];
-
-function compoundProjection(principal: number, monthlyAdd: number, annualRate: number, months: number): number {
-  const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
-  let total = principal;
-  for (let i = 0; i < months; i++) {
-    total = (total + monthlyAdd) * (1 + monthlyRate);
-  }
-  return total;
-}
 
 // Digital clock component
 function DigitalClock() {
