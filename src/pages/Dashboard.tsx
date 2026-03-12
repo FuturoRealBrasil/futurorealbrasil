@@ -217,25 +217,6 @@ const Dashboard = () => {
           navigate={navigate}
         />
 
-        {/* Summary cards - compact inline */}
-        <div className="grid grid-cols-4 gap-2 mb-6 md:mt-6">
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Renda</p>
-            <p className="text-sm font-bold text-foreground">R$ {data.renda.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Gastos</p>
-            <p className="text-sm font-bold text-foreground">R$ {data.gastos.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Saldo</p>
-            <p className={`text-sm font-bold ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Reserva</p>
-            <p className="text-sm font-bold text-foreground">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "—"}</p>
-          </div>
-        </div>
 
         {/* Monthly Investment (was "Guardado") */}
         <div className="bg-card rounded-xl p-4 border shadow-sm mb-3">
@@ -262,13 +243,6 @@ const Dashboard = () => {
           <span className="text-xs font-semibold text-foreground">Baixar Relatório PDF de {monthName}</span>
         </button>
 
-        {/* Weekly Expenses & Caixinhas */}
-        <div className="md:grid md:grid-cols-2 md:gap-6">
-          <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
-          <div className="mt-6 md:mt-0">
-            <Caixinhas />
-          </div>
-        </div>
 
         {/* Premium CTA */}
         {!isPremium && (
@@ -327,6 +301,8 @@ const Dashboard = () => {
         saldo={saldo}
         onUpdateRenda={handleUpdateRenda}
         onUpdateGastos={handleUpdateGastos}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
       />
     </AppLayout>
   );

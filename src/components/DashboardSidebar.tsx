@@ -6,6 +6,8 @@ import { useDebts, Debt } from "@/hooks/useDebts";
 import { toast } from "sonner";
 import { FinancialData } from "@/hooks/useFinancialData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import WeeklyExpenses from "@/components/WeeklyExpenses";
+import Caixinhas from "@/components/Caixinhas";
 
 interface Props {
   open: boolean;
@@ -14,9 +16,11 @@ interface Props {
   saldo: number;
   onUpdateRenda: (val: number) => void;
   onUpdateGastos: (val: number) => void;
+  selectedMonth: number;
+  selectedYear: number;
 }
 
-export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateRenda, onUpdateGastos }: Props) {
+export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateRenda, onUpdateGastos, selectedMonth, selectedYear }: Props) {
   const { debts, addDebt, toggleDebtStatus, deleteDebt } = useDebts();
   const [newDebtName, setNewDebtName] = useState("");
   const [newDebtValue, setNewDebtValue] = useState("");
@@ -147,6 +151,16 @@ export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateR
           {debts.length === 0 && (
             <p className="text-xs text-muted-foreground text-center py-4">Nenhuma dívida cadastrada 🎉</p>
           )}
+        </div>
+
+        {/* Weekly Expenses */}
+        <div className="border-t p-4">
+          <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
+        </div>
+
+        {/* Caixinhas */}
+        <div className="border-t p-4">
+          <Caixinhas />
         </div>
       </div>
 
