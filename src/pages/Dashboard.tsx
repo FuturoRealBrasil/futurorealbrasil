@@ -243,13 +243,6 @@ const Dashboard = () => {
           <span className="text-xs font-semibold text-foreground">Baixar Relatório PDF de {monthName}</span>
         </button>
 
-        {/* Weekly Expenses & Caixinhas */}
-        <div className="md:grid md:grid-cols-2 md:gap-6">
-          <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
-          <div className="mt-6 md:mt-0">
-            <Caixinhas />
-          </div>
-        </div>
 
         {/* Premium CTA */}
         {!isPremium && (
