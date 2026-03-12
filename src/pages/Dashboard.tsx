@@ -217,25 +217,6 @@ const Dashboard = () => {
           navigate={navigate}
         />
 
-        {/* Summary cards - compact inline */}
-        <div className="grid grid-cols-4 gap-2 mb-6 md:mt-6">
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Renda</p>
-            <p className="text-sm font-bold text-foreground">R$ {data.renda.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Gastos</p>
-            <p className="text-sm font-bold text-foreground">R$ {data.gastos.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Saldo</p>
-            <p className={`text-sm font-bold ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
-            <p className="text-[10px] text-muted-foreground font-medium">Reserva</p>
-            <p className="text-sm font-bold text-foreground">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "—"}</p>
-          </div>
-        </div>
 
         {/* Monthly Investment (was "Guardado") */}
         <div className="bg-card rounded-xl p-4 border shadow-sm mb-3">
