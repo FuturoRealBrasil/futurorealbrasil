@@ -319,43 +319,15 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Update Renda Dialog */}
-      <Dialog open={showUpdateRenda} onOpenChange={setShowUpdateRenda}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold">Atualizar Renda</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-foreground">Nova renda mensal</label>
-              <Input placeholder="R$ 0,00" value={newRenda} onChange={(e) => setNewRenda(e.target.value)} inputMode="decimal" className="mt-1" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowUpdateRenda(false)} className="flex-1">Cancelar</Button>
-              <Button onClick={handleUpdateRenda} className="flex-1">Confirmar</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Update Gastos Dialog */}
-      <Dialog open={showUpdateGastos} onOpenChange={setShowUpdateGastos}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold">Atualizar Gastos</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-foreground">Novos gastos fixos</label>
-              <Input placeholder="R$ 0,00" value={newGastos} onChange={(e) => setNewGastos(e.target.value)} inputMode="decimal" className="mt-1" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowUpdateGastos(false)} className="flex-1">Cancelar</Button>
-              <Button onClick={handleUpdateGastos} className="flex-1">Confirmar</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Dashboard Sidebar */}
+      <DashboardSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        data={data}
+        saldo={saldo}
+        onUpdateRenda={handleUpdateRenda}
+        onUpdateGastos={handleUpdateGastos}
+      />
     </AppLayout>
   );
 };
