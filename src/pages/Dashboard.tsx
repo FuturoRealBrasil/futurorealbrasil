@@ -114,19 +114,13 @@ const Dashboard = () => {
     toast.success("PDF baixado!");
   }
 
-  async function handleUpdateRenda() {
-    const v = parseFloat(newRenda.replace(",", "."));
-    if (isNaN(v) || v < 0) { toast.error("Valor inválido"); return; }
+  async function handleUpdateRenda(v: number) {
     await saveData({ renda: v });
-    setNewRenda(""); setShowUpdateRenda(false);
     toast.success("Renda atualizada!");
   }
 
-  async function handleUpdateGastos() {
-    const v = parseFloat(newGastos.replace(",", "."));
-    if (isNaN(v) || v < 0) { toast.error("Valor inválido"); return; }
+  async function handleUpdateGastos(v: number) {
     await saveData({ gastos: v });
-    setNewGastos(""); setShowUpdateGastos(false);
     toast.success("Gastos atualizados!");
   }
 
