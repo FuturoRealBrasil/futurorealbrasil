@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, RefreshCw } from "lucide-react";
+import { TrendingUp, RefreshCw, Calculator, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -81,6 +81,11 @@ export default function InvestmentProjection({ investmentMonthly, selectedInvest
   const [rates, setRates] = useState<LiveRates>(defaultRates);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [showCalc, setShowCalc] = useState(false);
+  const [calcDisplay, setCalcDisplay] = useState("0");
+  const [calcPrev, setCalcPrev] = useState<number | null>(null);
+  const [calcOp, setCalcOp] = useState<string | null>(null);
+  const [calcReset, setCalcReset] = useState(false);
 
   useEffect(() => {
     fetchRates();
@@ -110,21 +115,91 @@ export default function InvestmentProjection({ investmentMonthly, selectedInvest
   const interest = compoundInterest(investmentMonthly, selectedRate, period.months);
   const totalWithInterest = totalInvested + interest;
 
+  // Calculator functions
+  function calcInput(val: string) {
+    if (calcReset) { setCalcDisplay(val); setCalcReset(false); return; }
+    setCalcDisplay(calcDisplay === "0" ? val : calcDisplay + val);
+  }
+  function calcOperation(op: string) {
+    setCalcPrev(parseFloat(calcDisplay));
+    setCalcOp(op);
+    setCalcReset(true);
+  }
+  function calcEquals() {
+    if (calcPrev === null || !calcOp) return;
+    const cur = parseFloat(calcDisplay);
+    let result = 0;
+    if (calcOp === "+") result = calcPrev + cur;
+    else if (calcOp === "-") result = calcPrev - cur;
+    else if (calcOp === "×") result = calcPrev * cur;
+    else if (calcOp === "÷") result = cur !== 0 ? calcPrev / cur : 0;
+    setCalcDisplay(String(parseFloat(result.toFixed(10))));
+    setCalcPrev(null);
+    setCalcOp(null);
+    setCalcReset(true);
+  }
+  function calcClear() { setCalcDisplay("0"); setCalcPrev(null); setCalcOp(null); }
+
   return (
     <div className="bg-card rounded-2xl p-5 border shadow-sm mb-6 animate-fade-up">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-brand-green" /> Projeção de Investimento
         </h2>
-        <button
-          onClick={fetchRates}
-          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-          disabled={ratesLoading}
-        >
-          <RefreshCw className={`w-3 h-3 ${ratesLoading ? "animate-spin" : ""}`} />
-          Atualizar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCalc(!showCalc)}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          >
+            <Calculator className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={fetchRates}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            disabled={ratesLoading}
+          >
+            <RefreshCw className={`w-3 h-3 ${ratesLoading ? "animate-spin" : ""}`} />
+            Atualizar
+          </button>
+        </div>
       </div>
+
+      {/* Mini Calculator */}
+      {showCalc && (
+        <div className="bg-muted/50 rounded-xl p-3 mb-4 border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Calculadora</p>
+            <button onClick={() => setShowCalc(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="bg-card rounded-lg p-2 mb-2 text-right border">
+            <p className="text-lg font-mono font-bold text-foreground">{calcDisplay}</p>
+          </div>
+          <div className="grid grid-cols-4 gap-1">
+            {["7","8","9","÷","4","5","6","×","1","2","3","-","0",".","=","+"].map(btn => (
+              <button
+                key={btn}
+                onClick={() => {
+                  if (btn === "=") calcEquals();
+                  else if (["+","-","×","÷"].includes(btn)) calcOperation(btn);
+                  else calcInput(btn);
+                }}
+                className={`py-2 rounded-lg text-xs font-bold transition-colors ${
+                  ["+","-","×","÷"].includes(btn) ? "bg-primary/10 text-primary" :
+                  btn === "=" ? "bg-primary text-primary-foreground" :
+                  "bg-card text-foreground border"
+                }`}
+              >
+                {btn}
+              </button>
+            ))}
+            <button onClick={calcClear} className="col-span-4 py-1.5 rounded-lg text-[10px] font-bold bg-destructive/10 text-destructive mt-1">
+              Limpar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Live rate indicator */}
       <div className="flex items-center gap-2 mb-3">

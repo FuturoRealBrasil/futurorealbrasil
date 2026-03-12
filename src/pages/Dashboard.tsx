@@ -4,16 +4,16 @@ import { useFinancialData, calcularFuturo } from "@/hooks/useFinancialData";
 import { useMonthlySavings } from "@/hooks/useMonthlySavings";
 import { useSavingsTransactions } from "@/hooks/useSavingsTransactions";
 import { useAuth } from "@/hooks/useAuth";
-import { AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, RefreshCw, DollarSign, Minus, FileDown, TrendingUp } from "lucide-react";
+import { AlertTriangle, Shield, ChevronRight, ChevronLeft, Wallet, DollarSign, Minus, FileDown, TrendingUp, PanelRightOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import InvestmentProjection from "@/components/InvestmentProjection";
 import AppLayout from "@/components/AppLayout";
 import WeeklyExpenses from "@/components/WeeklyExpenses";
 import Caixinhas from "@/components/Caixinhas";
+import DashboardSidebar from "@/components/DashboardSidebar";
 import { toast } from "sonner";
 import { generateTransactionsPDF } from "@/lib/pdfGenerator";
 import logo from "@/assets/logo-transparent.png";
@@ -68,10 +68,7 @@ const Dashboard = () => {
   const [savingDialog, setSavingDialog] = useState<"add" | "remove" | null>(null);
   const [savingValue, setSavingValue] = useState("");
   const [savingDesc, setSavingDesc] = useState("");
-  const [showUpdateRenda, setShowUpdateRenda] = useState(false);
-  const [newRenda, setNewRenda] = useState("");
-  const [showUpdateGastos, setShowUpdateGastos] = useState(false);
-  const [newGastos, setNewGastos] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !data.onboardingDone) {
@@ -117,19 +114,13 @@ const Dashboard = () => {
     toast.success("PDF baixado!");
   }
 
-  async function handleUpdateRenda() {
-    const v = parseFloat(newRenda.replace(",", "."));
-    if (isNaN(v) || v < 0) { toast.error("Valor inválido"); return; }
+  async function handleUpdateRenda(v: number) {
     await saveData({ renda: v });
-    setNewRenda(""); setShowUpdateRenda(false);
     toast.success("Renda atualizada!");
   }
 
-  async function handleUpdateGastos() {
-    const v = parseFloat(newGastos.replace(",", "."));
-    if (isNaN(v) || v < 0) { toast.error("Valor inválido"); return; }
+  async function handleUpdateGastos(v: number) {
     await saveData({ gastos: v });
-    setNewGastos(""); setShowUpdateGastos(false);
     toast.success("Gastos atualizados!");
   }
 
@@ -167,8 +158,15 @@ const Dashboard = () => {
                 <p className="text-xs md:text-sm text-primary-foreground/60 truncate">Gestão Financeira</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <DigitalClock />
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 rounded-lg text-primary-foreground hover:text-primary-foreground/80 hover:bg-white/10 transition-colors"
+                aria-label="Painel Financeiro"
+              >
+                <PanelRightOpen className="w-5 h-5" />
+              </button>
               <HamburgerMenu />
             </div>
           </div>
@@ -219,36 +217,24 @@ const Dashboard = () => {
           navigate={navigate}
         />
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 md:mt-6">
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Renda</p>
-            <p className="text-lg font-bold text-foreground mt-1">R$ {data.renda.toLocaleString("pt-BR")}</p>
+        {/* Summary cards - compact inline */}
+        <div className="grid grid-cols-4 gap-2 mb-6 md:mt-6">
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Renda</p>
+            <p className="text-sm font-bold text-foreground">R$ {data.renda.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Gastos</p>
-            <p className="text-lg font-bold text-foreground mt-1">R$ {data.gastos.toLocaleString("pt-BR")}</p>
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Gastos</p>
+            <p className="text-sm font-bold text-foreground">R$ {data.gastos.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Saldo</p>
-            <p className={`text-lg font-bold mt-1 ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Saldo</p>
+            <p className={`text-sm font-bold ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Reserva</p>
-            <p className="text-lg font-bold text-foreground mt-1">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "Nenhuma"}</p>
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Reserva</p>
+            <p className="text-sm font-bold text-foreground">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "—"}</p>
           </div>
-        </div>
-
-        {/* Update Renda / Gastos buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button onClick={() => { setShowUpdateRenda(true); setNewRenda(String(data.renda)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
-            <RefreshCw className="w-4 h-4 text-brand-green" />
-            <span className="text-xs font-semibold text-foreground">Atualizar Renda</span>
-          </button>
-          <button onClick={() => { setShowUpdateGastos(true); setNewGastos(String(data.gastos)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
-            <RefreshCw className="w-4 h-4 text-warning" />
-            <span className="text-xs font-semibold text-foreground">Atualizar Gastos</span>
-          </button>
         </div>
 
         {/* Monthly Investment (was "Guardado") */}
@@ -333,43 +319,15 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Update Renda Dialog */}
-      <Dialog open={showUpdateRenda} onOpenChange={setShowUpdateRenda}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold">Atualizar Renda</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-foreground">Nova renda mensal</label>
-              <Input placeholder="R$ 0,00" value={newRenda} onChange={(e) => setNewRenda(e.target.value)} inputMode="decimal" className="mt-1" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowUpdateRenda(false)} className="flex-1">Cancelar</Button>
-              <Button onClick={handleUpdateRenda} className="flex-1">Confirmar</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Update Gastos Dialog */}
-      <Dialog open={showUpdateGastos} onOpenChange={setShowUpdateGastos}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold">Atualizar Gastos</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-foreground">Novos gastos fixos</label>
-              <Input placeholder="R$ 0,00" value={newGastos} onChange={(e) => setNewGastos(e.target.value)} inputMode="decimal" className="mt-1" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowUpdateGastos(false)} className="flex-1">Cancelar</Button>
-              <Button onClick={handleUpdateGastos} className="flex-1">Confirmar</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Dashboard Sidebar */}
+      <DashboardSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        data={data}
+        saldo={saldo}
+        onUpdateRenda={handleUpdateRenda}
+        onUpdateGastos={handleUpdateGastos}
+      />
     </AppLayout>
   );
 };

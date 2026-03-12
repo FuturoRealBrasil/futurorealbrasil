@@ -86,6 +86,36 @@ export type Database = {
         }
         Relationships: []
       }
+      debts: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          status: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       monthly_savings: {
         Row: {
           ano: number
