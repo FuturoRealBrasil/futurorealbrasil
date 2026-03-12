@@ -68,10 +68,7 @@ const Dashboard = () => {
   const [savingDialog, setSavingDialog] = useState<"add" | "remove" | null>(null);
   const [savingValue, setSavingValue] = useState("");
   const [savingDesc, setSavingDesc] = useState("");
-  const [showUpdateRenda, setShowUpdateRenda] = useState(false);
-  const [newRenda, setNewRenda] = useState("");
-  const [showUpdateGastos, setShowUpdateGastos] = useState(false);
-  const [newGastos, setNewGastos] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !data.onboardingDone) {
