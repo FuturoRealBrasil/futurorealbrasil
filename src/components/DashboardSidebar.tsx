@@ -152,6 +152,16 @@ export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateR
             <p className="text-xs text-muted-foreground text-center py-4">Nenhuma dívida cadastrada 🎉</p>
           )}
         </div>
+
+        {/* Weekly Expenses */}
+        <div className="border-t p-4">
+          <WeeklyExpenses selectedMonth={selectedMonth} selectedYear={selectedYear} />
+        </div>
+
+        {/* Caixinhas */}
+        <div className="border-t p-4">
+          <Caixinhas />
+        </div>
       </div>
 
       {/* Add Debt Dialog */}
