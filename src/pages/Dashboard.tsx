@@ -301,6 +301,8 @@ const Dashboard = () => {
         saldo={saldo}
         onUpdateRenda={handleUpdateRenda}
         onUpdateGastos={handleUpdateGastos}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
       />
     </AppLayout>
   );
