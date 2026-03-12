@@ -217,36 +217,24 @@ const Dashboard = () => {
           navigate={navigate}
         />
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 md:mt-6">
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Renda</p>
-            <p className="text-lg font-bold text-foreground mt-1">R$ {data.renda.toLocaleString("pt-BR")}</p>
+        {/* Summary cards - compact inline */}
+        <div className="grid grid-cols-4 gap-2 mb-6 md:mt-6">
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Renda</p>
+            <p className="text-sm font-bold text-foreground">R$ {data.renda.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Gastos</p>
-            <p className="text-lg font-bold text-foreground mt-1">R$ {data.gastos.toLocaleString("pt-BR")}</p>
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Gastos</p>
+            <p className="text-sm font-bold text-foreground">R$ {data.gastos.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Saldo</p>
-            <p className={`text-lg font-bold mt-1 ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Saldo</p>
+            <p className={`text-sm font-bold ${saldo >= 0 ? "text-safe" : "text-danger"}`}>R$ {saldo.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="bg-card rounded-xl p-4 border shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">Reserva</p>
-            <p className="text-lg font-bold text-foreground mt-1">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "Nenhuma"}</p>
+          <div className="bg-card rounded-xl p-3 border shadow-sm text-center">
+            <p className="text-[10px] text-muted-foreground font-medium">Reserva</p>
+            <p className="text-sm font-bold text-foreground">{data.temReserva ? `R$ ${data.valorReserva.toLocaleString("pt-BR")}` : "—"}</p>
           </div>
-        </div>
-
-        {/* Update Renda / Gastos buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button onClick={() => { setShowUpdateRenda(true); setNewRenda(String(data.renda)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
-            <RefreshCw className="w-4 h-4 text-brand-green" />
-            <span className="text-xs font-semibold text-foreground">Atualizar Renda</span>
-          </button>
-          <button onClick={() => { setShowUpdateGastos(true); setNewGastos(String(data.gastos)); }} className="bg-card rounded-xl p-3 border shadow-sm flex items-center gap-2 hover:bg-muted/50 transition-colors">
-            <RefreshCw className="w-4 h-4 text-warning" />
-            <span className="text-xs font-semibold text-foreground">Atualizar Gastos</span>
-          </button>
         </div>
 
         {/* Monthly Investment (was "Guardado") */}
