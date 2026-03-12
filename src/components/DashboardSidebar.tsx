@@ -6,6 +6,8 @@ import { useDebts, Debt } from "@/hooks/useDebts";
 import { toast } from "sonner";
 import { FinancialData } from "@/hooks/useFinancialData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import WeeklyExpenses from "@/components/WeeklyExpenses";
+import Caixinhas from "@/components/Caixinhas";
 
 interface Props {
   open: boolean;
@@ -14,6 +16,8 @@ interface Props {
   saldo: number;
   onUpdateRenda: (val: number) => void;
   onUpdateGastos: (val: number) => void;
+  selectedMonth: number;
+  selectedYear: number;
 }
 
 export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateRenda, onUpdateGastos }: Props) {
