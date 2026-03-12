@@ -81,6 +81,11 @@ export default function InvestmentProjection({ investmentMonthly, selectedInvest
   const [rates, setRates] = useState<LiveRates>(defaultRates);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [showCalc, setShowCalc] = useState(false);
+  const [calcDisplay, setCalcDisplay] = useState("0");
+  const [calcPrev, setCalcPrev] = useState<number | null>(null);
+  const [calcOp, setCalcOp] = useState<string | null>(null);
+  const [calcReset, setCalcReset] = useState(false);
 
   useEffect(() => {
     fetchRates();
