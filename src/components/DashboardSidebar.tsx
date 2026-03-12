@@ -20,7 +20,7 @@ interface Props {
   selectedYear: number;
 }
 
-export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateRenda, onUpdateGastos }: Props) {
+export default function DashboardSidebar({ open, onClose, data, saldo, onUpdateRenda, onUpdateGastos, selectedMonth, selectedYear }: Props) {
   const { debts, addDebt, toggleDebtStatus, deleteDebt } = useDebts();
   const [newDebtName, setNewDebtName] = useState("");
   const [newDebtValue, setNewDebtValue] = useState("");
