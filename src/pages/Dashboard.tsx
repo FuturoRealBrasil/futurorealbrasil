@@ -158,8 +158,15 @@ const Dashboard = () => {
                 <p className="text-xs md:text-sm text-primary-foreground/60 truncate">Gestão Financeira</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <DigitalClock />
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 rounded-lg text-primary-foreground hover:text-primary-foreground/80 hover:bg-white/10 transition-colors"
+                aria-label="Painel Financeiro"
+              >
+                <PanelRightOpen className="w-5 h-5" />
+              </button>
               <HamburgerMenu />
             </div>
           </div>
